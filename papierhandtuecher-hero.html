@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Papierhandtücher · Hero (Vorschau)</title>
+</head>
+<body style="margin:0;background:#f3f5f8;font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;"><!-- font-family nur für die lokale Vorschau; in Shopware erbt der Block die Theme-Schrift -->
+
+<!--
+  ============================================================================
+  HAMBURG PAPIER · HERO-BEREICH "PAPIERHANDTÜCHER"  (Shopware 6 Erlebniswelt)
+  ============================================================================
+  EINBINDUNG:
+  1. In der Erlebniswelt ein Element "HTML" (Custom HTML) hinzufügen.
+  2. Den kompletten Block zwischen  >>> COPY START <<<  und  >>> COPY END <<<
+     kopieren und in das HTML-Feld einfügen (style + section + script).
+  3. Bei Bedarf anpassen:
+       - Rail-Kacheln: href, Bild (src/alt) und Label je <li>
+       - Video: <source src> und optional ein poster-Standbild
+  Hinweise: Keine eigene Schriftart (erbt vom Shop-Theme). Alle Klassen sind
+  unter dem Präfix .hph- gescoped, kollidiert also nicht mit dem Theme.
+  Layout: Inhalt auf max. 1320px geboxt (Shop-Container), weißer Kopf +
+  gräulicher Video-Bereich laufen randlos durch (full-width-boxed).
+  ============================================================================
+-->
+
+<!-- >>> COPY START >>> -->
+<style>
+.hph-hero{
+  /* ---- Markenfarben (bei Bedarf anpassen) ---- */
+  --hph-ink:          oklch(0.30 0.045 245);   /* dunkles Navy, Haupttext   */
+  --hph-ink-soft:     oklch(0.47 0.035 245);   /* gedämpfter Text           */
+  --hph-brand:        oklch(0.55 0.13  248);   /* Markenblau                */
+  --hph-brand-light:  oklch(0.69 0.11  232);   /* heller Akzent             */
+  --hph-surface-lower: oklch(0.963 0.006 245); /* gräulicher unterer Bereich*/
+  --hph-border:       oklch(0.905 0.012 245);  /* feine Linien              */
+  --hph-on-brand:     oklch(0.99 0.006 245);   /* Text auf Markenblau       */
+
+  box-sizing:border-box;
+  position:relative;
+  padding-block: clamp(48px, 7vw, 96px) 0;   /* unten 0: der graue Bereich schließt bündig an */
+  color: var(--hph-ink);
+  /* Oberer Bereich (Titel + Rail) komplett weiß */
+  background: #ffffff;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+.hph-hero *,
+.hph-hero *::before,
+.hph-hero *::after{ box-sizing:border-box; }
+
+.hph-hero__inner{
+  /* an das Shop-Grundlayout angeglichen: Container max. 1320px (full-width-boxed) */
+  max-width: 1320px;
+  margin-inline:auto;
+  padding-inline: clamp(16px, 3vw, 40px);
+}
+/* etwas Weißraum unter der Rail, bevor der graue Bereich beginnt */
+.hph-hero__inner--lead{ padding-bottom: clamp(34px, 5vw, 60px); }
+
+/* Unterer Bereich: leicht gräulich + randlos volle Breite, trennt sich klar vom weißen Kopf */
+.hph-hero__lower{
+  background: var(--hph-surface-lower);
+  border-top: 1px solid var(--hph-border);
+  padding-block: clamp(40px, 5.5vw, 72px) clamp(48px, 7vw, 96px);
+}
+
+/* ---------- Kopf ---------- */
+.hph-hero__head{
+  text-align:left;
+  max-width: 760px;
+  margin-inline:0;
+}
+.hph-hero__title{
+  margin:0;
+  font-weight:700;
+  letter-spacing:-0.02em;
+  line-height:1.04;
+  font-size: clamp(1.9rem, 1.2rem + 3.1vw, 3.7rem);
+  color: var(--hph-ink);
+  overflow-wrap:break-word;
+  hyphens:auto;
+}
+.hph-hero__subtitle{
+  margin: clamp(16px,2.4vw,22px) 0 0;
+  max-width: 56ch;
+  color: var(--hph-ink-soft);
+  line-height:1.55;
+  font-size: clamp(1.02rem, .97rem + .45vw, 1.22rem);
+}
+
+/* ---------- Product-Rail ---------- */
+.hph-rail{
+  position:relative;        /* Anker für die Slider-Pfeile */
+  margin-top: clamp(34px,4.6vw,54px);
+  /* zentrale Maße – pro Breakpoint übersteuerbar (mobil größer) */
+  --hph-media-w: clamp(92px, 11vw, 118px);
+  --hph-media-h: clamp(66px, 7.5vw, 96px);
+}
+.hph-rail__track{
+  list-style:none;
+  margin:0;
+  padding:8px 0 6px;
+  display:flex;
+  gap: clamp(10px, 1.6vw, 30px);
+  justify-content:space-between;
+  /* einreihig: passt alles, wird gleichmäßig verteilt; sonst horizontal scrollbar */
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  overflow-y:hidden;
+  /* flüssiges, ausschließlich horizontales Wischen + sanftes Pfeil-Scrollen */
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+  scroll-snap-type:x proximity;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.hph-rail__track::-webkit-scrollbar{ display:none; }
+.hph-rail__item{ display:flex; flex:0 0 auto; scroll-snap-align:center; }
+.hph-rail__tile{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap: clamp(20px, 2.2vw, 28px);
+  /* Kachel so breit wie ihr Inhalt (das einzeilige Label) – Mindestbreite = Bildbreite.
+     So passt der Titel immer in eine Zeile und überlappt nie die Nachbarkachel. */
+  width: max-content;
+  min-width: var(--hph-media-w);
+  padding:6px;
+  text-decoration:none;
+  color: var(--hph-ink);
+}
+/* Produktbild steht frei (kein Kasten/Rahmen) wie auf der Apple-Vorlage */
+.hph-rail__media{
+  position:relative;
+  /* feste Breite, sonst würde das intrinsisch große Bild die Kachel aufblähen */
+  width: var(--hph-media-w);
+  height: var(--hph-media-h);
+  display:grid;
+  place-items:center;
+  overflow:visible;
+}
+/* Weicher Kontaktschatten am Boden – blendet beim Hover ein, das Produkt "hebt ab" */
+.hph-rail__media::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-4px;
+  width:64%;
+  height:12px;
+  transform: translateX(-50%) scale(.55);
+  border-radius:50%;
+  background: radial-gradient(closest-side, oklch(0.30 0.045 245 / .34), transparent);
+  filter: blur(4px);
+  opacity:0;
+  transition: opacity .5s cubic-bezier(.16,1,.3,1),
+              transform .5s cubic-bezier(.16,1,.3,1);
+  pointer-events:none;
+}
+.hph-rail__media img{
+  width:100%;
+  height:100%;
+  object-fit:contain;       /* Bild bleibt sicher in der Medienbox, ragt nie in das Label */
+  object-position:center bottom;
+  display:block;
+  /* lässt den weißen Produkt-Hintergrund mit der Seite verschmelzen (wie Apple) */
+  mix-blend-mode:multiply;
+  /* Pro-Bild-Skalierung gleicht unterschiedlich groß fotografierte Kartons aus.
+     Verankert unten, damit alle Kartons auf einer Linie stehen.            */
+  transform: translateY(var(--hph-y, 0px)) scale(var(--hph-s, 1));
+  transform-origin: center bottom;
+  transition: transform .5s cubic-bezier(.16,1,.3,1);
+}
+/* Feinabstimmung je Kachel, damit alle Kartons optisch gleich groß wirken
+   --hph-s: Skalierung · --hph-y: vertikaler Versatz (gleicht Leerraum im Foto aus) */
+.hph-rail__item:nth-child(1) .hph-rail__media img{ --hph-s: 1.05; } /* 1-lagig  */
+.hph-rail__item:nth-child(2) .hph-rail__media img{ --hph-s: 1.00; } /* 2-lagig  */
+.hph-rail__item:nth-child(3) .hph-rail__media img{ --hph-s: 1.02; } /* 3-lagig  */
+.hph-rail__item:nth-child(4) .hph-rail__media img{ --hph-s: 1.04; } /* Interfold*/
+.hph-rail__item:nth-child(5) .hph-rail__media img{ --hph-s: 0.96; } /* C-Falz   */
+.hph-rail__item:nth-child(6) .hph-rail__media img{ --hph-s: 1.14; --hph-y: 20px; } /* Preise */
+.hph-rail__label{
+  width:100%;
+  font-size: clamp(.92rem, .88rem + .2vw, 1.05rem);
+  font-weight:500;
+  line-height:1.25;
+  text-align:center;
+  color: var(--hph-ink);
+  white-space:nowrap;        /* Titel immer einzeilig, kein Umbruch */
+  transition: color .25s ease;
+}
+/* "Öffnet in neuem Tab"-Icon (External Link) neben dem Label */
+.hph-rail__ext{
+  width:.82em;
+  height:.82em;
+  margin-left:.36em;
+  vertical-align:-0.07em;
+  color: var(--hph-ink-soft);
+  transition: color .25s ease, transform .25s ease;
+}
+.hph-rail__tile:hover .hph-rail__ext{ color: var(--hph-brand); transform: translate(1px,-1px); }
+.hph-rail__tile:hover .hph-rail__media img{ transform: translateY(calc(var(--hph-y, 0px) - 7px)) scale(calc(var(--hph-s, 1) * 1.03)); }
+.hph-rail__tile:hover .hph-rail__media::after{ opacity:1; transform: translateX(-50%) scale(1); }
+.hph-rail__tile:hover .hph-rail__label{ color: var(--hph-brand); }
+.hph-rail__tile:active .hph-rail__media img{ transform: translateY(calc(var(--hph-y, 0px) - 3px)) scale(calc(var(--hph-s, 1) * 1.01)); transition-duration:.16s; }
+.hph-rail__tile:active .hph-rail__media::after{ opacity:.7; transform: translateX(-50%) scale(.82); transition-duration:.16s; }
+.hph-rail__tile:focus-visible{
+  outline:3px solid var(--hph-brand);
+  outline-offset:4px;
+  border-radius:14px;
+}
+
+/* ---------- Slider-Pfeile: weiße Box mit weichem Schatten, nur mobil ---------- */
+.hph-rail__nav{
+  display:none;            /* nur in der Mobile-Query auf grid gesetzt */
+  position:absolute;
+  top:14px;                /* = Bildoberkante (8px Track- + 6px Kachel-Padding) */
+  bottom:12px;             /* = Titel-Unterkante (6px Kachel- + 6px Track-Padding) */
+  z-index:3;
+  width:38px;
+  padding:0;
+  border:0;
+  border-radius:0;                            /* scharfkantiges Rechteck */
+  background:#ffffff;
+  color: oklch(0.45 0.02 245);               /* Chevron-Grau */
+  cursor:pointer;
+  place-items:center;       /* Chevron mittig in der Box */
+  -webkit-tap-highlight-color: transparent;
+  transition: color .2s ease, transform .25s cubic-bezier(.16,1,.3,1),
+              box-shadow .25s ease, opacity .25s ease;
+}
+.hph-rail__nav svg{ width:24px; height:24px; }
+/* negatives Innen-Padding ausgleichen -> Pfeile sitzen bündig am Bildschirmrand.
+   Schatten nur an der langen Innenseite (negativer Spread = oben/unten kein Schatten). */
+.hph-rail__nav--prev{
+  left:  calc(-1 * clamp(16px, 3vw, 40px));
+  box-shadow: 7px 0 16px -9px oklch(0.30 0.045 245 / .34);
+}
+.hph-rail__nav--next{
+  right: calc(-1 * clamp(16px, 3vw, 40px));
+  box-shadow: -7px 0 16px -9px oklch(0.30 0.045 245 / .34);
+}
+.hph-rail__nav:hover{ color: var(--hph-brand); }
+.hph-rail__nav--prev:hover{ box-shadow: 10px 0 22px -9px oklch(0.30 0.045 245 / .42); }
+.hph-rail__nav--next:hover{ box-shadow: -10px 0 22px -9px oklch(0.30 0.045 245 / .42); }
+.hph-rail__nav:active{ transform: scale(.96); transition-duration:.12s; }
+.hph-rail__nav:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; }
+/* am Anfang/Ende ausblenden */
+.hph-rail__nav[disabled]{ opacity:0; pointer-events:none; }
+
+/* ---------- Video ---------- */
+.hph-video{
+  position:relative;
+  margin: 0;                 /* Abstand kommt jetzt vom Padding des grauen Bereichs */
+  aspect-ratio:16/9;
+  border-radius: clamp(16px, 2.4vw, 26px);
+  overflow:hidden;
+  border:1px solid var(--hph-border);
+  box-shadow: 0 30px 70px oklch(0.30 0.045 245 / .16);
+  isolation:isolate;
+}
+.hph-video__el{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  /* Fallback-Fläche, solange kein Video/Poster gesetzt ist */
+  background: linear-gradient(135deg, var(--hph-ink), var(--hph-brand) 130%);
+}
+.hph-video::after{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(180deg, transparent 52%, oklch(0.22 0.04 245 / .42));
+  pointer-events:none;
+}
+.hph-video__caption{
+  position:absolute;
+  left: clamp(16px,3vw,28px);
+  bottom: clamp(14px,3vw,24px);
+  z-index:2;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color: var(--hph-on-brand);
+  font-weight:600;
+  font-size: clamp(.88rem,.82rem+.3vw,1rem);
+  text-shadow: 0 1px 3px oklch(0.20 0.04 245 / .5);
+}
+.hph-video__dot{
+  width:9px; height:9px;
+  border-radius:50%;
+  background: var(--hph-brand-light);
+  box-shadow: 0 0 0 0 oklch(0.69 0.11 232 / .6);
+  animation: hph-pulse 2.4s ease-out infinite;
+}
+@keyframes hph-pulse{
+  0%   { box-shadow: 0 0 0 0 oklch(0.69 0.11 232 / .55); }
+  70%  { box-shadow: 0 0 0 12px oklch(0.69 0.11 232 / 0); }
+  100% { box-shadow: 0 0 0 0 oklch(0.69 0.11 232 / 0); }
+}
+
+/* ---------- Einblend-Choreografie (nur bei aktivem JS via .is-ready) ---------- */
+.hph-hero__head,
+.hph-rail__item,
+.hph-video{
+  opacity:0;
+  transition: opacity .6s cubic-bezier(.16,1,.3,1),
+              transform .6s cubic-bezier(.16,1,.3,1);
+}
+.hph-hero__head{ transform: translateY(16px); }
+.hph-rail__item{ transform: translateY(14px); }
+.hph-video{ transform: translateY(20px) scale(.985); transform-origin:50% 0; }
+
+.hph-hero.is-ready .hph-hero__head{ opacity:1; transform:none; transition-delay:.05s; }
+.hph-hero.is-ready .hph-rail__item{ opacity:1; transform:none; }
+.hph-hero.is-ready .hph-rail__item:nth-child(1){ transition-delay:.20s; }
+.hph-hero.is-ready .hph-rail__item:nth-child(2){ transition-delay:.26s; }
+.hph-hero.is-ready .hph-rail__item:nth-child(3){ transition-delay:.32s; }
+.hph-hero.is-ready .hph-rail__item:nth-child(4){ transition-delay:.38s; }
+.hph-hero.is-ready .hph-rail__item:nth-child(5){ transition-delay:.44s; }
+.hph-hero.is-ready .hph-rail__item:nth-child(6){ transition-delay:.50s; }
+.hph-hero.is-ready .hph-video{ opacity:1; transform:none; transition-delay:.40s; }
+
+/* ---------- Responsiv: echter Slider auf Mobilgeräten ---------- */
+/* (die Scroll-Mechanik selbst gilt bereits global an .hph-rail__track) */
+@media (max-width:720px){
+  .hph-rail{
+    /* deutlich größere Produktbilder auf dem Handy */
+    --hph-media-w: 128px;
+    --hph-media-h: 104px;
+  }
+  .hph-rail__track{
+    justify-content:flex-start;
+    gap:12px;                       /* einheitlicher, kompakter Abstand */
+    scroll-snap-type:x mandatory;
+    padding-inline:24px;            /* schmaler Rand für die Chevrons */
+    scroll-padding-inline:24px;     /* gesnappte Kachel landet neben dem Pfeil */
+    /* Produkte weichen am Rand sanft aus, wenn sie unter den Chevron scrollen */
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+  }
+  .hph-rail__item{ scroll-snap-align:start; }
+  .hph-rail__nav{ display:grid; }   /* Pfeile einblenden */
+}
+
+/* ---------- Bewegung reduzieren ---------- */
+@media (prefers-reduced-motion: reduce){
+  .hph-hero__head,
+  .hph-rail__item,
+  .hph-video{ opacity:1 !important; transform:none !important; transition:none !important; }
+  .hph-rail__tile, .hph-rail__media img, .hph-rail__media::after, .hph-rail__nav{ transition:none !important; }
+  .hph-rail__track{ scroll-behavior:auto; }
+  .hph-video__dot{ animation:none; }
+}
+</style>
+
+<!-- Fallback: ohne JavaScript bleibt der Inhalt sichtbar (Einblend-Animation entfällt dann) -->
+<noscript>
+  <style>
+    .hph-hero__head,
+    .hph-rail__item,
+    .hph-video{ opacity:1 !important; transform:none !important; }
+  </style>
+</noscript>
+
+<section class="hph-hero" aria-labelledby="hph-hero-title">
+  <div class="hph-hero__inner hph-hero__inner--lead">
+
+    <!-- 1) Kopf: Titel + Subline -->
+    <header class="hph-hero__head">
+      <h1 class="hph-hero__title" id="hph-hero-title">Papierhandtücher</h1>
+      <p class="hph-hero__subtitle">Saugstark und hygienisch. Für Gastronomie, Gewerbe und Büro.</p>
+    </header>
+
+    <!-- 2) Product-Rail (Unterkategorien) -->
+    <!-- Pro Kachel: href, Bild (src/alt) und Label anpassen. -->
+    <nav class="hph-rail" aria-label="Papierhandtücher Unterkategorien">
+
+      <!-- Slider-Pfeile (nur mobil sichtbar, per CSS) -->
+      <button type="button" class="hph-rail__nav hph-rail__nav--prev" aria-label="Vorherige Produkte" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button type="button" class="hph-rail__nav hph-rail__nav--next" aria-label="Weitere Produkte">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+
+      <ul class="hph-rail__track">
+
+        <li class="hph-rail__item">
+          <a class="hph-rail__tile" href="https://www.hamburgpapier-shop.de/papierhandtuecher-1-lagig">
+            <span class="hph-rail__media">
+              <img src="https://www.hamburgpapier-shop.de/media/e2/06/39/1780051194/papierhandtuecher-gruen-022-oekologisch-hochformat.avif?ts=1780051194"
+                   alt="1-lagig Papierhandtücher mit Z-Falzung" loading="lazy" decoding="async">
+            </span>
+            <span class="hph-rail__label">1-lagig / Z-Falzung</span>
+          </a>
+        </li>
+
+        <li class="hph-rail__item">
+          <a class="hph-rail__tile" href="https://www.hamburgpapier-shop.de/papierhandtuecher-2-lagig">
+            <span class="hph-rail__media">
+              <img src="https://www.hamburgpapier-shop.de/media/ef/d7/dc/1780051194/ecoline-papierhandtuecher-e023-100-zellstoff-hochformat.avif?ts=1780051194"
+                   alt="2-lagig Papierhandtücher mit Z-Falzung" loading="lazy" decoding="async">
+            </span>
+            <span class="hph-rail__label">2-lagig / Z-Falzung</span>
+          </a>
+        </li>
+
+        <li class="hph-rail__item">
+          <a class="hph-rail__tile" href="https://www.hamburgpapier-shop.de/papierhandtuecher-3-lagig">
+            <span class="hph-rail__media">
+              <img src="https://www.hamburgpapier-shop.de/media/ed/d2/f1/1780051194/papierhandtuecher-gold-049-100-zellstoff-hochformat.avif?ts=1780051194"
+                   alt="3-lagig Papierhandtücher mit Z-Falzung" loading="lazy" decoding="async">
+            </span>
+            <span class="hph-rail__label">3-lagig / Z-Falzung</span>
+          </a>
+        </li>
+
+        <li class="hph-rail__item">
+          <a class="hph-rail__tile" href="https://www.hamburgpapier-shop.de/papierhandtuecher-interfold">
+            <span class="hph-rail__media">
+              <img src="https://www.hamburgpapier-shop.de/media/85/f4/d3/1780051194/go-clean-handtowels-superior-3255-papierhandtuecher-weiss-hochformat.avif?ts=1780051194"
+                   alt="Interfold Papierhandtücher" loading="lazy" decoding="async">
+            </span>
+            <span class="hph-rail__label">Interfold</span>
+          </a>
+        </li>
+
+        <li class="hph-rail__item">
+          <a class="hph-rail__tile" href="https://www.hamburgpapier-shop.de/papierhandtuecher-c-falz">
+            <span class="hph-rail__media">
+              <img src="https://www.hamburgpapier-shop.de/media/a9/0d/a2/1780051194/papierhandtuecher-c-fold-1045-100-cellulose-lila-hochformat.avif?ts=1780051194"
+                   alt="C-Falz Papierhandtücher" loading="lazy" decoding="async">
+            </span>
+            <span class="hph-rail__label">C-Falz</span>
+          </a>
+        </li>
+
+        <!-- Kachel "Preise Vergleichen" (Produktfinder). Bei Bedarf das ganze <li> entfernen: -->
+        <!-- Öffnet in neuem Tab: target=_blank + rel + sichtbares External-Link-Icon -->
+        <li class="hph-rail__item">
+          <a class="hph-rail__tile" href="https://produktfinder.hamburgpapier-shop.de/vergleich/papierhandtuecher"
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Preise vergleichen (öffnet in neuem Tab)">
+            <span class="hph-rail__media">
+              <img src="https://www.hamburgpapier-shop.de/media/66/8b/f4/1780053285/Papierhantcher-Preise-Vergleichen.avif?ts=1780053285"
+                   alt="Papierhandtücher Preise vergleichen" loading="lazy" decoding="async">
+            </span>
+            <span class="hph-rail__label">Preise Vergleichen<svg class="hph-rail__ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg></span>
+          </a>
+        </li>
+
+      </ul>
+    </nav>
+
+  </div>
+
+  <!-- Unterer, gräulicher Bereich: trennt das Video optisch vom weißen Kopf -->
+  <div class="hph-hero__lower">
+    <div class="hph-hero__inner">
+
+      <!-- 3) Video (Muted Autoplay-Loop) -->
+      <figure class="hph-video">
+        <!-- Empfehlung: gehostetes Standbild als poster ergänzen (poster="https://www.hamburgpapier-shop.de/media/.../poster.jpg")
+             für ein sauberes erstes Bild; bis dahin greift der CSS-Gradient als Fallback. -->
+        <video class="hph-video__el" autoplay muted loop playsinline preload="metadata">
+          <source src="https://www.hamburgpapier-shop.de/media/59/3b/ee/1768992362/Papierhandtuecher-Produktion.mp4?ts=1769087210" type="video/mp4">
+        </video>
+        <figcaption class="hph-video__caption">
+          <span class="hph-video__dot" aria-hidden="true"></span>
+          Produktion in Hamburg
+        </figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  try {
+    var heroes = document.querySelectorAll('.hph-hero');
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    heroes.forEach(function (hero) {
+      var video = hero.querySelector('video');
+
+      if (reduce) {
+        hero.classList.add('is-ready');
+        if (video) { try { video.pause(); } catch (e) {} video.removeAttribute('autoplay'); }
+        return;
+      }
+
+      if (!('IntersectionObserver' in window)) {
+        hero.classList.add('is-ready');
+        return;
+      }
+
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            hero.classList.add('is-ready');
+            io.disconnect();
+          }
+        });
+      }, { threshold: 0.15 });
+
+      io.observe(hero);
+    });
+
+    /* ---- Slider-Pfeile der Produkt-Rail ---- */
+    document.querySelectorAll('.hph-rail').forEach(function (rail) {
+      var track = rail.querySelector('.hph-rail__track');
+      var prev  = rail.querySelector('.hph-rail__nav--prev');
+      var next  = rail.querySelector('.hph-rail__nav--next');
+      if (!track || !prev || !next) return;
+
+      // pro Klick rund zwei Kacheln weiter blättern
+      function step() {
+        var item = track.querySelector('.hph-rail__item');
+        var w = item ? item.getBoundingClientRect().width : track.clientWidth * 0.6;
+        var gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+        return Math.round((w + gap) * 2);
+      }
+      // Pfeile am Anfang/Ende ausblenden
+      function update() {
+        var max = track.scrollWidth - track.clientWidth - 1;
+        prev.disabled = track.scrollLeft <= 0;
+        next.disabled = track.scrollLeft >= max;
+      }
+      function go(dir) {
+        track.scrollBy({ left: dir * step(), behavior: reduce ? 'auto' : 'smooth' });
+      }
+      prev.addEventListener('click', function () { go(-1); });
+      next.addEventListener('click', function () { go(1); });
+      track.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    });
+  } catch (err) {
+    /* Fallback: bei einem Script-Fehler den Inhalt garantiert einblenden */
+    var all = document.querySelectorAll('.hph-hero');
+    for (var i = 0; i < all.length; i++) { all[i].classList.add('is-ready'); }
+  }
+})();
+</script>
+<!-- <<< COPY END <<< -->
+
+</body>
+</html>
