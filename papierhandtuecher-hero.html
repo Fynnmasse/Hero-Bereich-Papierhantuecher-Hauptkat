@@ -87,8 +87,9 @@
   line-height:1.04;
   font-size: clamp(1.9rem, 1.2rem + 3.1vw, 3.7rem);
   color: var(--hph-ink);
+  /* Kein hyphens:auto: das Kompositum „Papierhandtücher" darf nie mitten
+     im Wort getrennt werden. overflow-wrap bleibt als Notbremse. */
   overflow-wrap:break-word;
-  hyphens:auto;
 }
 .hph-hero__subtitle{
   margin: clamp(16px,2.4vw,22px) 0 0;
@@ -133,9 +134,15 @@
 }
 .hph-hero__cta--primary:active{ transform:translateY(0); transition-duration:.1s; }
 .hph-hero__cta--primary:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; }
-/* sekundär = ruhiger Textlink mit Chevron */
-.hph-hero__cta--ghost{ padding:.5em .2em; color: var(--hph-brand); }
-.hph-hero__cta--ghost:hover{ color: var(--hph-brand-dark); gap:.7em; }
+/* sekundär = ruhige TONALE Pill (klares Sekundär-Gewicht neben dem gefüllten Primär,
+   damit der B2B-Preis-/Vergleichspfad nicht der leiseste Touchpoint der Seite ist) */
+.hph-hero__cta--ghost{
+  padding:.7em 1.3em;
+  border-radius:980px;
+  color: var(--hph-brand);
+  background: oklch(0.95 0.014 245);
+}
+.hph-hero__cta--ghost:hover{ color: var(--hph-brand-dark); background: oklch(0.92 0.02 245); gap:.7em; }
 .hph-hero__cta--ghost:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
 .hph-hero__cta svg{ width:1em; height:1em; flex:none; }
 .hph-hero__cta--ghost .hph-rail__ext{ width:.82em; height:.82em; margin-left:0; color:inherit; }
@@ -173,7 +180,7 @@
 /* ---------- Product-Rail ---------- */
 .hph-rail{
   position:relative;        /* Anker für die Slider-Pfeile */
-  margin-top: clamp(18px,2.6vw,32px);
+  margin-top: clamp(10px,1.4vw,16px);
   /* zentrale Maße – pro Breakpoint übersteuerbar (mobil größer) */
   --hph-media-w: clamp(92px, 11vw, 118px);
   --hph-media-h: clamp(66px, 7.5vw, 96px);
@@ -261,7 +268,6 @@
 .hph-rail__item:nth-child(3) .hph-rail__media img{ --hph-s: 1.02; } /* 3-lagig  */
 .hph-rail__item:nth-child(4) .hph-rail__media img{ --hph-s: 1.04; } /* Interfold*/
 .hph-rail__item:nth-child(5) .hph-rail__media img{ --hph-s: 0.96; } /* C-Falz   */
-.hph-rail__item:nth-child(6) .hph-rail__media img{ --hph-s: 1.14; --hph-y: 20px; } /* Preise */
 .hph-rail__label{
   width:100%;
   font-size: clamp(.92rem, .88rem + .2vw, 1.05rem);
@@ -291,6 +297,44 @@
   outline:3px solid var(--hph-brand);
   outline-offset:4px;
   border-radius:14px;
+}
+
+/* ---------- Rail: Klartext-Hilfe für Nicht-Experten ----------
+   Überbrückt die Falz-/Lagen-Fachsprache: eine Leitzeile über der Rail
+   plus ein kurzer Klartext-Hinweis unter jedem Foto. */
+.hph-rail__lead{
+  margin: clamp(16px,2.4vw,26px) 0 0;
+  max-width: 62ch;
+  font-size: clamp(.9rem,.86rem+.14vw,1rem);
+  line-height:1.55;
+  color: var(--hph-ink-soft);
+}
+.hph-rail__lead a{
+  color: var(--hph-brand);
+  font-weight:600;
+  text-decoration:none;
+  white-space:nowrap;
+  transition: color .2s ease;
+}
+.hph-rail__lead a:hover{ color: var(--hph-brand-dark); }
+.hph-rail__lead a:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
+
+/* Label + Klartext-Hint sitzen als enger Textblock unter dem Foto;
+   der große Tile-Gap bleibt zwischen Foto und Textblock erhalten. */
+.hph-rail__text{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:3px;
+  width:100%;
+}
+.hph-rail__hint{
+  font-size: clamp(.76rem,.72rem+.12vw,.84rem);
+  font-weight:400;
+  line-height:1.2;
+  text-align:center;
+  color: var(--hph-ink-soft);
+  white-space:nowrap;
 }
 
 /* ---------- Slider-Pfeile: weiße Box mit weichem Schatten, nur mobil ---------- */
@@ -542,6 +586,15 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
   line-height:1.72;
   font-size: clamp(1rem,.97rem+.2vw,1.1rem);
 }
+/* Laien-Lead: eine klare, alltagsnahe Zusammenfassung VOR der fachlichen Tiefe
+   („Erst führen, dann Fachtiefe"). Etwas größer, dunkler, halbfett. */
+.hph-cards__detail-lead{
+  margin:0 0 clamp(14px,1.8vw,22px);
+  color: var(--hph-ink);
+  font-weight:500;
+  line-height:1.55;
+  font-size: clamp(1.04rem,1rem+.25vw,1.16rem);
+}
 .hph-cards__detail-link{
   display:inline-flex;
   align-items:center;
@@ -659,8 +712,10 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
     padding-inline:24px;            /* schmaler Rand für die Chevrons */
     scroll-padding-inline:24px;     /* gesnappte Kachel landet neben dem Pfeil */
     /* Produkte weichen am Rand sanft aus, wenn sie unter den Chevron scrollen */
-    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
-            mask-image: linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+    /* schmalerer Fade (10px statt 18px): deutet das Ausblenden am Rand nur noch an,
+       statt eine angeschnittene Kachel unter dem Chevron zu verstecken. */
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);
   }
   .hph-rail__item{ scroll-snap-align:start; }
   .hph-rail__nav{ display:grid; }   /* Pfeile einblenden */
@@ -752,7 +807,10 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
     </ul>
 
     <!-- 2) Product-Rail (Unterkategorien) -->
-    <!-- Pro Kachel: href, Bild (src/alt) und Label anpassen. -->
+    <!-- Pro Kachel: href, Bild (src/alt), Label und Klartext-Hint anpassen. -->
+    <!-- Klartext-Leitzeile: macht die Falz-Auswahl auch für Nicht-Experten anschlussfähig
+         und beherbergt den (aus der Rail entfernten) Produktfinder-Pfad als Beratungs-Einstieg. -->
+    <p class="hph-rail__lead">Die Falzung muss zu Ihrem Spender passen. <a href="https://produktfinder.hamburgpapier-shop.de/vergleich/papierhandtuecher" target="_blank" rel="noopener noreferrer" aria-label="Passende Falzung finden (öffnet in neuem Tab)">Unsicher? Passende Falzung finden</a></p>
     <nav class="hph-rail" aria-label="Papierhandtücher Unterkategorien">
 
       <!-- Slider-Pfeile (nur mobil sichtbar, per CSS) -->
@@ -771,7 +829,10 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
               <img src="https://www.hamburgpapier-shop.de/media/e2/06/39/1780051194/papierhandtuecher-gruen-022-oekologisch-hochformat.avif?ts=1780051194"
                    alt="1-lagig Papierhandtücher mit Z-Falz" width="300" height="380" loading="eager" fetchpriority="high" decoding="async">
             </span>
-            <span class="hph-rail__label">1-lagig · Z-Falz</span>
+            <span class="hph-rail__text">
+              <span class="hph-rail__label">1-lagig · Z-Falz</span>
+              <span class="hph-rail__hint">ergiebig &amp; sparsam</span>
+            </span>
           </a>
         </li>
 
@@ -781,7 +842,10 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
               <img src="https://www.hamburgpapier-shop.de/media/ef/d7/dc/1780051194/ecoline-papierhandtuecher-e023-100-zellstoff-hochformat.avif?ts=1780051194"
                    alt="2-lagig Papierhandtücher mit Z-Falz" width="300" height="380" loading="lazy" decoding="async">
             </span>
-            <span class="hph-rail__label">2-lagig · Z-Falz</span>
+            <span class="hph-rail__text">
+              <span class="hph-rail__label">2-lagig · Z-Falz</span>
+              <span class="hph-rail__hint">weich &amp; saugstark</span>
+            </span>
           </a>
         </li>
 
@@ -791,7 +855,10 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
               <img src="https://www.hamburgpapier-shop.de/media/ed/d2/f1/1780051194/papierhandtuecher-gold-049-100-zellstoff-hochformat.avif?ts=1780051194"
                    alt="3-lagig Papierhandtücher mit Z-Falz" width="300" height="380" loading="lazy" decoding="async">
             </span>
-            <span class="hph-rail__label">3-lagig · Z-Falz</span>
+            <span class="hph-rail__text">
+              <span class="hph-rail__label">3-lagig · Z-Falz</span>
+              <span class="hph-rail__hint">besonders weich</span>
+            </span>
           </a>
         </li>
 
@@ -801,7 +868,10 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
               <img src="https://www.hamburgpapier-shop.de/media/85/f4/d3/1780051194/go-clean-handtowels-superior-3255-papierhandtuecher-weiss-hochformat.avif?ts=1780051194"
                    alt="Interfold Papierhandtücher" width="300" height="380" loading="lazy" decoding="async">
             </span>
-            <span class="hph-rail__label">Interfold</span>
+            <span class="hph-rail__text">
+              <span class="hph-rail__label">Interfold</span>
+              <span class="hph-rail__hint">Einzelentnahme</span>
+            </span>
           </a>
         </li>
 
@@ -811,23 +881,18 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
               <img src="https://www.hamburgpapier-shop.de/media/a9/0d/a2/1780051194/papierhandtuecher-c-fold-1045-100-cellulose-lila-hochformat.avif?ts=1780051194"
                    alt="C-Falz Papierhandtücher" width="300" height="380" loading="lazy" decoding="async">
             </span>
-            <span class="hph-rail__label">C-Falz</span>
+            <span class="hph-rail__text">
+              <span class="hph-rail__label">C-Falz</span>
+              <span class="hph-rail__hint">kompakt gefaltet</span>
+            </span>
           </a>
         </li>
 
-        <!-- Kachel "Preise Vergleichen" (Produktfinder). Bei Bedarf das ganze <li> entfernen: -->
-        <!-- Öffnet in neuem Tab: target=_blank + rel + sichtbares External-Link-Icon -->
-        <li class="hph-rail__item">
-          <a class="hph-rail__tile" href="https://produktfinder.hamburgpapier-shop.de/vergleich/papierhandtuecher"
-             target="_blank" rel="noopener noreferrer"
-             aria-label="Preise vergleichen (öffnet in neuem Tab)">
-            <span class="hph-rail__media">
-              <img src="https://www.hamburgpapier-shop.de/media/66/8b/f4/1780053285/Papierhantcher-Preise-Vergleichen.avif?ts=1780053285"
-                   alt="Papierhandtücher Preise vergleichen" width="300" height="380" loading="lazy" decoding="async">
-            </span>
-            <span class="hph-rail__label">Preise vergleichen<svg class="hph-rail__ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg></span>
-          </a>
-        </li>
+        <!-- Kachel "Preise vergleichen" wurde bewusst aus der Foto-Rail entfernt:
+             als Funktions-/Tool-Kachel brach sie das kuratierte Produktfoto-Raster.
+             Der Produktfinder-Pfad lebt jetzt zweifach intent-getrennt:
+               • Beratung („Passende Falzung finden") in der Leitzeile über der Rail
+               • Preis/Mengen („Staffelpreise vergleichen") als sekundärer Kopf-CTA. -->
 
       </ul>
     </nav>
@@ -851,7 +916,9 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
 
         <header class="hph-cards__head">
           <h2 class="hph-cards__heading">Gut zu wissen</h2>
-          <a class="hph-cards__more" href="https://produktfinder.hamburgpapier-shop.de/vergleich/papierhandtuecher" target="_blank" rel="noopener noreferrer" aria-label="Zum Produktfinder (öffnet in neuem Tab)">Zum Produktfinder
+          <!-- Header-Link auf das Sortiment (statt 3. Produktfinder-Dublette): unterstützt das
+               Primärziel „ins Sortiment/Kauf" und passt zum informativen Charakter der Sektion. -->
+          <a class="hph-cards__more" href="https://www.hamburgpapier-shop.de/papierhandtuecher" aria-label="Alle Papierhandtücher ansehen">Alle Papierhandtücher ansehen
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
           </a>
         </header>
@@ -964,6 +1031,7 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
           <article id="hph-detail-1lagig" class="hph-cards__detail" aria-labelledby="hph-detail-1lagig-h">
             <div class="hph-cards__detail-inner">
               <h4 class="hph-cards__detail-title" id="hph-detail-1lagig-h">Papierhandtücher 1-lagig</h4>
+              <p class="hph-cards__detail-lead">Kurz gesagt: die wirtschaftliche Wahl für viel Betrieb. Reißfest und saugstark genug für den Alltag, günstig pro Blatt und platzsparend im Lager.</p>
               <p>Dank einer strengen Materialauswahl und der Fertigung in zertifizierten europäischen Werken zeichnen sich diese Handtücher durch eine hohe Reißfestigkeit und zuverlässige Saugkraft aus, schon in der einlagigen Ausführung. Sie sind dafür konzipiert, hohen Personendurchlauf zu bewältigen, ohne das Budget des Facility Managements zu belasten. Auch in hygienesensiblen Bereichen, die nach HACCP-Richtlinien arbeiten, bietet das Einwegpapier eine sichere Methode zur schnellen Händetrocknung.</p>
               <p>Der größte B2B-Vorteil liegt in der Kosteneffizienz und der schlanken Lagerlogistik: Einlagige Papiere beanspruchen pro Blatt weniger Volumen als mehrlagige Alternativen. Das bedeutet konkret, dass mehr Blätter in einen Standard-Handtuchspender passen. Für Ihr Reinigungspersonal verlängern sich die Nachfüllintervalle spürbar, was Arbeitszeit einspart. Gleichzeitig passen mehr Verkaufseinheiten auf eine Europalette, was Ihre Frachtkosten bei der Speditionslieferung senkt und Platz in Ihrem Zentrallager schont.</p>
               <p>In Kombination mit passgenauen Spendersystemen, etwa dem klassischen Zickzack-Spender (Z-/ZZ-Falz) oder modernen Autocut-Sensorspendern für Rollenware, ermöglicht das Papier eine berührungsarme, hygienische Einzelblattentnahme. Das schützt Ihr Personal vor Kreuzkontaminationen und Schmierinfektionen und reduziert zugleich den unkontrollierten Mehrverbrauch. Weniger Verbrauch bedeutet ein deutlich reduziertes Abfallvolumen in den Papierkörben, was Ihre gewerblichen Entsorgungskosten (Müllgebühren) senkt. Ein ganzheitlicher Gewinn für Ihre Total-Cost-of-Ownership (TCO) und die betriebliche Umweltbilanz. Die Staffelpreise je Karton und Palette sehen Sie direkt am Artikel im Shop.</p>
@@ -977,10 +1045,11 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
           <article id="hph-detail-2lagig" class="hph-cards__detail" aria-labelledby="hph-detail-2lagig-h">
             <div class="hph-cards__detail-inner">
               <h4 class="hph-cards__detail-title" id="hph-detail-2lagig-h">Papierhandtücher 2-lagig</h4>
+              <p class="hph-cards__detail-lead">Kurz gesagt: das spürbare Komfort-Upgrade. Weicher und saugstärker, ideal fürs Gäste-WC und repräsentative Waschräume. Meist genügen ein bis zwei Blatt.</p>
               <p>Unsere 2-lagigen Papierhandtücher sind im direkten Vergleich ein spürbares Premium-Upgrade für Ihre Waschraumausstattung. Sie liefern mehr als nur eine zusätzliche Papierschicht: Durch ihre spezielle Verleimung überzeugen sie mit hoher Nassfestigkeit, kräftiger Saugkraft und einer weichen, hautfreundlichen Haptik.</p>
               <p>Diese Qualität entsteht im Herstellungsprozess: Die beiden Papierschichten werden durch einen wasserlöslichen Spezialleim und eine feine Flächenprägung fest miteinander verbunden. Diese Volumenprägung erzeugt einen Kapillareffekt: Zwischen den Lagen entstehen kleine Luftpolster, die Nässe schnell aufnehmen. Das Ergebnis ist ein Papierhandtuch, das auch im durchnässten Zustand formstabil bleibt, beim Herausziehen aus dem Spender nicht zerreißt und keine Papierfusseln an nassen Händen hinterlässt.</p>
               <p>Diese Reißfestigkeit löst zudem ein häufiges Problem im Facility Management: Sie verhindert den Papierstau im Spendersystem, der oft zu Unmut bei den Nutzern und zu Wartungsaufwand führt. Unsere langjährige Erfahrung im Großhandel zeigt, dass diese Verarbeitung die bevorzugte Wahl für repräsentative Unternehmenszentralen, Executive-Waschräume, medizinische Einrichtungen, Kanzleien und die gehobene Hotellerie ist. Auch die Nutzerpsychologie spielt eine Rolle: Ein hochwertiges Handtuch vermittelt Gästen und Mitarbeitern Wertschätzung und unterstreicht den Hygienestandard des Gebäudes.</p>
-              <p>Auch die Cost-in-Use-Rechnung geht bei 2-lagigen Papieren auf: Da die Tücher sehr saugfähig sind, genügen in der Praxis ein bis zwei Blätter zur vollständigen Händetrocknung. Der Blattverbrauch pro Toilettengang sinkt spürbar, was den etwas höheren Einkaufspreis schnell amortisiert. Je nach Anforderungsprofil erhalten Sie diese Variante aus zertifiziertem Recyclingmaterial oder hochweißem Frischzellstoff, passgenau gefaltet (Z-/ZZ-Falz, Interfold) für eine reibungslose Integration in Ihre Waschraum-Infrastruktur. Die Staffelpreise je Karton und Palette sehen Sie direkt am Artikel im Shop.</p>
+              <p>Auch die Cost-in-Use-Rechnung geht bei 2-lagigen Papieren auf: Da die Tücher sehr saugfähig sind, genügen in der Praxis ein bis zwei Blätter zur vollständigen Händetrocknung. Der Blattverbrauch pro Toilettengang sinkt spürbar, was den etwas höheren Einkaufspreis schnell amortisiert. Je nach Anforderungsprofil erhalten Sie diese Variante aus zertifiziertem Recyclingmaterial oder hochweißem Frischzellstoff (welches Umweltzeichen ein konkreter Artikel trägt, steht jeweils am Produkt), passgenau gefaltet (Z-/ZZ-Falz, Interfold) für eine reibungslose Integration in Ihre Waschraum-Infrastruktur. Die Staffelpreise je Karton und Palette sehen Sie direkt am Artikel im Shop.</p>
               <a class="hph-cards__detail-link" href="https://www.hamburgpapier-shop.de/papierhandtuecher-2-lagig">Zum 2-lagig-Sortiment
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
               </a>
@@ -991,9 +1060,11 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
           <article id="hph-detail-ecolabel" class="hph-cards__detail" aria-labelledby="hph-detail-ecolabel-h">
             <div class="hph-cards__detail-inner">
               <h4 class="hph-cards__detail-title" id="hph-detail-ecolabel-h">EU Ecolabel zertifiziert</h4>
+              <p class="hph-cards__detail-lead">Kurz gesagt: Das EU-Umweltzeichen bewertet den gesamten Lebensweg des Produkts. Die sichere Wahl, wenn Sie nach Nachhaltigkeitskriterien einkaufen oder ausschreiben.</p>
               <p>Das 1992 eingeführte EU Ecolabel ist das offiziell anerkannte, grenzüberschreitende Umweltzeichen in Europa. Es garantiert Einkäufern, dass unsere Papierhandtücher einheitliche, streng kontrollierte Kriterien erfüllen und hohen ökologischen Standards in Europa entsprechen.</p>
-              <p>Im Gegensatz zu vielen anderen Siegeln bewertet das EU Ecolabel den gesamten Lebenszyklus eines Produkts. Von der Rohstoffgewinnung über die energieeffiziente Produktion bis zur Anlieferung in Ihrem Betrieb steht der „Life-Cycle-Ansatz" im Vordergrund. Das bedeutet eine messbare Reduzierung der CO₂-Belastung, einen geringeren Wasserverbrauch während der Papierherstellung sowie streng überwachte Abwasserwerte.</p>
+              <p>Im Gegensatz zu vielen anderen Siegeln bewertet das EU Ecolabel den gesamten Lebenszyklus eines Produkts. Von der Rohstoffgewinnung über die energieeffiziente Produktion bis zur Anlieferung in Ihrem Betrieb steht der „Life-Cycle-Ansatz" im Vordergrund. Das bedeutet eine Reduzierung der CO₂-Belastung, einen geringeren Wasserverbrauch während der Papierherstellung sowie streng überwachte Abwasserwerte.</p>
               <p>Darüber hinaus berücksichtigt das Zertifikat die gesicherte, nachhaltige Herkunft der Rohstoffe (etwa FSC-Zertifizierungen für Frischfasern) und verbietet den Einsatz von umwelt- und gesundheitsschädlichen Chemikalien. Für B2B-Unternehmen, Behörden und Konzerne, die strengen ESG-Richtlinien unterliegen oder ein aktives Green Procurement (grüne Beschaffung) betreiben, sind Produkte mit diesem Gütesiegel eine verlässliche Wahl für eine umweltgerechte Beschaffung.</p>
+              <p>Die konkrete Lizenznummer und die Gültigkeit sehen Sie auf der offiziellen, unten verlinkten EU-Ecolabel-Produktseite; das Zeichen gilt für die dort gelisteten Artikel.<!-- TODO Hamburg Papier: EU-Ecolabel-Lizenznummer (Format DE/004/xxx) optional direkt hier nennen --></p>
               <a class="hph-cards__detail-link" href="https://environmental-data.ec.europa.eu/ecolabel/products/product_59468.html" target="_blank" rel="noopener noreferrer" aria-label="Zur EU-Ecolabel-Produktseite (öffnet in neuem Tab)">Zur EU-Ecolabel-Produktseite
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg>
               </a>
@@ -1004,9 +1075,11 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
           <article id="hph-detail-engel" class="hph-cards__detail" aria-labelledby="hph-detail-engel-h">
             <div class="hph-cards__detail-inner">
               <h4 class="hph-cards__detail-title" id="hph-detail-engel-h">Der Blaue Engel</h4>
+              <p class="hph-cards__detail-lead">Kurz gesagt: 100 % Recyclingpapier nach strengen Kriterien, ohne optische Aufheller und Chlorbleiche. Das deutsche Umweltzeichen, das viele öffentliche Ausschreibungen verlangen.</p>
               <p>Papierhandtücher, die das Umweltzeichen „Blauer Engel" tragen, stehen für eine ressourcenschonende und umweltverträgliche Produktion. Das bereits 1978 eingeführte deutsche Zertifikat garantiert, dass die Produkte zu 100 % aus recyceltem Altpapier hergestellt werden.</p>
               <p>Die Vergabekriterien des Blauen Engels sind streng: Das Umweltzeichen definiert dem Hersteller genau, welche Altpapiersorten für die Produktion von Hygienepapieren verwendet werden dürfen. Zudem wird der Einsatz von optischen Aufhellern, chlorhaltigen Bleichmitteln und anderen bedenklichen Chemikalien untersagt. Das schützt die Umwelt und sorgt für eine hohe Hautverträglichkeit bei der täglichen Händetrocknung.</p>
-              <p>Im direkten Vergleich zur Produktion von neuem Frischfaserpapier sparen unsere Blauer-Engel-Handtücher erhebliche Mengen an Energie, Wasser und Holzressourcen. Dadurch werden CO₂-Emissionen und Abfallmengen deutlich reduziert. Wer sich bei Hamburgpapier für diese zertifizierten Papiere entscheidet, erfüllt die Vorgaben vieler öffentlicher Ausschreibungen und unterstützt eine geschlossene Kreislaufwirtschaft.</p>
+              <p>Im direkten Vergleich zur Produktion von neuem Frischfaserpapier sparen unsere Blauer-Engel-Handtücher Energie, Wasser und Holzressourcen. Dadurch werden CO₂-Emissionen und Abfallmengen deutlich reduziert. Wer sich bei Hamburgpapier für diese zertifizierten Papiere entscheidet, erfüllt die Vorgaben vieler öffentlicher Ausschreibungen und unterstützt eine geschlossene Kreislaufwirtschaft.</p>
+              <p>Die Vergabegrundlage (RAL-UZ), den Zeichennehmer und die Gültigkeit sehen Sie im offiziellen, unten verlinkten Blauer-Engel-Eintrag; das Zeichen gilt für die dort gelisteten Artikel.<!-- TODO Hamburg Papier: RAL-UZ-Nummer + Gültigkeit optional direkt hier nennen --></p>
               <a class="hph-cards__detail-link" href="https://www.blauer-engel.de/de/produkte/herm-kemme-gmbh-papierhandtuecher-grau-25-x-23-cm-zz-falz-1-lagig-490-017" target="_blank" rel="noopener noreferrer" aria-label="Zum Eintrag beim Blauen Engel (öffnet in neuem Tab)">Zum Eintrag beim Blauen Engel
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg>
               </a>
