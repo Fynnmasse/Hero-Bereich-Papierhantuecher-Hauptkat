@@ -177,6 +177,36 @@
   .hph-hero__trust-item + .hph-hero__trust-item{ border-left:0; padding-left:0; }
 }
 
+/* ---------- Kopf-Band: Text links, Hintergrundvideo rechts ---------- */
+.hph-hero__intro{
+  display:grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);   /* leicht textlastig */
+  gap: clamp(28px, 4vw, 56px);
+  align-items: stretch;            /* Video matcht die Höhe der Textspalte */
+}
+.hph-hero__intro-text{ align-self:center; min-width:0; }
+
+/* Medien-Rahmen in derselben Sprache wie .hph-cards__media */
+.hph-hero__media{
+  position:relative; margin:0; overflow:hidden;
+  min-height: clamp(280px, 30vw, 440px);
+  border-radius: clamp(16px, 1.6vw, 22px);        /* identisch zu .hph-cards__media */
+  border:1px solid var(--hph-border);
+  background: linear-gradient(135deg, oklch(0.96 0.012 245), oklch(0.90 0.022 245)); /* Fallback-Fläche bis das Video lädt */
+  box-shadow: 0 10px 30px oklch(0.30 0.045 245 / .08);
+}
+.hp-hero-video{
+  position:absolute; inset:0;       /* füllt die Figure unabhängig von %-Höhen-Quirks */
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+.hph-hero__media-still{ display:none; }   /* nur bei prefers-reduced-motion sichtbar */
+
+/* Mobil: Intro stapelt, Video gedeckelt (nicht bildschirmfüllend) */
+@media (max-width: 860px){
+  .hph-hero__intro{ grid-template-columns:1fr; gap: clamp(20px, 5vw, 30px); }
+  .hph-hero__media{ min-height:0; aspect-ratio: 4 / 3; max-height: min(58vh, 320px); }
+}
+
 /* ---------- Product-Rail ---------- */
 .hph-rail{
   position:relative;        /* Anker für die Slider-Pfeile */
@@ -661,6 +691,7 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
    <script> verändert, sodass es gar nicht erst parst – bleibt der Inhalt
    sichtbar. Schlimmster Fall ist damit "keine Animation", nie "kein Hero". */
 .hph-hero--js .hph-hero__head,
+.hph-hero--js .hph-hero__media,
 .hph-hero--js .hph-hero__actions,
 .hph-hero--js .hph-hero__trust-item,
 .hph-hero--js .hph-rail__item,
@@ -671,6 +702,7 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
               transform .6s cubic-bezier(.16,1,.3,1);
 }
 .hph-hero--js .hph-hero__head{ transform: translateY(16px); }
+.hph-hero--js .hph-hero__media{ transform: translateY(16px); }
 .hph-hero--js .hph-hero__actions{ transform: translateY(14px); }
 .hph-hero--js .hph-hero__trust-item{ transform: translateY(12px); }
 .hph-hero--js .hph-rail__item{ transform: translateY(14px); }
@@ -678,6 +710,7 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
 .hph-hero--js .hph-cards__item{ transform: translateY(18px); }
 
 .hph-hero.is-ready .hph-hero__head{ opacity:1; transform:none; transition-delay:.05s; }
+.hph-hero.is-ready .hph-hero__media{ opacity:1; transform:none; transition-delay:.12s; }
 .hph-hero.is-ready .hph-hero__actions{ opacity:1; transform:none; transition-delay:.12s; }
 .hph-hero.is-ready .hph-hero__trust-item{ opacity:1; transform:none; }
 .hph-hero.is-ready .hph-hero__trust-item:nth-child(1){ transition-delay:.18s; }
@@ -746,12 +779,19 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
 /* ---------- Bewegung reduzieren ---------- */
 @media (prefers-reduced-motion: reduce){
   .hph-hero__head,
+  .hph-hero__media,
   .hph-hero__actions,
   .hph-hero__trust-item,
   .hph-rail__item,
   .hph-cards__head,
   .hph-cards__item{ opacity:1 !important; transform:none !important; transition:none !important; }
   .hph-hero__cta{ transition:none !important; }
+  /* Hintergrundvideo nicht abspielen -> Standbild zeigen */
+  .hph-hero__media .hp-hero-video{ display:none; }
+  .hph-hero__media-still{
+    display:block; position:absolute; inset:0;
+    width:100%; height:100%; object-fit:cover;
+  }
   .hph-rail__tile, .hph-rail__media img, .hph-rail__media::after, .hph-rail__nav{ transition:none !important; }
   .hph-cards__media, .hph-cards__nav, .hph-cards__toggle, .hph-cards__toggle-chevron,
   .hph-cards__detail, .hph-cards__detail-inner, .hph-cards__detail-link, .hph-cards__buy{ transition:none !important; }
@@ -765,6 +805,7 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
 <noscript>
   <style>
     .hph-hero__head,
+    .hph-hero__media,
     .hph-hero__actions,
     .hph-hero__trust-item,
     .hph-rail__item,
@@ -775,6 +816,10 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
 
 <section class="hph-hero" aria-labelledby="hph-hero-title">
   <div class="hph-hero__inner hph-hero__inner--lead">
+
+    <!-- 1) Kopf-Band: Text links, stummes Loop-Video rechts (ab 861px); darunter gestapelt -->
+    <div class="hph-hero__intro">
+      <div class="hph-hero__intro-text">
 
     <!-- 1) Kopf: Titel + Subline + Aktionen -->
     <header class="hph-hero__head">
@@ -805,6 +850,24 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
         Lieferung in ca. 4 Werktagen
       </li>
     </ul>
+
+      </div><!-- /.hph-hero__intro-text -->
+
+      <!-- Rechtes Medium: stummes, nahtlos loopendes Hintergrundvideo (1:1-Asset).
+           muted + playsinline + loop = Pflicht (Autoplay-Policy/iOS).
+           Bei prefers-reduced-motion zeigt CSS das Standbild statt des Videos.
+           Alternative 4:3-Quelle: …/papierhandtuecher-hero-4-3.mp4 -->
+      <figure class="hph-hero__media">
+        <video class="hp-hero-video" autoplay muted loop playsinline preload="metadata"
+               poster="https://www.hamburgpapier-shop.de/media/30/5b/45/1780743155/papierhandtuecher-hero-poster.jpg?ts=1780743155">
+          <source src="https://www.hamburgpapier-shop.de/media/44/a7/57/1780743161/papierhandtuecher-hero-1-1.webm?ts=1780743161" type="video/webm">
+          <source src="https://www.hamburgpapier-shop.de/media/44/a7/57/1780743161/papierhandtuecher-hero-1-1.mp4?ts=1780743161" type="video/mp4">
+        </video>
+        <img class="hph-hero__media-still"
+             src="https://www.hamburgpapier-shop.de/media/30/5b/45/1780743155/papierhandtuecher-hero-poster.jpg?ts=1780743155"
+             alt="" aria-hidden="true" width="600" height="600" loading="lazy" decoding="async">
+      </figure>
+    </div><!-- /.hph-hero__intro -->
 
     <!-- 2) Product-Rail (Unterkategorien) -->
     <!-- Pro Kachel: href, Bild (src/alt), Label und Klartext-Hint anpassen. -->
@@ -1126,6 +1189,14 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
 
       io.observe(hero);
     });
+
+    /* ---- prefers-reduced-motion: Hintergrundvideo nicht abspielen (CSS zeigt das Standbild) ---- */
+    if (reduce) {
+      document.querySelectorAll('.hp-hero-video').forEach(function (v) {
+        v.removeAttribute('autoplay');
+        try { v.pause(); } catch (e) {}
+      });
+    }
 
     /* ---- Slider-Pfeile der Produkt-Rail ---- */
     document.querySelectorAll('.hph-rail').forEach(function (rail) {
