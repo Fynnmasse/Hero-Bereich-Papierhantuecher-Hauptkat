@@ -39,13 +39,15 @@
   --hph-surface-lower: #f3f5f8;  /* gräulicher unterer Bereich              */
   --hph-border:       #eaeaf0;   /* Rahmenfarbe                             */
   --hph-on-brand:     #ffffff;   /* Hintergrundfarbe · Text auf Buttons     */
+  --hph-hairline:     oklch(0.30 0.045 245 / .12); /* navy-getönte Haarlinie · Trenner/Rahmen */
+  --hph-ink-mute:     oklch(0.52 0.028 245);       /* tertiäre, gedämpfte Textstufe (AA-konform) */
 
   box-sizing:border-box;
   position:relative;
   padding-block: clamp(48px, 7vw, 96px) 0;   /* unten 0: der graue Bereich schließt bündig an */
   color: var(--hph-ink);
-  /* Oberer Bereich (Titel + Rail) komplett weiß */
-  background: #ffffff;
+  /* Oberer Bereich (Titel + Rail): praktisch weiß, mit kaum sichtbarem Verlauf zur Naht */
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 55%, oklch(0.985 0.004 245) 100%);
   overflow:hidden;
   -webkit-font-smoothing:antialiased;
 }
@@ -70,8 +72,10 @@
 .hph-hero__lower{
   background: var(--hph-surface-lower);
   border-top: 1px solid oklch(0.90 0.008 245);
-  box-shadow: inset 0 1px 0 oklch(0.99 0.004 245);
-  padding-block: clamp(40px, 5.5vw, 72px) clamp(48px, 7vw, 96px);
+  box-shadow:
+    inset 0 1px 0 oklch(0.99 0.004 245),
+    inset 0 7px 12px -7px oklch(0.30 0.045 245 / .10);   /* flacher Naht-Schatten: grauer Bereich liegt unter dem Kopf */
+  padding-block: clamp(28px, 3.5vw, 44px) clamp(48px, 7vw, 96px);   /* oben gestrafft: Naht verbindet statt zu trennen */
 }
 
 /* ---------- Kopf ---------- */
@@ -83,25 +87,26 @@
 .hph-hero__title{
   margin:0;
   font-weight:700;
-  letter-spacing:-0.02em;
+  letter-spacing:-0.025em;
   line-height:1.04;
-  font-size: clamp(1.9rem, 1.2rem + 3.1vw, 3.7rem);
+  font-size: clamp(2.1rem, 1.3rem + 3.4vw, 4.05rem);
   color: var(--hph-ink);
   /* Kein hyphens:auto: das Kompositum „Papierhandtücher" darf nie mitten
      im Wort getrennt werden. overflow-wrap bleibt als Notbremse. */
   overflow-wrap:break-word;
 }
 .hph-hero__subtitle{
-  margin: clamp(16px,2.4vw,22px) 0 0;
+  margin: clamp(12px,1.8vw,16px) 0 0;
   max-width: 58ch;
   color: var(--hph-ink-soft);
-  line-height:1.55;
+  font-weight:450;
+  line-height:1.5;
   font-size: clamp(1.02rem, .97rem + .45vw, 1.22rem);
 }
 
 /* ---------- Kopf-Aktionen: primärer CTA + sekundärer Textlink ---------- */
 .hph-hero__actions{
-  margin: clamp(22px,2.8vw,32px) 0 0;
+  margin: clamp(24px,3.2vw,40px) 0 0;
   display:flex;
   flex-wrap:wrap;
   align-items:center;
@@ -118,11 +123,11 @@
   white-space:nowrap;
   -webkit-tap-highlight-color:transparent;
   transition: background-color .2s ease, color .2s ease,
-              transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease, gap .2s ease;
+              transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease;
 }
-/* primär = gefüllte Marken-Pill (gleiche Sprache wie .hph-cards__buy) */
+/* primär = gefüllte Marken-Pill (gleiche Sprache wie .hph-feature__buy) */
 .hph-hero__cta--primary{
-  padding:.72em 1.45em;
+  padding:.82em 1.6em;
   border-radius:980px;
   background: var(--hph-brand);
   color: var(--hph-on-brand);
@@ -137,12 +142,13 @@
 /* sekundär = ruhige TONALE Pill (klares Sekundär-Gewicht neben dem gefüllten Primär,
    damit der B2B-Preis-/Vergleichspfad nicht der leiseste Touchpoint der Seite ist) */
 .hph-hero__cta--ghost{
-  padding:.7em 1.3em;
+  padding:.7em 1.25em;
   border-radius:980px;
   color: var(--hph-brand);
   background: oklch(0.95 0.014 245);
 }
-.hph-hero__cta--ghost:hover{ color: var(--hph-brand-dark); background: oklch(0.92 0.02 245); gap:.7em; }
+.hph-hero__cta--ghost:hover{ color: var(--hph-brand-dark); background: oklch(0.92 0.02 245); transform: translateY(-1px); box-shadow: 0 4px 12px oklch(0.30 0.045 245 / .12); }
+.hph-hero__cta--ghost:hover .hph-rail__ext{ transform: translateX(2px); }
 .hph-hero__cta--ghost:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
 .hph-hero__cta svg{ width:1em; height:1em; flex:none; }
 .hph-hero__cta--ghost .hph-rail__ext{ width:.82em; height:.82em; margin-left:0; color:inherit; }
@@ -150,7 +156,7 @@
 /* ---------- Trust-Strip: schlanke Faktenzeile, KEINE Karten ---------- */
 .hph-hero__trust{
   list-style:none;
-  margin: clamp(22px,2.8vw,30px) 0 0;
+  margin: clamp(18px,2.4vw,26px) 0 0;
   padding:0;
   display:flex;
   flex-wrap:wrap;
@@ -168,7 +174,7 @@
 /* feine Trennlinie vor jedem Eintrag außer dem ersten (statt Bullets) */
 .hph-hero__trust-item + .hph-hero__trust-item{
   padding-left: clamp(16px,2vw,26px);
-  border-left:1px solid var(--hph-border);
+  border-left:1px solid var(--hph-hairline);
 }
 .hph-hero__trust-item svg{ width:1.15em; height:1.15em; flex:none; color: var(--hph-brand); }
 /* auf schmalen Viewports umbrechen lassen und die Linien weglassen */
@@ -180,20 +186,25 @@
 /* ---------- Kopf-Band: Text links, Hintergrundvideo rechts ---------- */
 .hph-hero__intro{
   display:grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);   /* leicht textlastig */
-  gap: clamp(28px, 4vw, 56px);
-  align-items: stretch;            /* Video matcht die Höhe der Textspalte */
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);   /* Text führt, Medium begleitet (~58/42) */
+  gap: clamp(32px, 4.5vw, 64px);
+  align-items: stretch;            /* Video nimmt die Höhe der Textspalte an → keine Lücke, Rail rückt nach oben */
 }
 .hph-hero__intro-text{ align-self:center; min-width:0; }
 
-/* Medien-Rahmen in derselben Sprache wie .hph-cards__media */
+/* Medien-Rahmen: abgerundet wie die Feature-Karten */
 .hph-hero__media{
   position:relative; margin:0; overflow:hidden;
-  min-height: clamp(280px, 30vw, 440px);
-  border-radius: clamp(16px, 1.6vw, 22px);        /* identisch zu .hph-cards__media */
-  border:1px solid var(--hph-border);
+  /* KEIN festes aspect-ratio auf Desktop: das Medium nimmt per align-items:stretch die
+     Höhe der Textspalte an, damit kein Höhen-Überschuss die Rail nach unten drückt. */
+  min-height: clamp(260px, 22vw, 360px);           /* Untergrenze, falls die Textspalte kurz ist */
+  border-radius: clamp(20px, 2vw, 28px);          /* identisch zu den Feature-Karten */
+  border:1px solid var(--hph-hairline);
   background: linear-gradient(135deg, oklch(0.96 0.012 245), oklch(0.90 0.022 245)); /* Fallback-Fläche bis das Video lädt */
-  box-shadow: 0 10px 30px oklch(0.30 0.045 245 / .08);
+  box-shadow:
+    inset 0 1px 0 oklch(0.99 0.004 245 / .9),      /* heller Innen-Grat */
+    0 1px 2px oklch(0.30 0.045 245 / .06),         /* nahe Kontaktlage */
+    0 14px 34px -8px oklch(0.30 0.045 245 / .12);  /* weiche Streulage */
 }
 .hp-hero-video{
   position:absolute; inset:0;       /* füllt die Figure unabhängig von %-Höhen-Quirks */
@@ -217,8 +228,9 @@
 }
 .hph-rail__track{
   list-style:none;
-  margin:0;
-  padding:8px 0 6px;
+  margin-block:0;
+  margin-inline:-8px;          /* gleicht das Inline-Padding aus → Rail bleibt linksbündig */
+  padding:12px 8px 10px;       /* mehr Raum für Lift, Standschatten und Fokus-Ring (nicht beschnitten) */
   display:flex;
   gap: clamp(10px, 1.6vw, 30px);
   justify-content:flex-start;
@@ -241,7 +253,7 @@
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap: clamp(20px, 2.2vw, 28px);
+  gap: clamp(11px, 1.2vw, 15px);
   /* Kachel so breit wie ihr Inhalt (das einzeilige Label) – Mindestbreite = Bildbreite.
      So passt der Titel immer in eine Zeile und überlappt nie die Nachbarkachel. */
   width: max-content;
@@ -260,7 +272,7 @@
   place-items:center;
   overflow:visible;
 }
-/* Weicher Kontaktschatten am Boden – blendet beim Hover ein, das Produkt "hebt ab" */
+/* Weiche Standlinie am Boden – im Ruhezustand dezent sichtbar, beim Hover verstärkt */
 .hph-rail__media::after{
   content:"";
   position:absolute;
@@ -268,11 +280,11 @@
   bottom:-4px;
   width:64%;
   height:12px;
-  transform: translateX(-50%) scale(.55);
+  transform: translateX(-50%) scale(.66);
   border-radius:50%;
   background: radial-gradient(closest-side, oklch(0.30 0.045 245 / .34), transparent);
   filter: blur(4px);
-  opacity:0;
+  opacity:.2;                /* dezente Ruhe-Standlinie: Produkt ist verankert, Hover verstärkt nur */
   transition: opacity .5s cubic-bezier(.16,1,.3,1),
               transform .5s cubic-bezier(.16,1,.3,1);
   pointer-events:none;
@@ -301,7 +313,8 @@
 .hph-rail__label{
   width:100%;
   font-size: clamp(.92rem, .88rem + .2vw, 1.05rem);
-  font-weight:500;
+  font-weight:600;
+  letter-spacing:-0.01em;
   line-height:1.25;
   text-align:center;
   color: var(--hph-ink);
@@ -348,14 +361,16 @@
 }
 .hph-rail__lead a:hover{ color: var(--hph-brand-dark); }
 .hph-rail__lead a:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
+.hph-rail__lead a .hph-rail__ext{ color:inherit; }                       /* „externer Link"-Icon übernimmt die Linkfarbe */
+.hph-rail__lead a:hover .hph-rail__ext{ transform: translate(1px,-1px); }
 
-/* Label + Klartext-Hint sitzen als enger Textblock unter dem Foto;
-   der große Tile-Gap bleibt zwischen Foto und Textblock erhalten. */
+/* Label + Klartext-Hint als enger Textblock; Foto und Text rücken als eine Einheit
+   zusammen (kleiner Tile-Gap), die dezente Standlinie trägt die optische Trennung. */
 .hph-rail__text{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:3px;
+  gap:4px;
   width:100%;
 }
 .hph-rail__hint{
@@ -363,7 +378,7 @@
   font-weight:400;
   line-height:1.2;
   text-align:center;
-  color: var(--hph-ink-soft);
+  color: var(--hph-ink-mute);
   white-space:nowrap;
 }
 
@@ -371,8 +386,8 @@
 .hph-rail__nav{
   display:none;            /* nur in der Mobile-Query auf grid gesetzt */
   position:absolute;
-  top:14px;                /* = Bildoberkante (8px Track- + 6px Kachel-Padding) */
-  bottom:12px;             /* = Titel-Unterkante (6px Kachel- + 6px Track-Padding) */
+  top:18px;                /* = Bildoberkante (12px Track- + 6px Kachel-Padding) */
+  bottom:16px;             /* = Titel-Unterkante (6px Kachel- + 10px Track-Padding) */
   z-index:3;
   width:38px;
   padding:0;
@@ -406,23 +421,24 @@
 .hph-rail__nav[disabled]{ opacity:0; pointer-events:none; }
 
 /* ============================================================================
-   INFO-KARTEN  (Apple-„Entdecke alle Modelle"-Stil)
-   4 Kacheln: Bild-Karte oben, darunter frei stehender Titel (h2) + Fließtext.
-   Informativ, KEINE Produktanzeigen. Desktop: 4 gleich breite Spalten.
-   Tablet/Handy: echter Slider (s. Media-Query weiter unten).
+   FEATURE-KACHELN  (Apple-„iPad Zubehör"-Stil)
+   Zwei große, zertifizierte Produkt-Highlights nebeneinander (Desktop),
+   gestapelt (Mobil). Pro Karte: Textblock oben (Titel + zwei Untertitel-
+   Zeilen + „Weitere Infos ›" + „Jetzt kaufen") und großes, randabfallendes
+   Produktfoto unten. Statisch – keine JS-Abhängigkeit.
    ============================================================================ */
-.hph-cards{ position:relative; }
+.hph-feature{ position:relative; }
 
-/* Optionaler Kopf (Überschrift + Link) – Struktur vorbereitet, Inhalt folgt.
-   Solange auskommentiert, beginnt die Sektion direkt mit den Karten. */
-.hph-cards__head{
+/* Kopf: Überschrift links, Sortiment-Link rechts */
+.hph-feature__head{
   display:flex;
   align-items:baseline;
   justify-content:space-between;
   gap: clamp(16px, 3vw, 40px);
-  margin-bottom: clamp(24px, 3.4vw, 44px);
+  margin-bottom: clamp(20px, 2.8vw, 36px);
+  flex-wrap:wrap;
 }
-.hph-cards__heading{
+.hph-feature__heading{
   margin:0;
   font-weight:700;
   letter-spacing:-0.02em;
@@ -430,7 +446,7 @@
   font-size: clamp(1.6rem, 1.1rem + 1.9vw, 2.6rem);
   color: var(--hph-ink);
 }
-.hph-cards__more{
+.hph-feature__seeall{
   flex:0 0 auto;
   display:inline-flex;
   align-items:center;
@@ -440,250 +456,269 @@
   color: var(--hph-brand);
   text-decoration:none;
   white-space:nowrap;
-  transition: color .2s ease, gap .2s ease;
+  transition: color .2s ease;
 }
-.hph-cards__more:hover{ color: var(--hph-brand-dark); gap:.5em; }
-.hph-cards__more:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
+.hph-feature__seeall svg{ width:1em; height:1em; flex:none; transition: transform .2s ease; }
+.hph-feature__seeall:hover{ color: var(--hph-brand-dark); }
+.hph-feature__seeall:hover svg{ transform: translateX(3px); }
+.hph-feature__seeall:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
 
-/* Track: ein Flex-Streifen. Desktop füllt er die Reihe (flex:1), mobil scrollt er. */
-.hph-cards__track{
+/* Grid: zwei gleich hohe Karten; mobil gestapelt (s. Media-Query unten) */
+.hph-feature__grid{
   list-style:none;
   margin:0;
-  padding:6px 0;
-  display:flex;
-  gap: clamp(16px, 2vw, 30px);
-  overflow-x:auto;
-  overflow-y:hidden;
-  touch-action: pan-x;
-  overscroll-behavior-x: contain;
-  scroll-behavior:smooth;
-  scroll-snap-type:x proximity;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-  -ms-overflow-style:none;
+  padding:0;
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(16px, 2vw, 24px);
 }
-.hph-cards__track::-webkit-scrollbar{ display:none; }
+.hph-feature__item{ display:flex; }   /* Karte füllt die Zelle → beide gleich hoch */
 
-.hph-cards__item{
-  flex: 0 0 clamp(280px, 30vw, 360px);   /* große Karten · Slider auf Desktop UND Mobil */
-  min-width:0;
-  display:flex;
-  scroll-snap-align:start;
-}
-.hph-cards__tile{
+/* Karte: weiße, stark gerundete Fläche; Foto blutet an die Ränder aus */
+.hph-feature__card{
+  position:relative;
+  isolation:isolate;
   display:flex;
   flex-direction:column;
   width:100%;
-  text-decoration:none;
-  color:inherit;
-}
-
-/* Bild-Karte: NUR das Bild sitzt in einer Karte (Apple-Prinzip),
-   der Text steht frei darunter. */
-.hph-cards__media{
-  position:relative;
-  display:block;
-  width:100%;
-  aspect-ratio: 3 / 4;
-  border-radius: clamp(16px, 1.6vw, 22px);
+  background:#fff;
+  border:1px solid var(--hph-hairline);            /* gleiche getönte Hairline wie das Hero-Medium */
+  border-radius: clamp(20px, 2vw, 28px);
   overflow:hidden;
-  background: linear-gradient(180deg, oklch(0.99 0.006 245), oklch(0.948 0.009 245));
-  border:1px solid var(--hph-border);
-  box-shadow: 0 10px 30px oklch(0.30 0.045 245 / .08);
-  transition: transform .55s cubic-bezier(.16,1,.3,1),
-              box-shadow .55s cubic-bezier(.16,1,.3,1);
+  box-shadow:
+    inset 0 1px 0 oklch(0.99 0.004 245 / .9),       /* heller Innen-Grat … */
+    0 1px 2px oklch(0.30 0.045 245 / .06),          /* nahe Kontaktlage … */
+    0 14px 34px -8px oklch(0.30 0.045 245 / .12);   /* … gleiche dreilagige Schatten-Sprache wie das Hero-Medium */
+  transition: transform .45s cubic-bezier(.16,1,.3,1),
+              box-shadow .45s cubic-bezier(.16,1,.3,1);
 }
-/* Echtes Bild später hier einsetzen (füllt die Karte randlos) */
-.hph-cards__img{
-  position:absolute; inset:0;
-  width:100%; height:100%;
-  object-fit:cover;
-  display:block;
+.hph-feature__card:hover{
+  transform: translateY(-2px);                      /* Hülle hebt nur knapp über den Kauf-Button (-1px) */
+  box-shadow:
+    inset 0 1px 0 oklch(0.99 0.004 245 / .9),
+    0 2px 4px oklch(0.30 0.045 245 / .08),
+    0 26px 50px -12px oklch(0.30 0.045 245 / .18);
 }
-/* Platzhalter, solange noch kein Bild gesetzt ist */
-.hph-cards__ph{
-  position:absolute; inset:0;
-  display:grid; place-content:center; justify-items:center; gap:10px;
-  padding:18px; text-align:center;
-  color: oklch(0.60 0.028 245);
-}
-.hph-cards__ph svg{ width: clamp(32px, 4vw, 44px); height:auto; opacity:.65; }
-.hph-cards__ph span{ font-size:.86rem; font-weight:500; letter-spacing:.01em; }
 
-/* Nur als <a> ausgezeichnete (klickbare) Karten heben beim Hover ab */
-a.hph-cards__media{ cursor:pointer; }
-a.hph-cards__media:hover{
-  transform: translateY(-4px);
-  box-shadow: 0 20px 46px oklch(0.30 0.045 245 / .16);
+/* Textblock oben (kompakt gehalten, damit die Karte flach bleibt) */
+.hph-feature__copy{
+  padding: clamp(20px,2.4vw,34px) clamp(22px,2.6vw,36px) 0;
 }
-a.hph-cards__media:active{ transform: translateY(-1px); transition-duration:.16s; }
-a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-offset:3px; }
-
-/* Text frei unter der Karte */
-.hph-cards__body{ padding: clamp(16px,2vw,22px) 2px 0; }
-.hph-cards__title{
+.hph-feature__title{
   margin:0;
-  font-weight:600;
-  letter-spacing:-0.015em;
-  line-height:1.22;
-  font-size: clamp(1.18rem, 1.04rem + .5vw, 1.5rem);
+  font-weight:700;
+  letter-spacing:-0.02em;
+  line-height:1.07;
+  font-size: clamp(1.45rem, 1.0rem + 1.4vw, 1.9rem);   /* klarer unter der Sektions-H2 gestaffelt */
   color: var(--hph-ink);
 }
-/* Teaser im Karten-Body (kurz, auf 3 Zeilen begrenzt für eine ruhige Reihe) */
-.hph-cards__teaser{
-  margin: clamp(8px,1vw,12px) 0 0;
+.hph-feature__sub{
+  margin: clamp(8px,1.2vw,14px) 0 0;
+  font-weight:600;
+  line-height:1.25;
+  font-size: clamp(1rem, .95rem + .35vw, 1.2rem);
   color: var(--hph-ink-soft);
-  line-height:1.55;
-  font-size: clamp(.98rem, .95rem + .15vw, 1.06rem);
-  display:-webkit-box;
-  -webkit-line-clamp:3;
-  line-clamp:3;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
+}
+.hph-feature__note{
+  margin: .35em 0 0;
+  line-height:1.35;
+  font-size: clamp(.94rem, .9rem + .2vw, 1.05rem);
+  color: var(--hph-ink-mute);   /* gleiche gedämpfte Stufe wie der Rail-Hint (statt opacity-Hack) */
 }
 
-/* Aktionszeile: „Mehr erfahren" links, „Jetzt kaufen" rechts daneben */
-.hph-cards__actions{
-  margin-top: clamp(14px,1.6vw,18px);
+/* Aktionen: „Weitere Infos ›" + „Jetzt kaufen" */
+.hph-feature__actions{
+  margin-top: clamp(14px,1.8vw,20px);
   display:flex;
   align-items:center;
-  gap: clamp(12px,1.6vw,20px);
+  gap: clamp(12px,1.6vw,22px);
   flex-wrap:wrap;
 }
-/* „Jetzt kaufen"-CTA (Apple-Pill) */
-.hph-cards__buy{
+.hph-feature__more{
   display:inline-flex;
   align-items:center;
-  padding:.52em 1.1em;
+  gap:.3em;
+  font-weight:600;
+  font-size: clamp(1rem,.96rem + .25vw,1.15rem);
+  color: var(--hph-brand);
+  text-decoration:none;
+  transition: color .2s ease;
+}
+.hph-feature__more svg{ width:1.05em; height:1.05em; flex:none; transition: transform .2s ease; }
+.hph-feature__more:hover{ color: var(--hph-brand-dark); }
+.hph-feature__more:hover svg{ transform: translateX(3px); }
+.hph-feature__more:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
+
+/* „Jetzt kaufen" – gefüllte Marken-Pill (gleiche Sprache wie .hph-hero__cta--primary) */
+.hph-feature__buy{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:.6em 1.25em;
   border-radius:980px;
   background: var(--hph-brand);
   color: var(--hph-on-brand);
-  font-size: clamp(.92rem,.9rem+.12vw,1rem);
   font-weight:600;
+  font-size: clamp(.95rem,.92rem + .15vw,1.05rem);
   line-height:1.1;
   text-decoration:none;
   white-space:nowrap;
   transition: background-color .2s ease, transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease;
 }
-.hph-cards__buy:hover{ background: var(--hph-brand-dark); transform:translateY(-1px); box-shadow:0 6px 16px oklch(0.30 0.045 245 / .18); }
-.hph-cards__buy:active{ transform:translateY(0); transition-duration:.1s; }
-.hph-cards__buy:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; }
+.hph-feature__buy:hover{ background: var(--hph-brand-dark); transform:translateY(-1px); box-shadow:0 6px 16px oklch(0.30 0.045 245 / .18); }
+.hph-feature__buy:active{ transform:translateY(0); transition-duration:.1s; }
+.hph-feature__buy:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; }
 
-/* „Mehr erfahren"-Schalter */
-.hph-cards__toggle{
-  display:none;            /* erst per JS (.is-enhanced) sichtbar – ohne JS sind die Volltexte ohnehin offen */
+/* Medien: Foto sitzt zentriert am unteren Rand. Höhe + Breite werden begrenzt,
+   damit die Karte flach & breit bleibt (sonst skaliert ein Hochformat-Foto die
+   Karte bei voller Breite sehr hoch). */
+.hph-feature__media{
+  margin-top:auto;                       /* schiebt das Foto an den unteren Rand */
+  padding-top: clamp(10px,1.6vw,18px);
+  display:flex;
+  justify-content:flex-end;              /* Foto bündig an den rechten Kartenrand */
+  align-items:flex-end;                  /* … und an den unteren Rand (Ecke unten rechts) */
+}
+.hph-feature__img{
+  display:block;
+  width:auto;
+  height:auto;
+  max-width: min(92%, 420px);            /* Foto nicht über die ganze breite Karte ziehen */
+  max-height: clamp(190px, 20vw, 290px); /* begrenzt die Kartenhöhe → kompakt */
+}
+
+/* ============================================================================
+   SHOWCASE-AKKORDEON  (Apple-„iPad und iPhone"-Stil) · GERÜST
+   Große weiße Karte: links Akkordeon (3 Einträge, genau einer offen),
+   rechts wechselndes Produktbild. Collapse + Bild-Crossfade greifen NUR unter
+   .hph-hero--js → ohne JS alle Panels offen + alle Bilder gestapelt sichtbar.
+   ============================================================================ */
+.hph-showcase-section{ position:relative; margin-top: clamp(44px, 6vw, 80px); }   /* eigene Sektion: klar vom Karten-Block darüber abgesetzt */
+.hph-showcase{ margin-top: 0; }
+.hph-showcase__card{
+  position:relative;
+  isolation:isolate;
+  display:grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);   /* Desktop: Text links, Bild rechts */
   align-items:center;
-  gap:.4em;
-  padding:0;
-  border:0;
-  background:none;
-  cursor:pointer;
-  font:inherit;
-  font-size: clamp(.96rem,.93rem+.15vw,1.04rem);
-  font-weight:600;
-  color: var(--hph-brand);
-  -webkit-tap-highlight-color:transparent;
-  transition: color .2s ease, gap .2s ease;
+  gap: clamp(20px, 3vw, 48px);
+  background:#fff;
+  border:1px solid var(--hph-hairline);
+  border-radius: clamp(20px, 2vw, 28px);
+  padding: clamp(16px, 1.8vw, 22px) clamp(20px, 2.4vw, 34px);   /* weniger Platz oben/unten */
+  box-shadow:
+    inset 0 1px 0 oklch(0.99 0.004 245 / .9),
+    0 1px 2px oklch(0.30 0.045 245 / .06),
+    0 14px 34px -8px oklch(0.30 0.045 245 / .12);   /* gleiche Schatten-Sprache wie die Feature-Karten */
 }
-.hph-cards__toggle:hover{ color: var(--hph-brand-dark); gap:.6em; }
-.hph-cards__toggle:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
-.hph-cards.is-enhanced .hph-cards__toggle{ display:inline-flex; }
-.hph-cards__toggle-chevron{
-  width:1em; height:1em;
-  transition: transform .3s cubic-bezier(.16,1,.3,1);
-}
-.hph-cards__toggle[aria-expanded="true"] .hph-cards__toggle-chevron{ transform:rotate(180deg); }
 
-/* ---- Lesebereich (Volltext in breiter, gut lesbarer Spalte) ---- */
-.hph-cards__reader{ margin-top: clamp(6px,1vw,12px); }
-/* Ohne JS sind alle Panels sichtbar; mit JS (.is-enhanced, s. u.) eingeklappt. */
-.hph-cards__detail-inner{
-  max-width: 70ch;                                /* angenehme Lesebreite (60–75 Zeichen) */
-  padding: clamp(24px,3vw,40px) 0 clamp(6px,1vw,12px);
-  border-top:1px solid var(--hph-border);
-}
-.hph-cards__detail-title{
-  margin:0 0 clamp(12px,1.4vw,18px);
+/* ---------- LINKS: Akkordeon ---------- */
+.hph-showcase__list{ align-self:center; min-width:0; display:flex; flex-direction:column; }
+.hph-showcase__entry{ min-width:0; }
+.hph-showcase__entry + .hph-showcase__entry{ border-top:1px solid var(--hph-hairline); }
+.hph-showcase__entry-heading{ margin:0; font:inherit; }
+.hph-showcase__trigger{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: clamp(12px, 1.6vw, 20px);
+  width:100%;
+  margin:0;
+  padding: clamp(12px, 1.4vw, 17px) 0;
+  border:0;
+  background:transparent;
+  text-align:left;
+  cursor:pointer;
+  color: var(--hph-ink);
+  font-family:inherit;
   font-weight:700;
   letter-spacing:-0.015em;
-  line-height:1.18;
-  font-size: clamp(1.3rem, 1.1rem + .8vw, 1.7rem);
-  color: var(--hph-ink);
+  line-height:1.2;
+  font-size: clamp(1.1rem, .95rem + .7vw, 1.45rem);
+  -webkit-tap-highlight-color:transparent;
+  transition: color .2s ease;
 }
-.hph-cards__detail p{
-  margin:0 0 clamp(12px,1.4vw,18px);
+.hph-showcase__trigger:hover{ color: var(--hph-brand-dark); }
+.hph-showcase__trigger:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:8px; }
+.hph-showcase__trigger-label{ min-width:0; }
+.hph-showcase__chevron{
+  flex:none;
+  color: var(--hph-ink-mute);
+  transition: transform .4s cubic-bezier(.16,1,.3,1), color .2s ease;
+}
+.hph-showcase__trigger[aria-expanded="true"] .hph-showcase__chevron{ transform: rotate(180deg); color: var(--hph-brand); }
+
+/* Panel-Collapse via grid-template-rows (0fr → 1fr). Geschlossener Startzustand
+   NUR unter .hph-hero--js; ohne JS Default 1fr = offen/sichtbar. */
+.hph-showcase__panel{ display:grid; grid-template-rows: 1fr; }
+.hph-showcase__panel-inner{ min-height:0; overflow:hidden; padding-bottom: clamp(18px, 2vw, 26px); }
+.hph-showcase__body{
+  margin:0;
+  padding-bottom: 0;
+  max-width: 54ch;
   color: var(--hph-ink-soft);
-  line-height:1.72;
-  font-size: clamp(1rem,.97rem+.2vw,1.1rem);
+  font-weight:450;
+  line-height:1.6;
+  font-size: clamp(1rem, .96rem + .25vw, 1.12rem);
 }
-/* Laien-Lead: eine klare, alltagsnahe Zusammenfassung VOR der fachlichen Tiefe
-   („Erst führen, dann Fachtiefe"). Etwas größer, dunkler, halbfett. */
-.hph-cards__detail-lead{
-  margin:0 0 clamp(14px,1.8vw,22px);
-  color: var(--hph-ink);
-  font-weight:500;
-  line-height:1.55;
-  font-size: clamp(1.04rem,1rem+.25vw,1.16rem);
-}
-.hph-cards__detail-link{
+/* Kontextueller Weiterführungs-Link je Eintrag (dezent, kein Button) */
+.hph-showcase__link{
   display:inline-flex;
   align-items:center;
-  gap:.4em;
-  margin-top: clamp(4px,.8vw,8px);
+  gap:.3em;
+  margin-top: clamp(10px,1.4vw,16px);
   font-weight:600;
-  font-size: clamp(1rem,.97rem+.2vw,1.08rem);
+  font-size: clamp(.98rem,.95rem + .2vw,1.08rem);
   color: var(--hph-brand);
   text-decoration:none;
-  transition: color .2s ease, gap .2s ease;
+  transition: color .2s ease;
 }
-.hph-cards__detail-link:hover{ color: var(--hph-brand-dark); gap:.6em; }
-.hph-cards__detail-link:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
-.hph-cards__detail-link svg{ width:1em; height:1em; flex:none; }
+.hph-showcase__link svg{ width:1.05em; height:1.05em; flex:none; transition: transform .2s ease; }
+.hph-showcase__link:hover{ color: var(--hph-brand-dark); }
+.hph-showcase__link:hover svg{ transform: translateX(3px); }            /* interner Pfeil rückt nach rechts */
+.hph-showcase__link--ext:hover svg{ transform: translate(2px,-2px); }   /* externer Link: nach oben-rechts */
+.hph-showcase__link:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
+.hph-hero--js .hph-showcase__panel{ grid-template-rows: 0fr; transition: grid-template-rows .45s cubic-bezier(.16,1,.3,1); }
+.hph-hero--js .hph-showcase__panel-inner{ opacity:0; transition: opacity .35s cubic-bezier(.16,1,.3,1); }
+.hph-hero--js .hph-showcase__entry.is-active .hph-showcase__panel{ grid-template-rows: 1fr; }
+.hph-hero--js .hph-showcase__entry.is-active .hph-showcase__panel-inner{ opacity:1; }
 
-/* Mit JS: Panels einklappen und per Schalter öffnen (Akkordeon) */
-.hph-cards.is-enhanced .hph-cards__detail{
-  display:grid;
-  grid-template-rows:0fr;
-  transition: grid-template-rows .45s cubic-bezier(.16,1,.3,1);
-}
-.hph-cards.is-enhanced .hph-cards__detail-inner{
+/* ---------- RECHTS: Bild-Stack (transparente PNGs, schweben auf der weißen Karte) ---------- */
+.hph-showcase__media{
+  position:relative;
+  align-self:center;
+  width:100%;
+  aspect-ratio: 16 / 9;    /* EIN einheitliches, größeres Bildfeld für alle drei Bilder */
+  border-radius: clamp(16px, 1.6vw, 22px);
   overflow:hidden;
-  min-height:0;
-  visibility:hidden;
-  opacity:0;
-  transition: opacity .3s ease, visibility 0s linear .45s;
+  display:grid;            /* alle Bilder exakt übereinander in derselben Zelle */
 }
-.hph-cards.is-enhanced .hph-cards__detail.is-open{ grid-template-rows:1fr; }
-.hph-cards.is-enhanced .hph-cards__detail.is-open .hph-cards__detail-inner{
-  visibility:visible;
-  opacity:1;
-  transition: opacity .35s ease .1s, visibility 0s;
+.hph-showcase__img{
+  grid-area:1 / 1;
+  width:100%;
+  height:100%;
+  object-fit:contain;      /* jedes Produkt füllt dasselbe Feld → einheitliche, gleich hohe Darstellung */
+  object-position:center;
+  display:block;
+  padding: clamp(8px, 1.4vw, 16px);
 }
+.hph-hero--js .hph-showcase__img{ opacity:0; transition: opacity .45s cubic-bezier(.16,1,.3,1); }
+.hph-hero--js .hph-showcase__img.is-active{ opacity:1; }
 
-/* Slider-Pfeile (rund, Apple-Stil) · nur auf Tablet/Handy sichtbar */
-.hph-cards__nav-wrap{
-  display:flex;                  /* Slider-Pfeile auf allen Größen sichtbar */
-  justify-content:flex-end;      /* Desktop: rechts ausgerichtet (mobil zentriert) */
-  gap:18px;
-  margin-top: clamp(20px, 2.4vw, 28px);
+/* Reveal: an die .is-ready-Choreografie angehängt (knapp nach den Feature-Karten) */
+.hph-hero--js .hph-showcase{
+  opacity:0;
+  transform: translateY(18px);
+  transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1);
 }
-.hph-cards__nav{
-  width:44px; height:44px;
-  display:grid; place-items:center;
-  padding:0; border:0; border-radius:50%;
-  background: oklch(0.99 0.006 245);
-  color: oklch(0.45 0.02 245);
-  box-shadow: 0 6px 18px oklch(0.30 0.045 245 / .16);
-  cursor:pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: color .2s ease, box-shadow .25s ease,
-              transform .2s cubic-bezier(.16,1,.3,1), opacity .25s ease;
+.hph-hero.is-ready .hph-showcase{ opacity:1; transform:none; transition-delay:.86s; }
+
+/* ---------- Mobil: gestapelt (Akkordeon oben, Bild darunter) ---------- */
+@media (max-width:760px){
+  .hph-showcase__card{ grid-template-columns:1fr; gap: clamp(18px, 4vw, 28px); }
+  .hph-showcase__list{ order:1; }
+  .hph-showcase__media{ order:2; aspect-ratio: 4 / 3; }
 }
-.hph-cards__nav svg{ width:22px; height:22px; }
-.hph-cards__nav:hover{ color: var(--hph-brand); box-shadow: 0 8px 22px oklch(0.30 0.045 245 / .22); }
-.hph-cards__nav:active{ transform: scale(.94); transition-duration:.12s; }
-.hph-cards__nav:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; }
-.hph-cards__nav[disabled]{ opacity:.4; pointer-events:none; }
 
 /* ---------- Einblend-Choreografie ---------- */
 /* Robustheit: Der Start-Zustand (opacity:0) gilt NUR, wenn JS läuft und die
@@ -695,8 +730,8 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
 .hph-hero--js .hph-hero__actions,
 .hph-hero--js .hph-hero__trust-item,
 .hph-hero--js .hph-rail__item,
-.hph-hero--js .hph-cards__head,
-.hph-hero--js .hph-cards__item{
+.hph-hero--js .hph-feature__head,
+.hph-hero--js .hph-feature__item{
   opacity:0;
   transition: opacity .6s cubic-bezier(.16,1,.3,1),
               transform .6s cubic-bezier(.16,1,.3,1);
@@ -706,8 +741,8 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
 .hph-hero--js .hph-hero__actions{ transform: translateY(14px); }
 .hph-hero--js .hph-hero__trust-item{ transform: translateY(12px); }
 .hph-hero--js .hph-rail__item{ transform: translateY(14px); }
-.hph-hero--js .hph-cards__head{ transform: translateY(16px); }
-.hph-hero--js .hph-cards__item{ transform: translateY(18px); }
+.hph-hero--js .hph-feature__head{ transform: translateY(16px); }
+.hph-hero--js .hph-feature__item{ transform: translateY(18px); }
 
 .hph-hero.is-ready .hph-hero__head{ opacity:1; transform:none; transition-delay:.05s; }
 .hph-hero.is-ready .hph-hero__media{ opacity:1; transform:none; transition-delay:.12s; }
@@ -722,15 +757,24 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
 .hph-hero.is-ready .hph-rail__item:nth-child(3){ transition-delay:.42s; }
 .hph-hero.is-ready .hph-rail__item:nth-child(4){ transition-delay:.48s; }
 .hph-hero.is-ready .hph-rail__item:nth-child(5){ transition-delay:.54s; }
-.hph-hero.is-ready .hph-rail__item:nth-child(6){ transition-delay:.60s; }
-.hph-hero.is-ready .hph-cards__head{ opacity:1; transform:none; transition-delay:.05s; }
-.hph-hero.is-ready .hph-cards__item{ opacity:1; transform:none; }
-.hph-hero.is-ready .hph-cards__item:nth-child(1){ transition-delay:.12s; }
-.hph-hero.is-ready .hph-cards__item:nth-child(2){ transition-delay:.20s; }
-.hph-hero.is-ready .hph-cards__item:nth-child(3){ transition-delay:.28s; }
-.hph-hero.is-ready .hph-cards__item:nth-child(4){ transition-delay:.36s; }
+.hph-hero.is-ready .hph-feature__head{ opacity:1; transform:none; transition-delay:.62s; }
+.hph-hero.is-ready .hph-feature__item{ opacity:1; transform:none; }
+.hph-hero.is-ready .hph-feature__item:nth-child(1){ transition-delay:.70s; }
+.hph-hero.is-ready .hph-feature__item:nth-child(2){ transition-delay:.78s; }
 
-/* ---------- Responsiv: echter Slider auf Mobilgeräten ---------- */
+/* ---------- Responsiv: echter Slider ab Tablet abwärts ----------
+   Slider-Affordance (Pfeile + festes Snapping) schon ab ≤860px – deckungsgleich mit der
+   Intro-Stapelung –, damit die Rail im Bereich 721–860px nicht ohne Hinweis überläuft. */
+@media (max-width:860px){
+  .hph-rail__track{
+    scroll-snap-type:x mandatory;
+    margin-inline:0;                /* Inline-Ausgleich zurücknehmen … */
+    padding-inline:24px;            /* … stattdessen schmaler Rand für die Chevrons */
+    scroll-padding-inline:24px;     /* gesnappte Kachel landet neben dem Pfeil */
+  }
+  .hph-rail__item{ scroll-snap-align:start; }
+  .hph-rail__nav{ display:grid; }   /* Pfeile einblenden */
+}
 /* (die Scroll-Mechanik selbst gilt bereits global an .hph-rail__track) */
 @media (max-width:720px){
   .hph-rail{
@@ -739,41 +783,49 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
     --hph-media-h: 104px;
   }
   .hph-rail__track{
-    justify-content:flex-start;
     gap:12px;                       /* einheitlicher, kompakter Abstand */
-    scroll-snap-type:x mandatory;
-    padding-inline:24px;            /* schmaler Rand für die Chevrons */
-    scroll-padding-inline:24px;     /* gesnappte Kachel landet neben dem Pfeil */
-    /* Produkte weichen am Rand sanft aus, wenn sie unter den Chevron scrollen */
-    /* schmalerer Fade (10px statt 18px): deutet das Ausblenden am Rand nur noch an,
-       statt eine angeschnittene Kachel unter dem Chevron zu verstecken. */
+    /* Produkte weichen am Rand sanft aus, wenn sie unter den Chevron scrollen.
+       Schmaler Fade (10px): deutet das Ausblenden am Rand nur an. */
     -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);
             mask-image: linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);
   }
-  .hph-rail__item{ scroll-snap-align:start; }
-  .hph-rail__nav{ display:grid; }   /* Pfeile einblenden */
 }
 
-/* ---------- Info-Karten: echter Slider auf Handy, Tablet & kleinem Laptop ----------
-   Grenze bis 1023px, damit sie nahtlos an das 4-Spalten-Layout (ab 1024px) anschließt
-   und es im Bereich 861–1023px keinen ungestylten Zwischenzustand gibt.
-   .98px schließt nahtlos (auch bei Zoom/Subpixel) an die 1024px-Grenze an. */
-@media (max-width:1023.98px){
-  .hph-cards__track{
-    gap:18px;
+/* ---------- Desktop: Produkt-Rail füllt die volle Breite (5 gleiche Spalten) ----------
+   Ab Tablet aufwärts passen alle 5 Falzungen nebeneinander: gleichmäßig verteilt,
+   freistehende Produkte – kein Leerraum rechts neben einer links geclusterten Rail. */
+@media (min-width:861px){
+  .hph-rail{
+    --hph-media-w: clamp(112px, 11vw, 150px);
+    --hph-media-h: clamp(88px, 9vw, 116px);
+    margin-top: clamp(20px, 2.4vw, 32px);
+  }
+  .hph-rail__track{ justify-content:space-between; }
+  .hph-rail__item{ flex:1 1 0; }      /* fünf gleich breite Spalten über die volle Breite */
+  .hph-rail__tile{ width:100%; gap: clamp(16px, 1.7vw, 26px); }   /* mehr Luft zwischen größerem Foto und Titel */
+}
+
+/* ---------- Feature-Karten: auf dem Handy als horizontaler Swipe-Slider ----------
+   Native scroll-snap (kein JS): wischen, die nächste Karte lugt am Rand hervor. */
+@media (max-width:760px){
+  .hph-feature__grid{
+    display:flex;
+    gap:16px;
+    overflow-x:auto;
     scroll-snap-type:x mandatory;
+    scroll-behavior:smooth;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    touch-action:pan-x;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+    padding-bottom:6px;            /* etwas Luft, damit der Karten-Schatten nicht abschneidet */
   }
-  .hph-cards__item{
-    flex:0 0 82%;          /* eine Karte pro Ansicht, die nächste lugt hervor */
-    max-width:360px;
+  .hph-feature__grid::-webkit-scrollbar{ display:none; }
+  .hph-feature__item{
+    flex:0 0 86%;                  /* eine Karte pro Ansicht, die nächste lugt hervor */
+    scroll-snap-align:start;
   }
-  .hph-cards__nav-wrap{ justify-content:center; }   /* Pfeile mittig */
-}
-
-/* ---------- Info-Karten: ab großem Viewport alle 4 nebeneinander (kein Slider, wie Apple) ---------- */
-@media (min-width:1024px){
-  .hph-cards__item{ flex:1 1 0; max-width:none; }   /* 4 gleich breite Spalten, füllen die Reihe */
-  .hph-cards__nav-wrap{ display:none; }             /* kein Slider -> keine Pfeile nötig */
 }
 
 /* ---------- Bewegung reduzieren ---------- */
@@ -783,8 +835,8 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
   .hph-hero__actions,
   .hph-hero__trust-item,
   .hph-rail__item,
-  .hph-cards__head,
-  .hph-cards__item{ opacity:1 !important; transform:none !important; transition:none !important; }
+  .hph-feature__head,
+  .hph-feature__item{ opacity:1 !important; transform:none !important; transition:none !important; }
   .hph-hero__cta{ transition:none !important; }
   /* Hintergrundvideo nicht abspielen -> Standbild zeigen */
   .hph-hero__media .hp-hero-video{ display:none; }
@@ -793,9 +845,14 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
     width:100%; height:100%; object-fit:cover;
   }
   .hph-rail__tile, .hph-rail__media img, .hph-rail__media::after, .hph-rail__nav{ transition:none !important; }
-  .hph-cards__media, .hph-cards__nav, .hph-cards__toggle, .hph-cards__toggle-chevron,
-  .hph-cards__detail, .hph-cards__detail-inner, .hph-cards__detail-link, .hph-cards__buy{ transition:none !important; }
-  .hph-rail__track, .hph-cards__track{ scroll-behavior:auto; }
+  .hph-feature__card, .hph-feature__more, .hph-feature__buy, .hph-feature__img{ transition:none !important; }
+  .hph-rail__ext, .hph-feature__more svg, .hph-feature__seeall svg{ transition:none !important; transform:none !important; }
+  .hph-rail__track, .hph-feature__grid{ scroll-behavior:auto; }
+  /* Showcase: Reveal/Chevron/Trigger/Panel-Text sofort; Bilder NUR ohne Crossfade
+     (Opacity bleibt der .is-active-Logik überlassen → weiter genau EIN Bild sichtbar). */
+  .hph-showcase, .hph-showcase__panel-inner, .hph-showcase__chevron, .hph-showcase__trigger{ opacity:1 !important; transform:none !important; transition:none !important; }
+  .hph-showcase__panel, .hph-showcase__img{ transition:none !important; }
+  .hph-showcase__link svg{ transition:none !important; transform:none !important; }
 }
 </style>
 
@@ -809,8 +866,11 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
     .hph-hero__actions,
     .hph-hero__trust-item,
     .hph-rail__item,
-    .hph-cards__head,
-    .hph-cards__item{ opacity:1 !important; transform:none !important; }
+    .hph-feature__head,
+    .hph-feature__item{ opacity:1 !important; transform:none !important; }
+    .hph-showcase{ opacity:1 !important; transform:none !important; }
+    .hph-showcase__panel{ grid-template-rows:1fr !important; }
+    .hph-showcase__panel-inner, .hph-showcase__img{ opacity:1 !important; }
   </style>
 </noscript>
 
@@ -826,11 +886,10 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
       <h1 class="hph-hero__title" id="hph-hero-title">Papierhandtücher</h1>
       <p class="hph-hero__subtitle">Saugstark und hygienisch, für Gastronomie, Gewerbe und Büro. Mit Staffelpreisen ab Karton und der passenden Falzung für jeden Spender.</p>
 
-      <!-- Kopf-Aktionen: primär ins Sortiment, sekundär zum Preisvergleich (Produktfinder).
-           href je nach Ziel anpassen. -->
+      <!-- Kopf-Aktionen: primär ins Sortiment, sekundär zum Preisvergleich (Produktfinder). href je nach Ziel anpassen. -->
       <div class="hph-hero__actions">
         <a class="hph-hero__cta hph-hero__cta--primary" href="https://www.hamburgpapier-shop.de/papierhandtuecher">Zum Sortiment</a>
-        <a class="hph-hero__cta hph-hero__cta--ghost" href="https://produktfinder.hamburgpapier-shop.de/vergleich/papierhandtuecher" target="_blank" rel="noopener noreferrer" aria-label="Staffelpreise vergleichen (öffnet in neuem Tab)">Staffelpreise vergleichen<svg class="hph-rail__ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg></a>
+        <a class="hph-hero__cta hph-hero__cta--ghost" href="https://produktfinder.hamburgpapier-shop.de/vergleich/papierhandtuecher">Staffelpreise vergleichen<svg class="hph-rail__ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
       </div>
     </header>
 
@@ -871,9 +930,6 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
 
     <!-- 2) Product-Rail (Unterkategorien) -->
     <!-- Pro Kachel: href, Bild (src/alt), Label und Klartext-Hint anpassen. -->
-    <!-- Klartext-Leitzeile: macht die Falz-Auswahl auch für Nicht-Experten anschlussfähig
-         und beherbergt den (aus der Rail entfernten) Produktfinder-Pfad als Beratungs-Einstieg. -->
-    <p class="hph-rail__lead">Die Falzung muss zu Ihrem Spender passen. <a href="https://produktfinder.hamburgpapier-shop.de/vergleich/papierhandtuecher" target="_blank" rel="noopener noreferrer" aria-label="Passende Falzung finden (öffnet in neuem Tab)">Unsicher? Passende Falzung finden</a></p>
     <nav class="hph-rail" aria-label="Papierhandtücher Unterkategorien">
 
       <!-- Slider-Pfeile (nur mobil sichtbar, per CSS) -->
@@ -954,11 +1010,15 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
         <!-- Kachel "Preise vergleichen" wurde bewusst aus der Foto-Rail entfernt:
              als Funktions-/Tool-Kachel brach sie das kuratierte Produktfoto-Raster.
              Der Produktfinder-Pfad lebt jetzt zweifach intent-getrennt:
-               • Beratung („Passende Falzung finden") in der Leitzeile über der Rail
+               • Beratung („Passende Falzung finden") in der Leitzeile unter der Rail
                • Preis/Mengen („Staffelpreise vergleichen") als sekundärer Kopf-CTA. -->
 
       </ul>
     </nav>
+
+    <!-- Klartext-Leitzeile UNTER der Rail: macht die Falz-Auswahl auch für Nicht-Experten
+         anschlussfähig und beherbergt den Produktfinder-Pfad als Beratungs-Einstieg. -->
+    <p class="hph-rail__lead">Die Falzung muss zu Ihrem Spender passen. <a href="https://produktfinder.hamburgpapier-shop.de/papierhandtuecher" target="_blank" rel="noopener noreferrer" aria-label="Passende Falzung finden (öffnet in neuem Tab)">Unsicher? Passende Falzung finden<svg class="hph-rail__ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg></a></p>
 
   </div>
 
@@ -967,189 +1027,166 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
     <div class="hph-hero__inner">
 
       <!-- ====================================================================
-           3) INFO-KARTEN  (Apple-„Entdecke alle Modelle"-Stil) · Slider + Lesebereich
-           Informative Kacheln, KEINE Produktanzeigen. Pro Kachel:
-             Bild-Platzhalter → Titel (h2) → kurzer Teaser → „Mehr erfahren".
-           „Mehr erfahren" öffnet unten im LESEBEREICH den vollen Text (breit lesbar).
-           • Bild tauschen:    <img class="hph-cards__img" src="…" alt="…">
-           • Link je Karte:    href am umschließenden <a class="hph-cards__media"> (alle Karten verlinkt)
-           • Schalter ↔ Text:  aria-controls am <button> = id am <article> im Lesebereich.
+           3) FEATURE-KACHELN  (Apple-„iPad Zubehör"-Stil) · zwei große Karten
+           Zwei zertifizierte Produkt-Highlights nebeneinander (Desktop),
+           gestapelt (Mobil). Statisch – keine JS-Abhängigkeit. Pro Karte:
+             Textblock (Titel h3 + zwei Untertitel-Zeilen + „Weitere Infos ›"
+             + „Jetzt kaufen") → großes, randabfallendes Produktfoto unten.
+           • Bild tauschen:        <img class="hph-feature__img" src="…" alt="…">
+           • „Weitere Infos"-Ziel: href am <a class="hph-feature__more">
+           • „Jetzt kaufen"-Ziel:  href am <a class="hph-feature__buy">
+           • TODO Hamburg Papier: finalen Sektionsnamen + Linkziele bestätigen
+             (unten als [PLATZHALTER]/TODO markiert).
            ==================================================================== -->
-      <section class="hph-cards" aria-label="Wissenswertes zu Papierhandtüchern">
+      <section class="hph-feature" aria-labelledby="hph-feature-heading">
 
-        <header class="hph-cards__head">
-          <h2 class="hph-cards__heading">Gut zu wissen</h2>
-          <!-- Header-Link auf das Sortiment (statt 3. Produktfinder-Dublette): unterstützt das
-               Primärziel „ins Sortiment/Kauf" und passt zum informativen Charakter der Sektion. -->
-          <a class="hph-cards__more" href="https://www.hamburgpapier-shop.de/papierhandtuecher" aria-label="Alle Papierhandtücher ansehen">Alle Papierhandtücher ansehen
+        <header class="hph-feature__head">
+          <!-- TODO: finalen Sektionsnamen einsetzen (ersetzt „Gut zu wissen") -->
+          <h2 class="hph-feature__heading" id="hph-feature-heading">Ausgezeichnet nachhaltig</h2>
+          <a class="hph-feature__seeall" href="https://www.hamburgpapier-shop.de/papierhandtuecher" aria-label="Alle Papierhandtücher ansehen">Alle Papierhandtücher ansehen
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
           </a>
         </header>
 
-        <ul class="hph-cards__track">
+        <ul class="hph-feature__grid">
 
-          <!-- Kachel 1 · 1-lagig · Bild verlinkt aufs Sortiment, Volltext per „Mehr erfahren" -->
-          <li class="hph-cards__item">
-            <article class="hph-cards__tile">
-              <a class="hph-cards__media" href="https://www.hamburgpapier-shop.de/papierhandtuecher-1-lagig" aria-label="Papierhandtücher 1-lagig ansehen">
-                <img class="hph-cards__img" src="https://www.hamburgpapier-shop.de/media/af/83/fc/1780599198/papierhandtuch-1-lagig-weiss-gefalzt.avif?ts=1780599198" alt="Einlagiges, weißes Papierhandtuch, gefalzt" width="600" height="800" loading="lazy" decoding="async">
-              </a>
-              <div class="hph-cards__body">
-                <h3 class="hph-cards__title">Papierhandtücher 1-lagig</h3>
-                <p class="hph-cards__teaser">Hohe Reißfestigkeit und zuverlässige Saugkraft schon einlagig, gemacht für hohen Durchlauf bei minimalen Kosten und kompakter Lagerung.</p>
-                <div class="hph-cards__actions">
-                  <button class="hph-cards__toggle" type="button" aria-expanded="false" aria-controls="hph-detail-1lagig">
-                    <span class="hph-cards__toggle-label">Mehr erfahren</span>
-                    <svg class="hph-cards__toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                  </button>
-                  <a class="hph-cards__buy" href="https://www.hamburgpapier-shop.de/papierhandtuecher-1-lagig">Jetzt kaufen</a>
+          <!-- Karte 1 · EU Ecolabel -->
+          <li class="hph-feature__item">
+            <article class="hph-feature__card">
+              <div class="hph-feature__copy">
+                <h3 class="hph-feature__title">Papierhandtücher<br>mit EU Ecolabel</h3>
+                <p class="hph-feature__sub">Nachhaltig. Sauber. Durchdacht.</p>
+                <p class="hph-feature__note">Für weniger Umweltbelastung – jeden Tag.</p>
+                <div class="hph-feature__actions">
+                  <!-- TODO „Weitere Infos"-Ziel ggf. anpassen (aktuell: offizielle EU-Ecolabel-Produktseite) -->
+                  <a class="hph-feature__more" href="https://environmental-data.ec.europa.eu/ecolabel/products/product_59468.html" target="_blank" rel="noopener noreferrer" aria-label="Weitere Infos zum EU Ecolabel (öffnet in neuem Tab)">Weitere Infos
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg>
+                  </a>
+                  <!-- TODO „Jetzt kaufen"-Ziel ggf. auf zertifizierte Produkte anpassen -->
+                  <a class="hph-feature__buy" href="https://www.hamburgpapier-shop.de/papierhandtuecher">Jetzt kaufen</a>
                 </div>
+              </div>
+              <div class="hph-feature__media">
+                <img class="hph-feature__img" src="https://www.hamburgpapier-shop.de/media/35/02/46/1780820090/papierhandtuecher%20mit%20EU%20Ecolabel.avif?ts=1780820618" alt="Papierhandtücher mit EU-Ecolabel-Zertifizierung, weiße ECOLINE-Box" width="920" height="1032" loading="lazy" decoding="async">
               </div>
             </article>
           </li>
 
-          <!-- Kachel 2 · 2-lagig -->
-          <li class="hph-cards__item">
-            <article class="hph-cards__tile">
-              <a class="hph-cards__media" href="https://www.hamburgpapier-shop.de/papierhandtuecher-2-lagig" aria-label="Papierhandtücher 2-lagig ansehen">
-                <img class="hph-cards__img" src="https://www.hamburgpapier-shop.de/media/9e/99/d9/1780599198/zweilagiges-papierhandtuch-weiss-strukturiert.avif?ts=1780599198" alt="Zweilagiges, weißes Papierhandtuch mit Strukturprägung" width="600" height="800" loading="lazy" decoding="async">
-              </a>
-              <div class="hph-cards__body">
-                <h3 class="hph-cards__title">Papierhandtücher 2-lagig</h3>
-                <p class="hph-cards__teaser">Spürbares Premium-Upgrade: hohe Nassfestigkeit, kräftige Saugkraft und weiche Haptik durch Volumenprägung. Erste Wahl für repräsentative Waschräume.</p>
-                <div class="hph-cards__actions">
-                  <button class="hph-cards__toggle" type="button" aria-expanded="false" aria-controls="hph-detail-2lagig">
-                    <span class="hph-cards__toggle-label">Mehr erfahren</span>
-                    <svg class="hph-cards__toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                  </button>
-                  <a class="hph-cards__buy" href="https://www.hamburgpapier-shop.de/papierhandtuecher-2-lagig">Jetzt kaufen</a>
+          <!-- Karte 2 · Blauer Engel -->
+          <li class="hph-feature__item">
+            <article class="hph-feature__card">
+              <div class="hph-feature__copy">
+                <h3 class="hph-feature__title">Papierhandtücher<br>mit Blauem Engel</h3>
+                <p class="hph-feature__sub">Recycelt. Effizient. Verlässlich.</p>
+                <p class="hph-feature__note">Gut für die Umwelt. Gut für Ihren Alltag.</p>
+                <div class="hph-feature__actions">
+                  <!-- TODO „Weitere Infos"-Ziel ggf. anpassen (aktuell: offizieller Blauer-Engel-Eintrag) -->
+                  <a class="hph-feature__more" href="https://www.blauer-engel.de/de/produkte/herm-kemme-gmbh-papierhandtuecher-grau-25-x-23-cm-zz-falz-1-lagig-490-017" target="_blank" rel="noopener noreferrer" aria-label="Weitere Infos zum Blauen Engel (öffnet in neuem Tab)">Weitere Infos
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg>
+                  </a>
+                  <!-- TODO „Jetzt kaufen"-Ziel ggf. auf zertifizierte Produkte anpassen -->
+                  <a class="hph-feature__buy" href="https://www.hamburgpapier-shop.de/papierhandtuecher">Jetzt kaufen</a>
                 </div>
               </div>
-            </article>
-          </li>
-
-          <!-- Kachel 3 · EU Ecolabel · Bild verlinkt zur EU-Produktseite (neuer Tab) -->
-          <li class="hph-cards__item">
-            <article class="hph-cards__tile">
-              <a class="hph-cards__media" href="https://environmental-data.ec.europa.eu/ecolabel/products/product_59468.html" target="_blank" rel="noopener noreferrer" aria-label="EU-Ecolabel-Produktseite öffnen (neuer Tab)">
-                <img class="hph-cards__img" src="https://www.hamburgpapier-shop.de/media/b8/ea/bd/1780599988/papierhantcher-mit-eu-ecolabel.avif?ts=1780599988" alt="Papierhandtücher mit EU-Ecolabel-Zertifizierung" width="600" height="800" loading="lazy" decoding="async">
-              </a>
-              <div class="hph-cards__body">
-                <h3 class="hph-cards__title">EU Ecolabel zertifiziert</h3>
-                <p class="hph-cards__teaser">Das offizielle EU-Umweltzeichen bewertet den gesamten Produkt-Lebenszyklus. Die sichere Wahl für ESG-Richtlinien und grüne Beschaffung.</p>
-                <div class="hph-cards__actions">
-                  <button class="hph-cards__toggle" type="button" aria-expanded="false" aria-controls="hph-detail-ecolabel">
-                    <span class="hph-cards__toggle-label">Mehr erfahren</span>
-                    <svg class="hph-cards__toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                  </button>
-                  <!-- Kauf-Ziel ggf. anpassen (z. B. zertifizierte Produkte) -->
-                  <a class="hph-cards__buy" href="https://www.hamburgpapier-shop.de/papierhandtuecher">Jetzt kaufen</a>
-                </div>
-              </div>
-            </article>
-          </li>
-
-          <!-- Kachel 4 · Blauer Engel · Bild verlinkt zum Eintrag (neuer Tab) -->
-          <li class="hph-cards__item">
-            <article class="hph-cards__tile">
-              <a class="hph-cards__media" href="https://www.blauer-engel.de/de/produkte/herm-kemme-gmbh-papierhandtuecher-grau-25-x-23-cm-zz-falz-1-lagig-490-017" target="_blank" rel="noopener noreferrer" aria-label="Eintrag beim Blauen Engel öffnen (neuer Tab)">
-                <img class="hph-cards__img" src="https://www.hamburgpapier-shop.de/media/8e/b7/55/1780600399/papierhantcher-mit-blauen-engel.avif?ts=1780600399" alt="Papierhandtücher mit dem Umweltzeichen Blauer Engel" width="600" height="800" loading="lazy" decoding="async">
-              </a>
-              <div class="hph-cards__body">
-                <h3 class="hph-cards__title">Der Blaue Engel</h3>
-                <p class="hph-cards__teaser">Deutsches Umweltzeichen seit 1978: 100 % Recyclingpapier, strenge Kriterien, ohne optische Aufheller und Chlorbleiche.</p>
-                <div class="hph-cards__actions">
-                  <button class="hph-cards__toggle" type="button" aria-expanded="false" aria-controls="hph-detail-engel">
-                    <span class="hph-cards__toggle-label">Mehr erfahren</span>
-                    <svg class="hph-cards__toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                  </button>
-                  <!-- Kauf-Ziel ggf. anpassen (z. B. zertifizierte Produkte) -->
-                  <a class="hph-cards__buy" href="https://www.hamburgpapier-shop.de/papierhandtuecher">Jetzt kaufen</a>
-                </div>
+              <div class="hph-feature__media">
+                <img class="hph-feature__img" src="https://www.hamburgpapier-shop.de/media/11/fe/65/1780600399/papierhandtuecher-mit-blauen-engel.avif?ts=1780820479" alt="Papierhandtücher mit dem Umweltzeichen Blauer Engel, Kraftkarton" width="940" height="940" loading="lazy" decoding="async">
               </div>
             </article>
           </li>
 
         </ul>
 
-        <!-- Slider-Pfeile · Desktop & Mobil (per CSS positioniert) -->
-        <div class="hph-cards__nav-wrap">
-          <button type="button" class="hph-cards__nav hph-cards__nav--prev" aria-label="Vorherige Karte" disabled>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
-          </button>
-          <button type="button" class="hph-cards__nav hph-cards__nav--next" aria-label="Nächste Karte">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
-          </button>
-        </div>
+      </section>
+
+      <!-- ====================================================================
+           SHOWCASE-SEKTION · eigene Sektion mit Überschrift (umschließt das Accordion)
+           ==================================================================== -->
+      <section class="hph-showcase-section" aria-labelledby="hph-showcase-heading">
+
+        <header class="hph-feature__head">
+          <h2 class="hph-feature__heading" id="hph-showcase-heading">Papierhandtücher: Leistung, Kosten und passende Auswahl</h2>
+        </header>
 
         <!-- ====================================================================
-             LESEBEREICH · Volltexte zu den Karten.
-             Ohne JS sind alle Panels sichtbar (Fallback + von Google lesbar);
-             mit JS klappen sie ein und öffnen sich per „Mehr erfahren" (Akkordeon).
-             Wichtig: id hier = aria-controls am jeweiligen Karten-Schalter.
+             SHOWCASE-AKKORDEON  (Apple-„iPad und iPhone"-Stil) · GERÜST
+             Große weiße Karte über volle Breite. Desktop = 2 Spalten:
+               LINKS  Akkordeon aus 3 Einträgen (Button-Überschrift + Chevron;
+                      Klick öffnet diesen, schließt die anderen; #1 offen by default)
+               RECHTS großes Produktbild, das je offenem Eintrag wechselt
+             Mobil = gestapelt (Akkordeon oben, Bild darunter).
+             Bild-Mapping: 1 → Karton, 2 → Palette/Großpackung, 3 → Preise vergleichen.
+             Progressive Enhancement: ohne JS sind alle 3 Panels offen + Bilder sichtbar;
+             der Collapse greift NUR unter .hph-hero--js. Alle Trigger starten
+             aria-expanded="true" (= No-JS-Sichtzustand); JS stellt „einer offen" her.
              ==================================================================== -->
-        <div class="hph-cards__reader">
+        <div class="hph-showcase">
+          <article class="hph-showcase__card">
 
-          <!-- Volltext · Papierhandtücher 1-lagig -->
-          <article id="hph-detail-1lagig" class="hph-cards__detail" aria-labelledby="hph-detail-1lagig-h">
-            <div class="hph-cards__detail-inner">
-              <h4 class="hph-cards__detail-title" id="hph-detail-1lagig-h">Papierhandtücher 1-lagig</h4>
-              <p class="hph-cards__detail-lead">Kurz gesagt: die wirtschaftliche Wahl für viel Betrieb. Reißfest und saugstark genug für den Alltag, günstig pro Blatt und platzsparend im Lager.</p>
-              <p>Dank einer strengen Materialauswahl und der Fertigung in zertifizierten europäischen Werken zeichnen sich diese Handtücher durch eine hohe Reißfestigkeit und zuverlässige Saugkraft aus, schon in der einlagigen Ausführung. Sie sind dafür konzipiert, hohen Personendurchlauf zu bewältigen, ohne das Budget des Facility Managements zu belasten. Auch in hygienesensiblen Bereichen, die nach HACCP-Richtlinien arbeiten, bietet das Einwegpapier eine sichere Methode zur schnellen Händetrocknung.</p>
-              <p>Der größte B2B-Vorteil liegt in der Kosteneffizienz und der schlanken Lagerlogistik: Einlagige Papiere beanspruchen pro Blatt weniger Volumen als mehrlagige Alternativen. Das bedeutet konkret, dass mehr Blätter in einen Standard-Handtuchspender passen. Für Ihr Reinigungspersonal verlängern sich die Nachfüllintervalle spürbar, was Arbeitszeit einspart. Gleichzeitig passen mehr Verkaufseinheiten auf eine Europalette, was Ihre Frachtkosten bei der Speditionslieferung senkt und Platz in Ihrem Zentrallager schont.</p>
-              <p>In Kombination mit passgenauen Spendersystemen, etwa dem klassischen Zickzack-Spender (Z-/ZZ-Falz) oder modernen Autocut-Sensorspendern für Rollenware, ermöglicht das Papier eine berührungsarme, hygienische Einzelblattentnahme. Das schützt Ihr Personal vor Kreuzkontaminationen und Schmierinfektionen und reduziert zugleich den unkontrollierten Mehrverbrauch. Weniger Verbrauch bedeutet ein deutlich reduziertes Abfallvolumen in den Papierkörben, was Ihre gewerblichen Entsorgungskosten (Müllgebühren) senkt. Ein ganzheitlicher Gewinn für Ihre Total-Cost-of-Ownership (TCO) und die betriebliche Umweltbilanz. Die Staffelpreise je Karton und Palette sehen Sie direkt am Artikel im Shop.</p>
-              <a class="hph-cards__detail-link" href="https://www.hamburgpapier-shop.de/papierhandtuecher-1-lagig">Zum 1-lagig-Sortiment
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-              </a>
-            </div>
+            <!-- LINKS: Akkordeon -->
+            <div class="hph-showcase__list">
+
+              <!-- Eintrag 1 (offen by default, sobald JS läuft) -->
+              <div class="hph-showcase__entry is-active" data-hph-showcase-entry>
+                <h3 class="hph-showcase__entry-heading">
+                  <button type="button" class="hph-showcase__trigger" id="hph-showcase-trigger-1" aria-expanded="true" aria-controls="hph-showcase-panel-1" data-hph-showcase-image="1">
+                    <span class="hph-showcase__trigger-label">Reißfest und saugstark, auch 1-lagig</span>
+                    <svg class="hph-showcase__chevron" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                </h3>
+                <div class="hph-showcase__panel" id="hph-showcase-panel-1" aria-labelledby="hph-showcase-trigger-1">
+                  <div class="hph-showcase__panel-inner">
+                    <p class="hph-showcase__body">Auch 1-lagige Papierhandtücher trocknen Hände zuverlässig. Gefertigt in zertifizierten europäischen Werken, sind diese Falthandtücher reißfest und saugstark und bewältigen hohen Durchlauf in Facility Management, Gastronomie und Büro, ohne im Spender zu reißen. In Bereichen nach HACCP sorgt die Einzelblattentnahme aus dem Z-Falz (auch ZZ-Falz) für eine berührungsarme Händetrocknung. Auf Wunsch aus zertifiziertem Recyclingmaterial oder hochweißem Frischzellstoff.</p>
+                    <a class="hph-showcase__link" href="https://www.hamburgpapier-shop.de/papierhandtuecher-1-lagig">1-lagige Papierhandtücher ansehen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Eintrag 2 -->
+              <div class="hph-showcase__entry" data-hph-showcase-entry>
+                <h3 class="hph-showcase__entry-heading">
+                  <button type="button" class="hph-showcase__trigger" id="hph-showcase-trigger-2" aria-expanded="true" aria-controls="hph-showcase-panel-2" data-hph-showcase-image="2">
+                    <span class="hph-showcase__trigger-label">Karton &amp; Palette: niedrigere Kosten pro Blatt</span>
+                    <svg class="hph-showcase__chevron" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                </h3>
+                <div class="hph-showcase__panel" id="hph-showcase-panel-2" aria-labelledby="hph-showcase-trigger-2">
+                  <div class="hph-showcase__panel-inner">
+                    <p class="hph-showcase__body">Wer für viele Objekte einkauft, rechnet in Gesamtkosten. 1-lagige Falthandtücher tragen pro Blatt weniger auf, also passen mehr Blätter in den Spender: längere Nachfüllintervalle, weniger Arbeitszeit. Auf einer Europalette stehen mehr Einheiten als bei mehrlagiger Ware, das senkt Frachtkosten und spart Lagerplatz. Weniger Mehrverbrauch bedeutet weniger Abfall und Entsorgungskosten, also eine bessere Cost-in-Use und TCO (Gesamtkosten).</p>
+                    <!-- TODO: finalen Filter-Link einsetzen (z. B. Großgebinde/Palette gefiltert); bis dahin Sortiment -->
+                    <a class="hph-showcase__link" href="https://www.hamburgpapier-shop.de/papierhandtuecher">Großgebinde ansehen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Eintrag 3 -->
+              <div class="hph-showcase__entry" data-hph-showcase-entry>
+                <h3 class="hph-showcase__entry-heading">
+                  <button type="button" class="hph-showcase__trigger" id="hph-showcase-trigger-3" aria-expanded="true" aria-controls="hph-showcase-panel-3" data-hph-showcase-image="3">
+                    <span class="hph-showcase__trigger-label">Falzung &amp; Staffelpreise: richtig wählen</span>
+                    <svg class="hph-showcase__chevron" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                </h3>
+                <div class="hph-showcase__panel" id="hph-showcase-panel-3" aria-labelledby="hph-showcase-trigger-3">
+                  <div class="hph-showcase__panel-inner">
+                    <p class="hph-showcase__body">Zwei Fragen entscheiden: Welcher Spender hängt bei Ihnen, und wie hoch ist der Verbrauch? Die Falzung muss zum Gerät passen, etwa Z-Falz für Zick-Zack-Spender oder Interfold für die Einzelblattentnahme. 1-lagig ist die wirtschaftliche Wahl für stark frequentierte Waschräume, 2-lagig für repräsentative Bereiche. Gekauft wird ab Karton, größere Mengen profitieren von Staffelpreisen. Im Produktfinder vergleichen Sie Falzung, Spender und Preis transparent.</p>
+                    <a class="hph-showcase__link hph-showcase__link--ext" href="https://produktfinder.hamburgpapier-shop.de/papierhandtuecher" target="_blank" rel="noopener noreferrer" aria-label="Im Produktfinder vergleichen (öffnet in neuem Tab)">Im Produktfinder vergleichen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg></a>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /.hph-showcase__list -->
+
+            <!-- RECHTS: Bild-Stack (illustrativ, aria-hidden). Genau ein Bild je offenem
+                 Eintrag per .is-active; ohne JS alle gestapelt sichtbar → oberstes (Karton) oben.
+                 Bild 3 ist Platzhalter (= Karton); später nur src/alt am 3. <img> tauschen. -->
+            <div class="hph-showcase__media" aria-hidden="true">
+              <img class="hph-showcase__img is-active" data-hph-showcase-image="1" src="https://www.hamburgpapier-shop.de/media/54/bd/17/1780838757/papierhandtuecher1-lagig-karton.png?ts=1780838757" alt="Karton Papierhandtücher 1-lagig" width="1622" height="1216" loading="lazy" decoding="async">
+              <img class="hph-showcase__img" data-hph-showcase-image="2" src="https://www.hamburgpapier-shop.de/media/fb/8f/9e/1780838755/falthandtuecher-1-lagig-gruen-paletten-gropackung.png?ts=1780838755" alt="Palette mit Falthandtücher-Großpackung, 1-lagig grün" width="800" height="800" loading="lazy" decoding="async">
+              <img class="hph-showcase__img" data-hph-showcase-image="3" src="https://www.hamburgpapier-shop.de/media/66/8b/f4/1780053285/Papierhantcher-Preise-Vergleichen.avif?ts=1780053285" alt="Papierhandtücher Preise vergleichen" width="1086" height="1448" loading="lazy" decoding="async">
+            </div><!-- /.hph-showcase__media -->
+
           </article>
-
-          <!-- Volltext · Papierhandtücher 2-lagig -->
-          <article id="hph-detail-2lagig" class="hph-cards__detail" aria-labelledby="hph-detail-2lagig-h">
-            <div class="hph-cards__detail-inner">
-              <h4 class="hph-cards__detail-title" id="hph-detail-2lagig-h">Papierhandtücher 2-lagig</h4>
-              <p class="hph-cards__detail-lead">Kurz gesagt: das spürbare Komfort-Upgrade. Weicher und saugstärker, ideal fürs Gäste-WC und repräsentative Waschräume. Meist genügen ein bis zwei Blatt.</p>
-              <p>Unsere 2-lagigen Papierhandtücher sind im direkten Vergleich ein spürbares Premium-Upgrade für Ihre Waschraumausstattung. Sie liefern mehr als nur eine zusätzliche Papierschicht: Durch ihre spezielle Verleimung überzeugen sie mit hoher Nassfestigkeit, kräftiger Saugkraft und einer weichen, hautfreundlichen Haptik.</p>
-              <p>Diese Qualität entsteht im Herstellungsprozess: Die beiden Papierschichten werden durch einen wasserlöslichen Spezialleim und eine feine Flächenprägung fest miteinander verbunden. Diese Volumenprägung erzeugt einen Kapillareffekt: Zwischen den Lagen entstehen kleine Luftpolster, die Nässe schnell aufnehmen. Das Ergebnis ist ein Papierhandtuch, das auch im durchnässten Zustand formstabil bleibt, beim Herausziehen aus dem Spender nicht zerreißt und keine Papierfusseln an nassen Händen hinterlässt.</p>
-              <p>Diese Reißfestigkeit löst zudem ein häufiges Problem im Facility Management: Sie verhindert den Papierstau im Spendersystem, der oft zu Unmut bei den Nutzern und zu Wartungsaufwand führt. Unsere langjährige Erfahrung im Großhandel zeigt, dass diese Verarbeitung die bevorzugte Wahl für repräsentative Unternehmenszentralen, Executive-Waschräume, medizinische Einrichtungen, Kanzleien und die gehobene Hotellerie ist. Auch die Nutzerpsychologie spielt eine Rolle: Ein hochwertiges Handtuch vermittelt Gästen und Mitarbeitern Wertschätzung und unterstreicht den Hygienestandard des Gebäudes.</p>
-              <p>Auch die Cost-in-Use-Rechnung geht bei 2-lagigen Papieren auf: Da die Tücher sehr saugfähig sind, genügen in der Praxis ein bis zwei Blätter zur vollständigen Händetrocknung. Der Blattverbrauch pro Toilettengang sinkt spürbar, was den etwas höheren Einkaufspreis schnell amortisiert. Je nach Anforderungsprofil erhalten Sie diese Variante aus zertifiziertem Recyclingmaterial oder hochweißem Frischzellstoff (welches Umweltzeichen ein konkreter Artikel trägt, steht jeweils am Produkt), passgenau gefaltet (Z-/ZZ-Falz, Interfold) für eine reibungslose Integration in Ihre Waschraum-Infrastruktur. Die Staffelpreise je Karton und Palette sehen Sie direkt am Artikel im Shop.</p>
-              <a class="hph-cards__detail-link" href="https://www.hamburgpapier-shop.de/papierhandtuecher-2-lagig">Zum 2-lagig-Sortiment
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-              </a>
-            </div>
-          </article>
-
-          <!-- Volltext · EU Ecolabel -->
-          <article id="hph-detail-ecolabel" class="hph-cards__detail" aria-labelledby="hph-detail-ecolabel-h">
-            <div class="hph-cards__detail-inner">
-              <h4 class="hph-cards__detail-title" id="hph-detail-ecolabel-h">EU Ecolabel zertifiziert</h4>
-              <p class="hph-cards__detail-lead">Kurz gesagt: Das EU-Umweltzeichen bewertet den gesamten Lebensweg des Produkts. Die sichere Wahl, wenn Sie nach Nachhaltigkeitskriterien einkaufen oder ausschreiben.</p>
-              <p>Das 1992 eingeführte EU Ecolabel ist das offiziell anerkannte, grenzüberschreitende Umweltzeichen in Europa. Es garantiert Einkäufern, dass unsere Papierhandtücher einheitliche, streng kontrollierte Kriterien erfüllen und hohen ökologischen Standards in Europa entsprechen.</p>
-              <p>Im Gegensatz zu vielen anderen Siegeln bewertet das EU Ecolabel den gesamten Lebenszyklus eines Produkts. Von der Rohstoffgewinnung über die energieeffiziente Produktion bis zur Anlieferung in Ihrem Betrieb steht der „Life-Cycle-Ansatz" im Vordergrund. Das bedeutet eine Reduzierung der CO₂-Belastung, einen geringeren Wasserverbrauch während der Papierherstellung sowie streng überwachte Abwasserwerte.</p>
-              <p>Darüber hinaus berücksichtigt das Zertifikat die gesicherte, nachhaltige Herkunft der Rohstoffe (etwa FSC-Zertifizierungen für Frischfasern) und verbietet den Einsatz von umwelt- und gesundheitsschädlichen Chemikalien. Für B2B-Unternehmen, Behörden und Konzerne, die strengen ESG-Richtlinien unterliegen oder ein aktives Green Procurement (grüne Beschaffung) betreiben, sind Produkte mit diesem Gütesiegel eine verlässliche Wahl für eine umweltgerechte Beschaffung.</p>
-              <p>Die konkrete Lizenznummer und die Gültigkeit sehen Sie auf der offiziellen, unten verlinkten EU-Ecolabel-Produktseite; das Zeichen gilt für die dort gelisteten Artikel.<!-- TODO Hamburg Papier: EU-Ecolabel-Lizenznummer (Format DE/004/xxx) optional direkt hier nennen --></p>
-              <a class="hph-cards__detail-link" href="https://environmental-data.ec.europa.eu/ecolabel/products/product_59468.html" target="_blank" rel="noopener noreferrer" aria-label="Zur EU-Ecolabel-Produktseite (öffnet in neuem Tab)">Zur EU-Ecolabel-Produktseite
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg>
-              </a>
-            </div>
-          </article>
-
-          <!-- Volltext · Der Blaue Engel -->
-          <article id="hph-detail-engel" class="hph-cards__detail" aria-labelledby="hph-detail-engel-h">
-            <div class="hph-cards__detail-inner">
-              <h4 class="hph-cards__detail-title" id="hph-detail-engel-h">Der Blaue Engel</h4>
-              <p class="hph-cards__detail-lead">Kurz gesagt: 100 % Recyclingpapier nach strengen Kriterien, ohne optische Aufheller und Chlorbleiche. Das deutsche Umweltzeichen, das viele öffentliche Ausschreibungen verlangen.</p>
-              <p>Papierhandtücher, die das Umweltzeichen „Blauer Engel" tragen, stehen für eine ressourcenschonende und umweltverträgliche Produktion. Das bereits 1978 eingeführte deutsche Zertifikat garantiert, dass die Produkte zu 100 % aus recyceltem Altpapier hergestellt werden.</p>
-              <p>Die Vergabekriterien des Blauen Engels sind streng: Das Umweltzeichen definiert dem Hersteller genau, welche Altpapiersorten für die Produktion von Hygienepapieren verwendet werden dürfen. Zudem wird der Einsatz von optischen Aufhellern, chlorhaltigen Bleichmitteln und anderen bedenklichen Chemikalien untersagt. Das schützt die Umwelt und sorgt für eine hohe Hautverträglichkeit bei der täglichen Händetrocknung.</p>
-              <p>Im direkten Vergleich zur Produktion von neuem Frischfaserpapier sparen unsere Blauer-Engel-Handtücher Energie, Wasser und Holzressourcen. Dadurch werden CO₂-Emissionen und Abfallmengen deutlich reduziert. Wer sich bei Hamburgpapier für diese zertifizierten Papiere entscheidet, erfüllt die Vorgaben vieler öffentlicher Ausschreibungen und unterstützt eine geschlossene Kreislaufwirtschaft.</p>
-              <p>Die Vergabegrundlage (RAL-UZ), den Zeichennehmer und die Gültigkeit sehen Sie im offiziellen, unten verlinkten Blauer-Engel-Eintrag; das Zeichen gilt für die dort gelisteten Artikel.<!-- TODO Hamburg Papier: RAL-UZ-Nummer + Gültigkeit optional direkt hier nennen --></p>
-              <a class="hph-cards__detail-link" href="https://www.blauer-engel.de/de/produkte/herm-kemme-gmbh-papierhandtuecher-grau-25-x-23-cm-zz-falz-1-lagig-490-017" target="_blank" rel="noopener noreferrer" aria-label="Zum Eintrag beim Blauen Engel (öffnet in neuem Tab)">Zum Eintrag beim Blauen Engel
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg>
-              </a>
-            </div>
-          </article>
-
-        </div>
+        </div><!-- /.hph-showcase -->
 
       </section>
 
@@ -1228,75 +1265,48 @@ a.hph-cards__media:focus-visible{ outline:3px solid var(--hph-brand); outline-of
       update();
     });
 
-    /* ---- Slider-Pfeile der Info-Karten (Tablet/Handy) ---- */
-    document.querySelectorAll('.hph-cards').forEach(function (cards) {
-      var track = cards.querySelector('.hph-cards__track');
-      var prev  = cards.querySelector('.hph-cards__nav--prev');
-      var next  = cards.querySelector('.hph-cards__nav--next');
-      if (!track || !prev || !next) return;
+    /* ---- Showcase-Akkordeon: genau ein Eintrag offen, Bild wechselt mit ----
+       Sitzt im bestehenden try-Block (nach der Rail-Slider-Schleife, vor catch).
+       Bricht sauber ab, wenn keine Trigger da sind; eigener try/catch = Fail-open. */
+    try {
+      document.querySelectorAll('.hph-showcase').forEach(function (showcase) {
+        var triggers = Array.prototype.slice.call(showcase.querySelectorAll('.hph-showcase__trigger'));
+        if (!triggers.length) return;
+        var images = Array.prototype.slice.call(showcase.querySelectorAll('.hph-showcase__img'));
 
-      // pro Klick eine Karte weiter
-      function step() {
-        var item = track.querySelector('.hph-cards__item');
-        var w = item ? item.getBoundingClientRect().width : track.clientWidth * 0.8;
-        var gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-        return Math.round(w + gap);
-      }
-      function update() {
-        var max = track.scrollWidth - track.clientWidth - 1;
-        prev.disabled = track.scrollLeft <= 0;
-        next.disabled = track.scrollLeft >= max;
-      }
-      function go(dir) {
-        track.scrollBy({ left: dir * step(), behavior: reduce ? 'auto' : 'smooth' });
-      }
-      prev.addEventListener('click', function () { go(-1); });
-      next.addEventListener('click', function () { go(1); });
-      track.addEventListener('scroll', update, { passive: true });
-      window.addEventListener('resize', update);
-      update();
-    });
-
-    /* ---- Aufklappbarer Lesebereich der Info-Karten (Akkordeon) ---- */
-    document.querySelectorAll('.hph-cards').forEach(function (cards) {
-      var toggles = cards.querySelectorAll('.hph-cards__toggle');
-      if (!toggles.length) return;
-      cards.classList.add('is-enhanced');   // ohne JS bleiben die Volltexte sichtbar
-
-      function panelFor(btn) {
-        var id = btn.getAttribute('aria-controls');
-        if (!id) return null;
-        // Innerhalb DIESER .hph-cards auflösen, damit ein versehentlich doppelt
-        // eingefügter Block nicht die Panels der ersten Instanz schaltet.
-        var sel = '#' + (window.CSS && CSS.escape ? CSS.escape(id) : id);
-        return cards.querySelector(sel) || document.getElementById(id);
-      }
-      function setState(btn, open) {
-        var panel = panelFor(btn);
-        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-        var label = btn.querySelector('.hph-cards__toggle-label');
-        if (label) label.textContent = open ? 'Weniger anzeigen' : 'Mehr erfahren';
-        if (panel) panel.classList.toggle('is-open', open);
-      }
-
-      toggles.forEach(function (btn) {
-        setState(btn, false);
-        btn.addEventListener('click', function () {
-          var willOpen = btn.getAttribute('aria-expanded') !== 'true';
-          // Akkordeon: alle anderen schließen
-          toggles.forEach(function (other) { if (other !== btn) setState(other, false); });
-          setState(btn, willOpen);
-          if (willOpen) {
-            var panel = panelFor(btn);
-            if (panel) {
-              window.requestAnimationFrame(function () {
-                panel.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' });
-              });
-            }
-          }
+        function setImage(key) {
+          if (!images.length) return;
+          var matched = false;
+          images.forEach(function (img) {
+            var on = img.getAttribute('data-hph-showcase-image') === key;
+            img.classList.toggle('is-active', on);
+            if (on) matched = true;
+          });
+          if (!matched) images[0].classList.add('is-active');
+        }
+        function open(trigger) {
+          triggers.forEach(function (t) {
+            var isTarget = t === trigger;
+            t.setAttribute('aria-expanded', isTarget ? 'true' : 'false');
+            var entry = t.closest('.hph-showcase__entry');
+            if (entry) entry.classList.toggle('is-active', isTarget);
+          });
+          setImage(trigger.getAttribute('data-hph-showcase-image'));
+        }
+        // Startzustand: den als .is-active markierten (bzw. ersten) Eintrag als einzig
+        // offenen setzen -> korrigiert die im Markup auf true stehenden aria-Werte.
+        var initialEntry = showcase.querySelector('.hph-showcase__entry.is-active');
+        var initial = (initialEntry && initialEntry.querySelector('.hph-showcase__trigger')) || triggers[0];
+        open(initial);
+        triggers.forEach(function (trigger) {
+          trigger.addEventListener('click', function () { open(trigger); });
         });
       });
-    });
+    } catch (e) {
+      /* Fail-open: falls die Showcase-Init scheitert, Panels öffnen + Bilder zeigen */
+      document.querySelectorAll('.hph-showcase__panel').forEach(function (p) { p.style.gridTemplateRows = '1fr'; });
+      document.querySelectorAll('.hph-showcase__panel-inner, .hph-showcase__img').forEach(function (el) { el.style.opacity = '1'; });
+    }
   } catch (err) {
     /* Fallback: bei einem Script-Fehler den Inhalt garantiert einblenden */
     var all = document.querySelectorAll('.hph-hero');
