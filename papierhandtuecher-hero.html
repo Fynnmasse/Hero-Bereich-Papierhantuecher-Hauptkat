@@ -165,12 +165,14 @@
   background: var(--hph-brand);
   color: var(--hph-on-brand);
 }
-.hph-hero__cta--primary:hover{
-  background: var(--hph-brand-dark);
-  transform:translateY(-1px);
-  box-shadow:0 8px 20px oklch(0.30 0.045 245 / .20);
+@media (hover:hover) and (pointer:fine){
+  .hph-hero__cta--primary:hover{
+    background: var(--hph-brand-dark);
+    transform:translateY(-1px);
+    box-shadow:0 8px 20px oklch(0.30 0.045 245 / .20);
+  }
 }
-.hph-hero__cta--primary:active{ transform:translateY(0); transition-duration:.1s; }
+.hph-hero__cta--primary:active{ transform:translateY(0) scale(.97); transition-duration:.1s; }
 .hph-hero__cta--primary:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; }
 /* sekundär = ruhige TONALE Pill (klares Sekundär-Gewicht neben dem gefüllten Primär,
    damit der B2B-Preis-/Vergleichspfad nicht der leiseste Touchpoint der Seite ist) */
@@ -180,8 +182,10 @@
   color: var(--hph-brand);
   background: oklch(0.95 0.014 245);
 }
-.hph-hero__cta--ghost:hover{ color: var(--hph-brand-dark); background: oklch(0.92 0.02 245); transform: translateY(-1px); box-shadow: 0 4px 12px oklch(0.30 0.045 245 / .12); }
-.hph-hero__cta--ghost:hover .hph-rail__ext{ transform: translateX(2px); }
+@media (hover:hover) and (pointer:fine){
+  .hph-hero__cta--ghost:hover{ color: var(--hph-brand-dark); background: oklch(0.92 0.02 245); transform: translateY(-1px); box-shadow: 0 4px 12px oklch(0.30 0.045 245 / .12); }
+  .hph-hero__cta--ghost:hover .hph-rail__ext{ transform: translateX(2px); }
+}
 .hph-hero__cta--ghost:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
 .hph-hero__cta svg{ width:1em; height:1em; flex:none; }
 .hph-hero__cta--ghost .hph-rail__ext{ width:.82em; height:.82em; margin-left:0; color:inherit; }
@@ -245,6 +249,26 @@
 }
 .hph-hero__media-still{ display:none; }   /* nur bei prefers-reduced-motion sichtbar */
 
+/* ---------- Hero-Medium: dezente Scroll-Parallaxe (scroll-driven, ohne JS) ----------
+   Das Loop-Video driftet beim Scrollen minimal langsamer als die Seite → Tiefe/Leben.
+   Streng gegated: nur bei erlaubter Bewegung UND wenn der Browser scroll-driven
+   Animations beherrscht (sonst statisch · Safari-/Firefox-Fallback = kein Bruch).
+   Das Video ist leicht hochskaliert, damit der Versatz innerhalb der figure
+   (overflow:hidden) bleibt und nie eine Kante freilegt. */
+@media (prefers-reduced-motion: no-preference){
+  @supports (animation-timeline: view()){
+    .hph-hero__media .hp-hero-video{
+      animation: hph-hero-parallax linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    @keyframes hph-hero-parallax{
+      from{ transform: translateY(-4%) scale(1.12); }
+      to{   transform: translateY(4%)  scale(1.12); }
+    }
+  }
+}
+
 /* Mobil: Intro stapelt, Video gedeckelt (nicht bildschirmfüllend) */
 @media (max-width: 860px){
   .hph-hero__intro{ grid-template-columns:1fr; gap: clamp(20px, 5vw, 30px); }
@@ -281,7 +305,7 @@
   -ms-overflow-style:none;
 }
 .hph-rail__track::-webkit-scrollbar{ display:none; }
-.hph-rail__item{ display:flex; flex:0 0 auto; scroll-snap-align:center; }
+.hph-rail__item{ position:relative; display:flex; flex:0 0 auto; scroll-snap-align:center; }   /* position: Anker für den Vergleichen-Toggle */
 .hph-rail__tile{
   display:flex;
   flex-direction:column;
@@ -318,8 +342,8 @@
   background: radial-gradient(closest-side, oklch(0.30 0.045 245 / .34), transparent);
   filter: blur(4px);
   opacity:.2;                /* dezente Ruhe-Standlinie: Produkt ist verankert, Hover verstärkt nur */
-  transition: opacity .5s cubic-bezier(.16,1,.3,1),
-              transform .5s cubic-bezier(.16,1,.3,1);
+  transition: opacity .3s cubic-bezier(.16,1,.3,1),
+              transform .3s cubic-bezier(.16,1,.3,1);
   pointer-events:none;
 }
 .hph-rail__media img{
@@ -334,7 +358,7 @@
      Verankert unten, damit alle Kartons auf einer Linie stehen.            */
   transform: translateY(var(--hph-y, 0px)) scale(var(--hph-s, 1));
   transform-origin: center bottom;
-  transition: transform .5s cubic-bezier(.16,1,.3,1);
+  transition: transform .3s cubic-bezier(.16,1,.3,1);
 }
 /* Feinabstimmung je Kachel, damit alle Kartons optisch gleich groß wirken
    --hph-s: Skalierung · --hph-y: vertikaler Versatz (gleicht Leerraum im Foto aus) */
@@ -363,10 +387,12 @@
   color: var(--hph-ink-soft);
   transition: color .25s ease, transform .25s ease;
 }
-.hph-rail__tile:hover .hph-rail__ext{ color: var(--hph-brand); transform: translate(1px,-1px); }
-.hph-rail__tile:hover .hph-rail__media img{ transform: translateY(calc(var(--hph-y, 0px) - 4px)) scale(calc(var(--hph-s, 1) * 1.02)); }
-.hph-rail__tile:hover .hph-rail__media::after{ opacity:.6; transform: translateX(-50%) scale(.85); }
-.hph-rail__tile:hover .hph-rail__label{ color: var(--hph-brand); }
+@media (hover:hover) and (pointer:fine){
+  .hph-rail__tile:hover .hph-rail__ext{ color: var(--hph-brand); transform: translate(1px,-1px); }
+  .hph-rail__tile:hover .hph-rail__media img{ transform: translateY(calc(var(--hph-y, 0px) - 4px)) scale(calc(var(--hph-s, 1) * 1.02)); transition-duration:.3s; }
+  .hph-rail__tile:hover .hph-rail__media::after{ opacity:.6; transform: translateX(-50%) scale(.85); }
+  .hph-rail__tile:hover .hph-rail__label{ color: var(--hph-brand); }
+}
 .hph-rail__tile:active .hph-rail__media img{ transform: translateY(calc(var(--hph-y, 0px) - 3px)) scale(calc(var(--hph-s, 1) * 1.01)); transition-duration:.16s; }
 .hph-rail__tile:active .hph-rail__media::after{ opacity:.7; transform: translateX(-50%) scale(.82); transition-duration:.16s; }
 .hph-rail__tile:focus-visible{
@@ -465,6 +491,95 @@
 .hph-rail__nav[disabled]{ opacity:0; pointer-events:none; }
 
 /* ============================================================================
+   RAIL · INTERAKTIVE ELEMENTE
+   ③ Vergleichs-Auswahl · ④ Mobile Dots + Fokus
+   Progressive Enhancement: ohne JS bleiben die Kacheln normale Links – Dots und
+   Vergleichs-Bar erzeugt JS, der Vergleichen-Toggle ist auf .hph-hero--js gegated.
+   ============================================================================ */
+
+/* ③ Vergleichen-Toggle: dezenter Kreis an der oberen Bildecke (ohne JS ausgeblendet → keine inerten Buttons) */
+.hph-rail__compare{
+  display:none;
+  position:absolute; top:4px; right:6px; z-index:2;
+  width:30px; height:30px; place-items:center;
+  padding:0; border:0; border-radius:50%;
+  background: oklch(0.99 0.004 245 / .82);
+  color: var(--hph-ink-soft);
+  box-shadow: 0 1px 3px oklch(0.30 0.045 245 / .18);
+  cursor:pointer; opacity:0;
+  -webkit-tap-highlight-color:transparent;
+  transition: opacity .2s ease, background-color .2s ease, color .2s ease, transform .2s cubic-bezier(.16,1,.3,1);
+}
+.hph-hero--js .hph-rail__compare{ display:grid; }
+.hph-rail__compare-ico{ grid-area:1/1; width:17px; height:17px; transition: opacity .2s ease, transform .2s cubic-bezier(.16,1,.3,1); }
+.hph-rail__compare-ico--on{ opacity:0; transform:scale(.6); }
+.hph-rail__item:hover .hph-rail__compare,
+.hph-rail__compare:focus-visible,
+.hph-rail__compare.is-on{ opacity:1; }
+@media (hover:none){ .hph-rail__compare{ opacity:1; } }   /* Touch: dauerhaft sichtbar (kein Hover) */
+.hph-rail__compare:active{ transform:scale(.92); transition-duration:.1s; }
+.hph-rail__compare:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:2px; }
+.hph-rail__compare.is-on{ background: var(--hph-brand); color: var(--hph-on-brand); box-shadow:0 2px 8px oklch(0.30 0.045 245 / .28); }
+.hph-rail__compare.is-on .hph-rail__compare-ico--add{ opacity:0; transform:scale(.6); }
+.hph-rail__compare.is-on .hph-rail__compare-ico--on{ opacity:1; transform:none; }
+.hph-rail__compare.is-disabled{ pointer-events:none; }   /* andere Vergleichsachse: während einer Auswahl gesperrt (vglnach kennt nur EINE Achse) */
+.hph-rail__item:hover .hph-rail__compare.is-disabled{ opacity:.3; }
+@media (hover:none){ .hph-rail__compare.is-disabled{ opacity:.3; } }
+@media (hover:hover) and (pointer:fine){ .hph-rail__compare:hover{ color: var(--hph-brand); } }
+/* Desktop: Kachel ist eine breite Spalte → Toggle an die rechte Bildkante rücken (statt an den Spaltenrand) */
+@media (min-width:861px){
+  .hph-rail__compare{ right:auto; left:calc(50% + (var(--hph-media-w) / 2) - 28px); top:2px; }
+}
+
+/* ③ Vergleichs-Bar: erscheint zwischen Rail und Trust-Zeile, sobald ≥1 Sorte gewählt ist (House-Collapse-Idiom) */
+.hph-rail__compare-bar{
+  width:100%; display:grid; grid-template-rows:0fr; opacity:0;
+  transition: grid-template-rows .35s cubic-bezier(.16,1,.3,1), opacity .35s cubic-bezier(.16,1,.3,1);
+}
+.hph-rail__compare-bar.is-active{ grid-template-rows:1fr; opacity:1; }
+.hph-rail__compare-inner{
+  min-height:0; overflow:hidden;
+  display:flex; align-items:center; flex-wrap:wrap; gap: clamp(10px,1.6vw,18px);
+  padding: var(--hph-space-2xs) 0 var(--hph-space-xs);
+}
+.hph-rail__compare-count{ font-size:.92rem; font-weight:600; color: var(--hph-ink); }
+.hph-rail__compare-go{
+  display:inline-flex; align-items:center; gap:.35em;
+  padding:.5em 1.1em; border-radius:980px;
+  background: var(--hph-brand); color: var(--hph-on-brand);
+  font-size:.92rem; font-weight:600; text-decoration:none; white-space:nowrap;
+  transition: background-color .2s ease, transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease;
+}
+.hph-rail__compare-go svg{ width:1em; height:1em; }
+.hph-rail__compare-go:active{ transform:scale(.97); transition-duration:.1s; }
+.hph-rail__compare-go:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; }
+.hph-rail__compare-clear{
+  border:0; background:transparent; cursor:pointer; padding:.2em;
+  font:inherit; font-size:.88rem; font-weight:500; color: var(--hph-ink-mute);
+  text-decoration:underline; text-underline-offset:2px; transition: color .2s ease;
+}
+.hph-rail__compare-clear:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:2px; border-radius:4px; }
+@media (hover:hover) and (pointer:fine){
+  .hph-rail__compare-go:hover{ background: var(--hph-brand-dark); transform:translateY(-1px); box-shadow:0 6px 16px oklch(0.30 0.045 245 / .18); }
+  .hph-rail__compare-clear:hover{ color: var(--hph-brand-dark); }
+}
+
+/* ④ Mobile Dots + Fokus: nur dort, wo die Rail wirklich scrollt (≤860px) */
+.hph-rail__dots{ display:none; }
+@media (max-width:860px){
+  .hph-rail__dots{ display:flex; justify-content:center; align-items:center; gap:8px; margin-top:12px; }
+  .hph-rail__dot{
+    width:7px; height:7px; padding:0; border:0; border-radius:50%;
+    background: oklch(0.80 0.02 245); cursor:pointer;
+    transition: background-color .25s ease, transform .25s cubic-bezier(.16,1,.3,1);
+  }
+  .hph-rail__dot.is-on{ background: var(--hph-brand); transform:scale(1.4); }
+  /* Fokus-Dimmen erst, wenn JS die zentrierte Kachel markiert (.hph-rail--focusable) → fail-open */
+  .hph-rail--focusable .hph-rail__item{ transition: opacity .3s ease; }
+  .hph-rail--focusable .hph-rail__item:not(.is-focused){ opacity:.5; }
+}
+
+/* ============================================================================
    FEATURE-KACHELN  (Apple-„iPad Zubehör"-Stil)
    Zwei große, zertifizierte Produkt-Highlights nebeneinander (Desktop),
    gestapelt (Mobil). Pro Karte: Textblock oben (Titel + zwei Untertitel-
@@ -533,15 +648,21 @@
     inset 0 1px 0 oklch(0.99 0.004 245 / .9),       /* heller Innen-Grat … */
     0 1px 2px oklch(0.30 0.045 245 / .06),          /* nahe Kontaktlage … */
     0 10px 26px -10px oklch(0.30 0.045 245 / .09);   /* … gleiche dreilagige Schatten-Sprache wie das Hero-Medium */
-  transition: transform .45s cubic-bezier(.16,1,.3,1),
-              box-shadow .45s cubic-bezier(.16,1,.3,1);
+  /* OUT (Ruhe): snappy zurück · IN (Hover): minimal länger – „fast where the system responds" */
+  transition: transform .2s cubic-bezier(.16,1,.3,1),
+              box-shadow .2s cubic-bezier(.16,1,.3,1);
 }
-.hph-feature__card:hover{
-  transform: translateY(-2px);                      /* Hülle hebt nur knapp über den Kauf-Button (-1px) */
-  box-shadow:
-    inset 0 1px 0 oklch(0.99 0.004 245 / .9),
-    0 2px 4px oklch(0.30 0.045 245 / .08),
-    0 18px 40px -14px oklch(0.30 0.045 245 / .12);   /* leiser: war 0 26px 50px -12px /.18 */
+@media (hover:hover) and (pointer:fine){
+  .hph-feature__card:hover{
+    transform: translateY(-2px);                      /* Hülle hebt nur knapp über den Kauf-Button (-1px) */
+    box-shadow:
+      inset 0 1px 0 oklch(0.99 0.004 245 / .9),
+      0 2px 4px oklch(0.30 0.045 245 / .08),
+      0 18px 40px -14px oklch(0.30 0.045 245 / .12);   /* leiser: war 0 26px 50px -12px /.18 */
+    transition-duration:.3s;                          /* IN etwas weicher als OUT */
+  }
+  /* Tiefe: das Produktfoto hebt/skaliert stärker als die Hülle → Parallaxe statt flacher Fläche */
+  .hph-feature__card:hover .hph-feature__img{ transform: translateY(-6px) scale(1.03); }
 }
 
 /* Textblock oben (kompakt gehalten, damit die Karte flach bleibt) */
@@ -610,8 +731,10 @@
   white-space:nowrap;
   transition: background-color .2s ease, transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease;
 }
-.hph-feature__buy:hover{ background: var(--hph-brand-dark); transform:translateY(-1px); box-shadow:0 6px 16px oklch(0.30 0.045 245 / .18); }
-.hph-feature__buy:active{ transform:translateY(0); transition-duration:.1s; }
+@media (hover:hover) and (pointer:fine){
+  .hph-feature__buy:hover{ background: var(--hph-brand-dark); transform:translateY(-1px); box-shadow:0 6px 16px oklch(0.30 0.045 245 / .18); }
+}
+.hph-feature__buy:active{ transform:translateY(0) scale(.97); transition-duration:.1s; }
 .hph-feature__buy:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; }
 
 /* Medien: Foto sitzt zentriert am unteren Rand. Höhe + Breite werden begrenzt,
@@ -630,6 +753,7 @@
   height:auto;
   max-width: min(92%, 420px);            /* Foto nicht über die ganze breite Karte ziehen */
   max-height: clamp(190px, 20vw, 290px); /* begrenzt die Kartenhöhe → kompakt */
+  transition: transform .3s cubic-bezier(.16,1,.3,1);   /* Hover-Tiefe · gesteuert über .hph-feature__card:hover */
 }
 
 /* ============================================================================
@@ -727,6 +851,11 @@
 .hph-hero--js .hph-showcase__panel-inner{ opacity:0; transition: opacity .35s cubic-bezier(.16,1,.3,1); }
 .hph-hero--js .hph-showcase__entry.is-active .hph-showcase__panel{ grid-template-rows: 1fr; }
 .hph-hero--js .hph-showcase__entry.is-active .hph-showcase__panel-inner{ opacity:1; }
+/* Inhalt zieht beim Öffnen leicht gestaffelt nach (Text vor Link) → der Wechsel wirkt als EINE Bewegung */
+.hph-hero--js .hph-showcase__body{ transform: translateY(8px); transition: transform .45s cubic-bezier(.16,1,.3,1); transition-delay:.05s; }
+.hph-hero--js .hph-showcase__link{ transform: translateY(8px); transition: transform .45s cubic-bezier(.16,1,.3,1); transition-delay:.1s; }
+.hph-hero--js .hph-showcase__entry.is-active .hph-showcase__body,
+.hph-hero--js .hph-showcase__entry.is-active .hph-showcase__link{ transform:none; }
 
 /* ---------- RECHTS: Bild-Stack (transparente PNGs, schweben auf der weißen Karte) ---------- */
 .hph-showcase__media{
@@ -751,8 +880,15 @@
   display:block;
   padding: clamp(8px, 1.4vw, 16px);
 }
-.hph-hero--js .hph-showcase__img{ opacity:0; transition: opacity .45s cubic-bezier(.16,1,.3,1); }
-.hph-hero--js .hph-showcase__img.is-active{ opacity:1; }
+.hph-hero--js .hph-showcase__img{
+  opacity:0;
+  transform: scale(1.015);                 /* Start minimal größer … */
+  filter: blur(6px);                        /* … und unscharf: maskiert den Crossfade – zwei Bilder verschmelzen zu EINER Bewegung statt sichtbar zu überlappen */
+  transition: opacity   .45s cubic-bezier(.16,1,.3,1),
+              transform .45s cubic-bezier(.16,1,.3,1),
+              filter    .45s cubic-bezier(.16,1,.3,1);
+}
+.hph-hero--js .hph-showcase__img.is-active{ opacity:1; transform:none; filter:none; }
 
 /* Inline-Bild je Panel: nur auf Mobil sichtbar (Desktop nutzt den rechten Bild-Stack) */
 .hph-showcase__panel-img{ display:none; }
@@ -946,7 +1082,7 @@
     display:block; position:absolute; inset:0;
     width:100%; height:100%; object-fit:cover;
   }
-  .hph-rail__tile, .hph-rail__media img, .hph-rail__media::after, .hph-rail__nav{ transition:none !important; }
+  .hph-rail__tile, .hph-rail__media img, .hph-rail__media::after, .hph-rail__nav{ transition:none !important; }  .hph-rail__compare, .hph-rail__compare-ico, .hph-rail__compare-bar, .hph-rail__compare-go, .hph-rail__dot{ transition:none !important; }
   .hph-feature__card, .hph-feature__more, .hph-feature__buy, .hph-feature__img{ transition:none !important; }
   .hph-rail__ext, .hph-feature__more svg, .hph-feature__seeall svg{ transition:none !important; transform:none !important; }
   .hph-rail__track, .hph-feature__grid{ scroll-behavior:auto; }
@@ -954,6 +1090,7 @@
      (Opacity bleibt der .is-active-Logik überlassen → weiter genau EIN Bild sichtbar). */
   .hph-showcase, .hph-showcase__panel-inner, .hph-showcase__chevron, .hph-showcase__trigger{ opacity:1 !important; transform:none !important; transition:none !important; }
   .hph-showcase__panel, .hph-showcase__img{ transition:none !important; }
+  .hph-showcase__body, .hph-showcase__link{ transform:none !important; transition:none !important; }   /* gestaffelter Panel-Inhalt: sofort statt Bewegung */
   .hph-showcase__link svg{ transition:none !important; transform:none !important; }
 }
 </style>
@@ -1036,9 +1173,12 @@
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">1-lagig · Z-Falz</span>
-              <span class="hph-rail__hint">ergiebig &amp; sparsam</span>
-            </span>
+              <span class="hph-rail__hint">ergiebig &amp; sparsam</span>            </span>
           </a>
+          <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglnach="lagen" data-hph-vglwert="1" aria-label="„1-lagig · Z-Falz“ zum Vergleich hinzufügen">
+            <svg class="hph-rail__compare-ico hph-rail__compare-ico--add" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <svg class="hph-rail__compare-ico hph-rail__compare-ico--on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          </button>
         </li>
 
         <li class="hph-rail__item">
@@ -1049,9 +1189,12 @@
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">2-lagig · Z-Falz</span>
-              <span class="hph-rail__hint">weich &amp; saugstark</span>
-            </span>
+              <span class="hph-rail__hint">weich &amp; saugstark</span>            </span>
           </a>
+          <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglnach="lagen" data-hph-vglwert="2" aria-label="„2-lagig · Z-Falz“ zum Vergleich hinzufügen">
+            <svg class="hph-rail__compare-ico hph-rail__compare-ico--add" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <svg class="hph-rail__compare-ico hph-rail__compare-ico--on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          </button>
         </li>
 
         <li class="hph-rail__item">
@@ -1062,9 +1205,12 @@
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">3-lagig · Z-Falz</span>
-              <span class="hph-rail__hint">besonders weich</span>
-            </span>
+              <span class="hph-rail__hint">besonders weich</span>            </span>
           </a>
+          <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglnach="lagen" data-hph-vglwert="3" aria-label="„3-lagig · Z-Falz“ zum Vergleich hinzufügen">
+            <svg class="hph-rail__compare-ico hph-rail__compare-ico--add" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <svg class="hph-rail__compare-ico hph-rail__compare-ico--on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          </button>
         </li>
 
         <li class="hph-rail__item">
@@ -1423,9 +1569,135 @@
       }
       prev.addEventListener('click', function () { go(-1); });
       next.addEventListener('click', function () { go(1); });
-      track.addEventListener('scroll', update, { passive: true });
-      window.addEventListener('resize', update);
+
+      /* ---- ④ Mobile Dots + Fokus: Punkte zeigen die Scroll-Position, die zentrierte Kachel führt ---- */
+      var items = Array.prototype.slice.call(track.querySelectorAll('.hph-rail__item'));
+      var dotEls = [];
+      if (items.length > 1) {
+        var dotsWrap = document.createElement('div');
+        dotsWrap.className = 'hph-rail__dots';
+        dotsWrap.setAttribute('aria-hidden', 'true');   // visuelle Orientierung; Pfeile + Wischen sind die echte Navigation
+        items.forEach(function (it) {
+          var dot = document.createElement('button');
+          dot.type = 'button';
+          dot.className = 'hph-rail__dot';
+          dot.tabIndex = -1;
+          dot.addEventListener('click', function () {
+            it.scrollIntoView({ inline: 'center', block: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
+          });
+          dotsWrap.appendChild(dot);
+          dotEls.push(dot);
+        });
+        if (rail.parentNode) rail.parentNode.insertBefore(dotsWrap, rail.nextSibling);
+        rail.classList.add('hph-rail--focusable');   // aktiviert das Fokus-Dimmen; ohne JS bleiben alle Kacheln voll sichtbar
+      }
+
+      function activeIndex() {
+        var mid = track.scrollLeft + track.clientWidth / 2, best = 0, bestDist = Infinity;
+        for (var i = 0; i < items.length; i++) {
+          var dist = Math.abs((items[i].offsetLeft + items[i].offsetWidth / 2) - mid);
+          if (dist < bestDist) { bestDist = dist; best = i; }
+        }
+        return best;
+      }
+      function syncActive() {
+        if (!items.length) return;
+        var a = activeIndex();
+        for (var i = 0; i < items.length; i++) {
+          items[i].classList.toggle('is-focused', i === a);
+          if (dotEls[i]) dotEls[i].classList.toggle('is-on', i === a);
+        }
+      }
+
+      var rafId = 0;
+      function onScroll() {
+        if (rafId) return;
+        rafId = (window.requestAnimationFrame || function (f) { return setTimeout(f, 16); })(function () {
+          rafId = 0; update(); syncActive();
+        });
+      }
+      track.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
       update();
+      syncActive();
+
+      /* ---- ③ Vergleichs-Auswahl: ausgewählte Sorten → vorgefilterter Vergleich im Produktfinder ----
+         Echtes Produktfinder-Schema: ?vglnach=<achse>&vglwerte=<a,b,…> · Komma URL-kodiert (%2C).
+         Beispiel bestätigt: ?vglnach=lagen&vglwerte=1%2C2  (1- und 2-lagig vergleichen).
+         Pro Kachel: data-hph-vglnach (Achse) + data-hph-vglwert (Wert). Es ist genau EINE Achse je Vergleich
+         möglich – Kacheln einer anderen Achse werden während einer Auswahl gesperrt (.is-disabled).
+         Achse „lagen" (Werte 1/2/3) ist bestätigt; „falzung" (Interfold/C-Falz) ist vorläufig – Tokens bestätigen. */
+      var compareBtns = Array.prototype.slice.call(rail.querySelectorAll('.hph-rail__compare'));
+      var foot = rail.parentNode ? rail.parentNode.querySelector('.hph-rail__foot') : null;
+      if (compareBtns.length && foot) {
+        var COMPARE_BASE = 'https://produktfinder.hamburgpapier-shop.de/vergleich/papierhandtuecher';
+        var selected = [];
+
+        var bar = document.createElement('div');
+        bar.className = 'hph-rail__compare-bar';
+        var inner = document.createElement('div');
+        inner.className = 'hph-rail__compare-inner';
+        var countEl = document.createElement('span');
+        countEl.className = 'hph-rail__compare-count';
+        var goEl = document.createElement('a');
+        goEl.className = 'hph-rail__compare-go';
+        goEl.target = '_blank';
+        goEl.rel = 'noopener noreferrer';
+        goEl.innerHTML = 'Vergleichen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+        var clearEl = document.createElement('button');
+        clearEl.type = 'button';
+        clearEl.className = 'hph-rail__compare-clear';
+        clearEl.textContent = 'Leeren';
+        inner.appendChild(countEl);
+        inner.appendChild(goEl);
+        inner.appendChild(clearEl);
+        bar.appendChild(inner);
+        foot.parentNode.insertBefore(bar, foot);
+
+        var renderCompare = function () {
+          var n = selected.length;
+          bar.classList.toggle('is-active', n > 0);
+          countEl.textContent = (n === 1 ? '1 Sorte ausgewählt' : n + ' Sorten ausgewählt');
+          if (n) {
+            var werte = [];
+            for (var i = 0; i < selected.length; i++) werte.push(selected[i].wert);
+            goEl.href = COMPARE_BASE + '?vglnach=' + encodeURIComponent(selected[0].nach)
+                      + '&vglwerte=' + encodeURIComponent(werte.join(','));   // Komma → %2C
+          } else {
+            goEl.href = COMPARE_BASE;
+          }
+          // Single-Achse: solange eine Auswahl läuft, Kacheln anderer Achsen sperren (vglnach kennt nur EINE Achse)
+          var aktiv = n ? selected[0].nach : null;
+          compareBtns.forEach(function (b) {
+            var dis = aktiv && b.getAttribute('data-hph-vglnach') !== aktiv;
+            b.classList.toggle('is-disabled', !!dis);
+            b.setAttribute('aria-disabled', dis ? 'true' : 'false');
+          });
+        };
+        var indexOfPick = function (nach, wert) {
+          for (var i = 0; i < selected.length; i++) { if (selected[i].nach === nach && selected[i].wert === wert) return i; }
+          return -1;
+        };
+        compareBtns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            if (btn.classList.contains('is-disabled')) return;
+            var nach = btn.getAttribute('data-hph-vglnach') || '';
+            var wert = btn.getAttribute('data-hph-vglwert') || '';
+            var at = indexOfPick(nach, wert), on;
+            if (at > -1) { selected.splice(at, 1); on = false; }
+            else { selected.push({ nach: nach, wert: wert }); on = true; }
+            btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+            btn.classList.toggle('is-on', on);
+            renderCompare();
+          });
+        });
+        clearEl.addEventListener('click', function () {
+          selected = [];
+          compareBtns.forEach(function (b) { b.setAttribute('aria-pressed', 'false'); b.classList.remove('is-on'); });
+          renderCompare();
+        });
+        renderCompare();
+      }
     });
 
     /* ---- Showcase-Akkordeon: genau ein Eintrag offen, Bild wechselt mit ----
@@ -1468,7 +1740,7 @@
     } catch (e) {
       /* Fail-open: falls die Showcase-Init scheitert, Panels öffnen + Bilder zeigen */
       document.querySelectorAll('.hph-showcase__panel').forEach(function (p) { p.style.gridTemplateRows = '1fr'; });
-      document.querySelectorAll('.hph-showcase__panel-inner, .hph-showcase__img').forEach(function (el) { el.style.opacity = '1'; });
+      document.querySelectorAll('.hph-showcase__panel-inner, .hph-showcase__img').forEach(function (el) { el.style.opacity = '1'; el.style.transform = 'none'; el.style.filter = 'none'; });
     }
   } catch (err) {
     /* Fail-open: bei einem Script-Fehler die verborgenen Reveal-Startzustände
