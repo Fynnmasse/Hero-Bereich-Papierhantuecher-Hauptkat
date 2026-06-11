@@ -32,7 +32,11 @@
 <!-- Schriften: Comfortaa (Überschriften) + Open Sans (Text). Im Block geladen, damit
      der Baustein in Shopware unabhängig von der Theme-Schrift die richtigen Fonts zieht.
      Hinweis: Bei strenger Content-Security-Policy fonts.googleapis.com + fonts.gstatic.com
-     freigeben – oder die Fonts selbst hosten und diese drei Zeilen ersetzen. -->
+     freigeben – oder die Fonts selbst hosten und diese drei Zeilen ersetzen.
+     DSGVO-HINWEIS: Diese <link>-Einbindung lädt die Schriften von Google-Servern und
+     übermittelt dabei die IP-Adresse der Besucher an Google (LG München I, 3 O 17493/20:
+     ohne Einwilligung abmahnfähig). Für den Produktivbetrieb die Fonts deshalb selbst
+     hosten (z. B. per google-webfonts-helper ins Theme) und diese drei Zeilen ersetzen. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Open+Sans:wght@300..800&display=swap">
@@ -49,6 +53,19 @@
   --hph-on-brand:     #ffffff;   /* Hintergrundfarbe · Text auf Buttons     */
   --hph-hairline:     oklch(0.30 0.045 245 / .12); /* navy-getönte Haarlinie · Trenner/Rahmen */
   --hph-ink-mute:     oklch(0.52 0.028 245);       /* tertiäre, gedämpfte Textstufe (AA-konform) */
+  --hph-ink-strong:   oklch(0.26 0.05 245);        /* dunkelste Textstufe · Preisanker (Tonwert- statt Farbsprung) */
+
+  /* ---- Farb-Disziplin (3 Ebenen) ----
+     --hph-brand  = NUR Links, Icons, Hover-Tints, Fokus-Ringe (Marken-Ebene).
+     --hph-action = NUR gefüllte Conversion-Buttons („Zum Sortiment", „Jetzt kaufen",
+                    „Vergleichen", +-Auswahl aktiv) · satteres Petrol in der Navy-Familie,
+                    damit der Kauf-Pfad farblich führt (Weiß darauf ≥ AA).
+     --hph-cert   = NUR die Siegel-Chips (semantisch „zertifiziert nachhaltig") ·
+                    gedecktes Tannengrün, nie an Buttons oder Flächen (Greenwashing-Optik). */
+  --hph-action:       oklch(0.50 0.10 235);
+  --hph-action-dark:  oklch(0.42 0.10 235);
+  --hph-cert:         oklch(0.44 0.075 150);
+  --hph-cert-wash:    oklch(0.95 0.022 150);
 
   /* ---- Spacing-Skala · fluid (clamp), 4pt-Basis · EIN Raster für die ganze Seite ----
      Rhythmus-Tiers: 2xs/xs = enge Bindung · sm = Gitter/Gruppen · md = Sektionsköpfe ·
@@ -158,16 +175,16 @@
   transition: background-color .2s ease, color .2s ease,
               transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease;
 }
-/* primär = gefüllte Marken-Pill (gleiche Sprache wie .hph-feature__buy) */
+/* primär = gefüllte Aktions-Pill (gleiche Sprache wie .hph-feature__buy) */
 .hph-hero__cta--primary{
   padding:.82em 1.6em;
   border-radius:980px;
-  background: var(--hph-brand);
+  background: var(--hph-action);
   color: var(--hph-on-brand);
 }
 @media (hover:hover) and (pointer:fine){
   .hph-hero__cta--primary:hover{
-    background: var(--hph-brand-dark);
+    background: var(--hph-action-dark);
     transform:translateY(-1px);
     box-shadow:0 8px 20px oklch(0.30 0.045 245 / .20);
   }
@@ -249,6 +266,33 @@
 }
 .hph-hero__media-still{ display:none; }   /* nur bei prefers-reduced-motion sichtbar */
 
+/* ---------- Video-Pause-Toggle (WCAG 2.2.2): der Autoplay-Loop muss anhaltbar sein ----------
+   Nur unter .hph-hero--js sichtbar (ohne JS wäre der Button inert); bei
+   prefers-reduced-motion zeigt CSS ohnehin das Standbild → Toggle bleibt versteckt. */
+.hph-hero__media-toggle{
+  display:none;
+  position:absolute; right:10px; bottom:10px; z-index:2;
+  width:36px; height:36px;
+  padding:0; border:0; border-radius:50%;
+  background: oklch(0.99 0.004 245 / .85);
+  color: var(--hph-ink);
+  box-shadow: 0 1px 3px oklch(0.30 0.045 245 / .22);
+  cursor:pointer;
+  place-items:center;
+  -webkit-tap-highlight-color:transparent;
+  transition: background-color .2s ease, color .2s ease, transform .2s cubic-bezier(.16,1,.3,1);
+}
+.hph-hero--js .hph-hero__media-toggle{ display:grid; }
+.hph-hero__media-toggle-ico{ grid-area:1/1; width:15px; height:15px; transition: opacity .2s ease, transform .2s cubic-bezier(.16,1,.3,1); }
+.hph-hero__media-toggle-ico--play{ opacity:0; transform:scale(.7); margin-left:2px; }   /* Play-Dreieck optisch zentriert */
+.hph-hero__media-toggle.is-paused .hph-hero__media-toggle-ico--pause{ opacity:0; transform:scale(.7); }
+.hph-hero__media-toggle.is-paused .hph-hero__media-toggle-ico--play{ opacity:1; transform:scale(1); }
+@media (hover:hover) and (pointer:fine){
+  .hph-hero__media-toggle:hover{ background:#ffffff; color: var(--hph-brand-dark); }
+}
+.hph-hero__media-toggle:active{ transform:scale(.92); transition-duration:.1s; }
+.hph-hero__media-toggle:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:2px; }
+
 /* ---------- Hero-Medium: dezente Scroll-Parallaxe (scroll-driven, ohne JS) ----------
    Das Loop-Video driftet beim Scrollen minimal langsamer als die Seite → Tiefe/Leben.
    Streng gegated: nur bei erlaubter Bewegung UND wenn der Browser scroll-driven
@@ -305,7 +349,7 @@
   -ms-overflow-style:none;
 }
 .hph-rail__track::-webkit-scrollbar{ display:none; }
-.hph-rail__item{ position:relative; display:flex; flex:0 0 auto; scroll-snap-align:center; }   /* position: Anker für den Vergleichen-Toggle */
+.hph-rail__item{ display:flex; flex-direction:column; align-items:center; flex:0 0 auto; scroll-snap-align:center; }   /* Spalte: Kachel-Link + "Vergleichen"-Checkbox darunter */
 .hph-rail__tile{
   display:flex;
   flex-direction:column;
@@ -402,28 +446,10 @@
 }
 
 /* ---------- Rail: Klartext-Hilfe für Nicht-Experten ----------
-   Überbrückt die Falz-/Lagen-Fachsprache: eine Leitzeile über der Rail
-   plus ein kurzer Klartext-Hinweis unter jedem Foto. */
-.hph-rail__lead{
-  margin: var(--hph-space-sm) 0 0;
-  max-width: 62ch;
-  font-size: clamp(.9rem,.86rem+.14vw,1rem);
-  line-height:1.55;
-  color: var(--hph-ink-soft);
-}
-.hph-rail__lead a{
-  color: var(--hph-brand);
-  font-weight:600;
-  text-decoration:none;
-  white-space:nowrap;
-  transition: color .2s ease;
-}
-.hph-rail__lead a:hover{ color: var(--hph-brand-dark); }
-.hph-rail__lead a:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
-.hph-rail__lead a .hph-rail__ext{ color:inherit; }                       /* „externer Link"-Icon übernimmt die Linkfarbe */
-.hph-rail__lead a:hover .hph-rail__ext{ transform: translate(1px,-1px); }
+   Überbrückt die Falz-/Lagen-Fachsprache: ein kurzer Klartext-Hinweis plus
+   „ab"-Preisanker unter jedem Foto (scanbare Eckdaten direkt an der Kachel). */
 
-/* Fuß-Zeile unter der Rail: Leitzeile links, Trust-Strip rechts unten; bricht bei Enge um (Trust bleibt rechts) */
+/* Fuß-Zeile unter der Rail: Trust-Strip, linksbündig; bricht bei Enge um */
 .hph-rail__foot{
   display:flex;
   align-items:flex-end;
@@ -431,7 +457,6 @@
   gap: clamp(10px,1.6vw,18px) clamp(16px,3vw,40px);
   margin-top: var(--hph-space-sm);
 }
-.hph-rail__foot .hph-rail__lead{ margin:0; }            /* Abstand übernimmt der Foot */
 .hph-rail__foot .hph-hero__trust{ margin-left:0; }   /* linksbündig (gleiche Kante wie Rail/Titel) */
 
 /* Label + Klartext-Hint als enger Textblock; Foto und Text rücken als eine Einheit
@@ -449,6 +474,18 @@
   line-height:1.2;
   text-align:center;
   color: var(--hph-ink-mute);
+  white-space:nowrap;
+}
+/* „ab"-Preisanker: harte Einkäufer-Eckzahl direkt an der Kachel (Design-Prinzip 5).
+   Tabular-Ziffern: die Preise stehen über alle 5 Kacheln ruhig nebeneinander. */
+.hph-rail__price{
+  margin-top:2px;
+  font-size: clamp(.78rem,.74rem+.12vw,.86rem);
+  font-weight:600;
+  line-height:1.2;
+  text-align:center;
+  color: var(--hph-ink-strong);   /* dunkelste Stufe: Tonwert-Sprung führt den Einkäufer-Blick zum Preis */
+  font-variant-numeric: tabular-nums;
   white-space:nowrap;
 }
 
@@ -492,52 +529,67 @@
 
 /* ============================================================================
    RAIL · INTERAKTIVE ELEMENTE
-   ③ Vergleichs-Auswahl · ④ Mobile Dots + Fokus
-   Progressive Enhancement: ohne JS bleiben die Kacheln normale Links – Dots und
+   ③ Vergleichs-Auswahl
+   Progressive Enhancement: ohne JS bleiben die Kacheln normale Links – die
    Vergleichs-Bar erzeugt JS, der Vergleichen-Toggle ist auf .hph-hero--js gegated.
    ============================================================================ */
 
-/* ③ Vergleichen-Toggle: dezenter Kreis an der oberen Bildecke (ohne JS ausgeblendet → keine inerten Buttons).
-   DAUERHAFT dezent sichtbar – ein Conversion-Einstieg darf nicht hinter Hover versteckt sein
-   (unsichtbare Affordance); Hover/Fokus/Auswahl heben auf volle Deckkraft. */
+/* ③ Vergleichen-Auswahl: beschriftete Checkbox unter jeder Kachel (ohne JS ausgeblendet
+   → keine inerten Buttons). Sichtbares Label statt nacktem +: die Funktion erklärt sich
+   VOR dem ersten Klick (Standard-Idiom aus Preisvergleichs-/B2B-Shops) – kein
+   Überraschungsmoment, kein Erklärtext nötig. */
 .hph-rail__compare{
   display:none;
-  position:absolute; top:4px; right:6px; z-index:2;
-  width:30px; height:30px; place-items:center;
-  padding:0; border:0; border-radius:50%;
-  background: oklch(0.99 0.004 245 / .82);
+  align-items:center;
+  gap:.5em;
+  margin:2px auto 0;
+  padding:.3em .6em;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  font:inherit;
+  font-size: clamp(.78rem,.74rem+.12vw,.86rem);
+  font-weight:500;
+  line-height:1.1;
   color: var(--hph-ink-soft);
-  box-shadow: 0 1px 3px oklch(0.30 0.045 245 / .18);
-  cursor:pointer; opacity:.55;
+  cursor:pointer;
   -webkit-tap-highlight-color:transparent;
-  transition: opacity .2s ease, background-color .2s ease, color .2s ease, transform .2s cubic-bezier(.16,1,.3,1);
+  transition: color .2s ease;
 }
-.hph-hero--js .hph-rail__compare{ display:grid; }
-.hph-rail__compare-ico{ grid-area:1/1; width:17px; height:17px; transition: opacity .2s ease, transform .2s cubic-bezier(.16,1,.3,1); }
-.hph-rail__compare-ico--on{ opacity:0; transform:scale(.6); }
-.hph-rail__item:hover .hph-rail__compare,
-.hph-rail__compare:focus-visible,
-.hph-rail__compare.is-on{ opacity:1; }
-@media (hover:none){ .hph-rail__compare{ opacity:1; } }   /* Touch: dauerhaft sichtbar (kein Hover) */
-.hph-rail__compare:active{ transform:scale(.92); transition-duration:.1s; }
+.hph-hero--js .hph-rail__compare{ display:inline-flex; }
+/* die „Checkbox": leerer Rahmen → füllt sich in Aktionsfarbe mit Häkchen (State-Indication) */
+.hph-rail__compare-box{
+  display:grid;
+  place-items:center;
+  width:16px; height:16px;
+  flex:none;
+  border:1.5px solid oklch(0.62 0.03 245);
+  border-radius:4px;
+  background:#fff;
+  transition: background-color .18s ease, border-color .18s ease, transform .16s cubic-bezier(.16,1,.3,1);
+}
+.hph-rail__compare-box svg{
+  width:11px; height:11px;
+  color:#fff;
+  opacity:0;
+  transform:scale(.7);   /* nie aus scale(0) starten: wirkt sonst „aus dem Nichts" */
+  transition: opacity .18s ease, transform .18s cubic-bezier(.16,1,.3,1);
+}
+.hph-rail__compare:active .hph-rail__compare-box{ transform:scale(.9); transition-duration:.1s; }   /* Press-Feedback */
 .hph-rail__compare:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:2px; }
-.hph-rail__compare.is-on{ background: var(--hph-brand); color: var(--hph-on-brand); box-shadow:0 2px 8px oklch(0.30 0.045 245 / .28); }
-.hph-rail__compare.is-on .hph-rail__compare-ico--add{ opacity:0; transform:scale(.6); }
-.hph-rail__compare.is-on .hph-rail__compare-ico--on{ opacity:1; transform:none; }
+.hph-rail__compare.is-on{ color: var(--hph-ink); font-weight:600; }
+.hph-rail__compare.is-on .hph-rail__compare-box{ background: var(--hph-action); border-color: var(--hph-action); }   /* Auswahl gehört zum Conversion-Pfad → Aktionsfarbe */
+.hph-rail__compare.is-on .hph-rail__compare-box svg{ opacity:1; transform:none; }
 /* Maximum erreicht (4 Produkte): noch nicht gewählte Kacheln gesperrt/gedimmt – gewählte bleiben abwählbar */
-.hph-rail__compare.is-disabled{ pointer-events:none; opacity:.3; }
-.hph-rail__item:hover .hph-rail__compare.is-disabled{ opacity:.3; }
-@media (hover:none){ .hph-rail__compare.is-disabled{ opacity:.3; } }
-@media (hover:hover) and (pointer:fine){ .hph-rail__compare:hover{ color: var(--hph-brand); } }
-/* Desktop: Kachel ist eine breite Spalte → Toggle an die rechte Bildkante rücken (statt an den Spaltenrand) */
-@media (min-width:861px){
-  .hph-rail__compare{ right:auto; left:calc(50% + (var(--hph-media-w) / 2) - 28px); top:2px; }
+.hph-rail__compare.is-disabled{ pointer-events:none; opacity:.35; }
+@media (hover:hover) and (pointer:fine){
+  .hph-rail__compare:hover{ color: var(--hph-brand-dark); }
+  .hph-rail__compare:hover .hph-rail__compare-box{ border-color: var(--hph-brand); }
 }
 
-/* ③ Vergleichs-Bar: DAUERHAFT sichtbar zwischen Rail und Trust-Zeile.
-   Leer = Einladung („Preise vergleichen? …" erklärt das +, bevor man es benutzt);
-   ab der ersten Auswahl morpht sie zu Zähler + „Vergleichen" + „Leeren".
-   Collapse-Idiom bleibt als Mechanik erhalten (JS setzt is-active von Anfang an). */
+/* ③ Vergleichs-Bar: erscheint erst mit der ersten Auswahl (kein dauerhafter
+   Leer-Zustand above the fold – die „Vergleichen"-Checkbox an den Kacheln trägt die Einladung).
+   Inhalt: Zähler + Mengen-Auswahl + „Vergleichen" (Direktlink) + „Leeren". */
 .hph-rail__compare-bar{
   width:100%; display:grid; grid-template-rows:0fr; opacity:0;
   transition: grid-template-rows .35s cubic-bezier(.16,1,.3,1), opacity .35s cubic-bezier(.16,1,.3,1);
@@ -547,21 +599,37 @@
   min-height:0; overflow:hidden;
   padding: var(--hph-space-2xs) 0 var(--hph-space-xs);
 }
-/* obere Zeile: Zähler + „Vergleichen" + „Leeren" · min-height = Button-Höhe → kein Höhensprung beim Morph */
 .hph-rail__compare-row{
   display:flex; align-items:center; flex-wrap:wrap; gap: clamp(10px,1.6vw,18px);
   min-height:32px;
 }
-/* Empty-State: nur die Einladungszeile, Aktionen ausgeblendet */
-.hph-rail__compare-bar.is-empty .hph-rail__compare-go,
-.hph-rail__compare-bar.is-empty .hph-rail__compare-clear{ display:none; }
-.hph-rail__compare-bar.is-empty .hph-rail__compare-count{ font-weight:500; color: var(--hph-ink-soft); }
-.hph-rail__compare-count strong{ font-weight:700; color: var(--hph-ink); }
 .hph-rail__compare-count{ font-size:.92rem; font-weight:600; color: var(--hph-ink); }
+/* Mengen-Eingrenzung inline (ersetzt den früheren Mengen-Dialog): ruhige Pill-Gruppe.
+   Default „Alle Mengen" lässt die Sets unverändert; Karton/Palette wird jedem Set
+   als versandart:… mitgegeben (bestätigte Produktfinder-Token). */
+.hph-rail__compare-seg{ display:inline-flex; gap:6px; }
+.hph-rail__compare-seg-btn{
+  padding:.42em .9em;
+  border:1px solid var(--hph-hairline);
+  border-radius:980px;
+  background:#fff;
+  color: var(--hph-ink-soft);
+  font:inherit; font-size:.85rem; font-weight:500; line-height:1.1;
+  cursor:pointer;
+  white-space:nowrap;
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+.hph-rail__compare-seg-btn.is-on{
+  background: oklch(0.95 0.014 245);
+  border-color: transparent;
+  color: var(--hph-brand-dark);
+  font-weight:600;
+}
+.hph-rail__compare-seg-btn:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:2px; }
 .hph-rail__compare-go{
   display:inline-flex; align-items:center; gap:.35em;
   padding:.5em 1.1em; border:0; border-radius:980px;
-  background: var(--hph-brand); color: var(--hph-on-brand);
+  background: var(--hph-action); color: var(--hph-on-brand);
   font-family:inherit; font-size:.92rem; font-weight:600; text-decoration:none; white-space:nowrap;
   cursor:pointer;
   transition: background-color .2s ease, transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease;
@@ -576,111 +644,9 @@
 }
 .hph-rail__compare-clear:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:2px; border-radius:4px; }
 @media (hover:hover) and (pointer:fine){
-  .hph-rail__compare-go:hover{ background: var(--hph-brand-dark); transform:translateY(-1px); box-shadow:0 6px 16px oklch(0.30 0.045 245 / .18); }
+  .hph-rail__compare-go:hover{ background: var(--hph-action-dark); transform:translateY(-1px); box-shadow:0 6px 16px oklch(0.30 0.045 245 / .18); }
   .hph-rail__compare-clear:hover{ color: var(--hph-brand-dark); }
-  .hph-modal__opt:hover{ border-color: var(--hph-brand-light); box-shadow:0 8px 22px -12px oklch(0.30 0.045 245 / .25); transform:translateY(-1px); background: oklch(0.995 0.003 245); }
-  .hph-modal__close:hover{ background: oklch(0.92 0.02 245); color: var(--hph-brand-dark); }
-}
-
-/* ---------- Mengen-Dialog (Modal) · öffnet beim Klick auf „Vergleichen" ----------
-   Animationsregeln (Emil-Duktus): Modal bleibt ZENTRIERT (transform-origin center ist
-   bei Modals korrekt – die Trigger-Origin-Regel gilt nur für Popover), Eintritt aus
-   scale(.96)+opacity statt aus dem Nichts, Haus-ease-out, EXIT SCHNELLER ALS ENTER
-   (.16s zu / .24s auf), Transitions statt Keyframes (unterbrechbar). Backdrop dunkelt
-   + blurrt leicht; visibility-Delay hält den Dialog bis zum Ende des Exits sichtbar.
-   Wird per JS in .hph-hero eingehängt → erbt die Farb-Tokens des Blocks. */
-.hph-modal{
-  position:fixed; inset:0; z-index:9990;
-  display:grid; place-items:center;
-  padding: clamp(16px,4vw,32px);
-  visibility:hidden;
-  transition: visibility 0s linear .18s;   /* erst NACH dem Exit unsichtbar */
-}
-.hph-modal.is-open{ visibility:visible; transition-delay:0s; }
-.hph-modal__backdrop{
-  position:absolute; inset:0;
-  background: oklch(0.20 0.03 245 / .40);
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
-  opacity:0;
-  transition: opacity .16s ease;
-}
-.hph-modal.is-open .hph-modal__backdrop{ opacity:1; transition-duration:.24s; }
-.hph-modal__dialog{
-  position:relative;
-  width:min(560px, 100%);
-  max-height:min(86vh, 660px);
-  overflow:auto;
-  overscroll-behavior:contain;
-  background:#fff;
-  border:1px solid var(--hph-hairline);
-  border-radius: clamp(20px,2vw,26px);
-  padding: clamp(20px,3vw,30px);
-  box-shadow:
-    0 1px 2px oklch(0.30 0.045 245 / .10),
-    0 24px 60px -16px oklch(0.30 0.045 245 / .35);
-  opacity:0;
-  transform: scale(.96);
-  transition: opacity .16s cubic-bezier(.16,1,.3,1), transform .16s cubic-bezier(.16,1,.3,1);
-}
-.hph-modal.is-open .hph-modal__dialog{ opacity:1; transform:none; transition-duration:.24s; }
-.hph-modal__head{
-  display:flex; align-items:flex-start; justify-content:space-between;
-  gap:12px;
-  margin-bottom: clamp(14px,2vw,20px);
-}
-.hph-modal__title{
-  margin:0;
-  font-family: var(--hph-font-text);   /* explizit: Shop-Themes stylen h3 direkt */
-  font-size: clamp(1.15rem,1.05rem+.5vw,1.4rem);
-  font-weight:700; letter-spacing:-0.015em;
-  color: var(--hph-ink);
-}
-.hph-modal__sub{ margin:4px 0 0; font-size:.9rem; line-height:1.4; color: var(--hph-ink-soft); }
-.hph-modal__close{
-  flex:none; width:36px; height:36px;
-  display:grid; place-items:center;
-  padding:0; border:0; border-radius:50%;
-  background: oklch(0.95 0.01 245); color: var(--hph-ink-soft);
-  cursor:pointer;
-  transition: background-color .2s ease, color .2s ease, transform .2s cubic-bezier(.16,1,.3,1);
-}
-.hph-modal__close svg{ width:18px; height:18px; }
-.hph-modal__close:active{ transform:scale(.92); transition-duration:.1s; }
-.hph-modal__close:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:2px; }
-.hph-modal__opts{ display:flex; flex-direction:column; gap: clamp(10px,1.4vw,12px); }
-.hph-modal__opt{
-  display:flex; flex-direction:column; gap:3px;
-  padding: clamp(13px,1.8vw,17px) clamp(14px,2vw,18px);
-  border:1px solid var(--hph-hairline); border-radius:16px;
-  background:#fff; color: var(--hph-ink); text-decoration:none;
-  transition: border-color .2s ease, box-shadow .25s cubic-bezier(.16,1,.3,1),
-              transform .2s cubic-bezier(.16,1,.3,1), background-color .2s ease;
-}
-.hph-modal__opt:active{ transform:scale(.99); transition-duration:.1s; }
-.hph-modal__opt:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:2px; }
-.hph-modal__opt-top{ display:flex; align-items:center; flex-wrap:wrap; gap:.6em; }
-.hph-modal__opt-name{ font-size: clamp(1rem,.96rem+.2vw,1.1rem); font-weight:700; letter-spacing:-0.01em; }
-.hph-modal__opt-badge{
-  padding:.18em .6em; border-radius:980px;
-  font-size:.72rem; font-weight:700; letter-spacing:.02em;
-  background: oklch(0.95 0.014 245); color: var(--hph-brand-dark);
-}
-.hph-modal__opt-desc{ font-size:.88rem; line-height:1.45; font-weight:400; color: var(--hph-ink-soft); }
-
-/* ④ Mobile Dots + Fokus: nur dort, wo die Rail wirklich scrollt (≤860px) */
-.hph-rail__dots{ display:none; }
-@media (max-width:860px){
-  .hph-rail__dots{ display:flex; justify-content:center; align-items:center; gap:8px; margin-top:12px; }
-  .hph-rail__dot{
-    width:7px; height:7px; padding:0; border:0; border-radius:50%;
-    background: oklch(0.80 0.02 245); cursor:pointer;
-    transition: background-color .25s ease, transform .25s cubic-bezier(.16,1,.3,1);
-  }
-  .hph-rail__dot.is-on{ background: var(--hph-brand); transform:scale(1.4); }
-  /* Fokus-Dimmen erst, wenn JS die zentrierte Kachel markiert (.hph-rail--focusable) → fail-open */
-  .hph-rail--focusable .hph-rail__item{ transition: opacity .3s ease; }
-  .hph-rail--focusable .hph-rail__item:not(.is-focused){ opacity:.5; }
+  .hph-rail__compare-seg-btn:hover{ color: var(--hph-brand-dark); border-color: var(--hph-brand-light); }
 }
 
 /* ============================================================================
@@ -775,9 +741,9 @@
 }
 
 /* ---------- Zertifikats-Chip: macht die Auszeichnung als Siegel sichtbar ----------
-   „Stempelt" sich beim Scroll-Reveal der Karte auf: startet minimal größer + leicht
-   rotiert und landet mit leichtem Überschwingen (einmalig, danach statisch).
-   Verborgener Startzustand NUR unter .hph-hero--js → ohne JS statisch sichtbar. */
+   Statisch (erscheint mit dem Karten-Reveal, kein eigener Stempel-Effekt: Ruhe ist
+   bei Trust-Claims das Premium-Signal). Zertifikats-Grün NUR hier: semantische
+   Codierung „zertifiziert nachhaltig" – nie an Buttons oder Flächen. */
 .hph-feature__badge{
   display:inline-flex;
   align-items:center;
@@ -785,23 +751,13 @@
   margin:0 0 clamp(10px,1.4vw,14px);
   padding:.32em .8em;
   border-radius:980px;
-  background: oklch(0.95 0.014 245);
-  color: var(--hph-brand-dark);
+  background: var(--hph-cert-wash);
+  color: var(--hph-cert);
   font-size: clamp(.78rem,.75rem+.1vw,.85rem);
   font-weight:700;
   letter-spacing:.01em;
 }
 .hph-feature__badge svg{ width:1.15em; height:1.15em; flex:none; }
-.hph-hero--js .hph-feature__badge{
-  opacity:0;
-  transform: scale(1.22) rotate(-3deg);
-  /* back-out-Kurve: kurzes Überschwingen = Stempel-Charakter (bewusst nicht die Haus-Kurve) */
-  transition: opacity .45s cubic-bezier(.34,1.45,.64,1),
-              transform .45s cubic-bezier(.34,1.45,.64,1);
-  /* landet kurz nachdem die Karte selbst eingeschwebt ist (gleiche --i-Staffel + Versatz) */
-  transition-delay: calc(var(--i, 0) * var(--hph-reveal-step) + 320ms);
-}
-.hph-hero--js .hph-feature__item.is-in .hph-feature__badge{ opacity:1; transform:none; }
 .hph-feature__title{
   margin:0;
   font-family: var(--hph-font-text);   /* explizit Open Sans: erbt sonst nur – und Shop-Themes stylen h1–h6 direkt, was die Vererbung schlägt (Kachel bekäme die Theme-Schrift) */
@@ -848,7 +804,7 @@
 .hph-feature__more:hover svg{ transform: translateX(3px); }
 .hph-feature__more:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
 
-/* „Jetzt kaufen" – gefüllte Marken-Pill (gleiche Sprache wie .hph-hero__cta--primary) */
+/* „Jetzt kaufen" – gefüllte Aktions-Pill (gleiche Sprache wie .hph-hero__cta--primary) */
 .hph-feature__buy{
   position:relative;        /* Anker für den einschwebenden Hover-Pfeil */
   display:inline-flex;
@@ -856,7 +812,7 @@
   justify-content:center;
   padding:.6em 1.25em;
   border-radius:980px;
-  background: var(--hph-brand);
+  background: var(--hph-action);
   color: var(--hph-on-brand);
   font-weight:600;
   font-size: clamp(.95rem,.92rem + .15vw,1.05rem);
@@ -875,7 +831,7 @@
   transition: opacity .2s ease, transform .25s cubic-bezier(.16,1,.3,1);
 }
 @media (hover:hover) and (pointer:fine){
-  .hph-feature__buy:hover{ background: var(--hph-brand-dark); transform:translateY(-1px); box-shadow:0 6px 16px oklch(0.30 0.045 245 / .18); }
+  .hph-feature__buy:hover{ background: var(--hph-action-dark); transform:translateY(-1px); box-shadow:0 6px 16px oklch(0.30 0.045 245 / .18); }
   .hph-feature__buy:hover .hph-feature__buy-label{ transform: translateX(-.4em); }
   .hph-feature__buy:hover .hph-feature__buy-arrow{ opacity:1; transform: translate(0,-50%); }
 }
@@ -901,24 +857,9 @@
   transition: transform .3s cubic-bezier(.16,1,.3,1);   /* Hover-Tiefe · gesteuert über .hph-feature__card:hover */
 }
 
-/* ---------- Foto-Parallaxe: Produktfoto driftet beim Scrollen minimal langsamer als die Karte ----------
-   Gleiche Technik + Gates wie die Hero-Video-Parallaxe (scroll-driven, ohne JS;
-   Safari/Firefox bleiben still statisch). Animiert wird der Medien-CONTAINER,
-   damit der Hover-Lift auf dem <img> unangetastet bleibt (Animation schlüge
-   sonst die :hover-Transform). Die Karte clippt per overflow:hidden. */
-@media (prefers-reduced-motion: no-preference){
-  @supports (animation-timeline: view()){
-    .hph-feature__media{
-      animation: hph-feature-parallax linear both;
-      animation-timeline: view();
-      animation-range: cover 0% cover 100%;
-    }
-    @keyframes hph-feature-parallax{
-      from{ transform: translateY(8px); }
-      to{   transform: translateY(-8px); }
-    }
-  }
-}
+/* (Die frühere Feature-Foto-Parallaxe wurde bewusst entfernt: EINE Parallaxe –
+   das Hero-Video – bleibt als einziger „Hero-Moment"; die Zertifikats-Karten
+   bleiben als Trust-Elemente ruhig.) */
 
 /* ============================================================================
    SHOWCASE-AKKORDEON  (Apple-„iPad und iPhone"-Stil) · GERÜST
@@ -994,32 +935,13 @@
   line-height:1.6;
   font-size: clamp(1rem, .96rem + .25vw, 1.12rem);
 }
-/* Kontextueller Weiterführungs-Link je Eintrag (dezent, kein Button) */
-.hph-showcase__link{
-  display:inline-flex;
-  align-items:center;
-  gap:.3em;
-  margin-top: var(--hph-space-xs);
-  font-weight:600;
-  font-size: clamp(.98rem,.95rem + .2vw,1.08rem);
-  color: var(--hph-brand);
-  text-decoration:none;
-  transition: color .2s ease;
-}
-.hph-showcase__link svg{ width:1.05em; height:1.05em; flex:none; transition: transform .2s ease; }
-.hph-showcase__link:hover{ color: var(--hph-brand-dark); }
-.hph-showcase__link:hover svg{ transform: translateX(3px); }            /* interner Pfeil rückt nach rechts */
-.hph-showcase__link--ext:hover svg{ transform: translate(2px,-2px); }   /* externer Link: nach oben-rechts */
-.hph-showcase__link:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
 .hph-hero--js .hph-showcase__panel{ grid-template-rows: 0fr; transition: grid-template-rows .45s cubic-bezier(.16,1,.3,1); }
 .hph-hero--js .hph-showcase__panel-inner{ opacity:0; transition: opacity .35s cubic-bezier(.16,1,.3,1); }
 .hph-hero--js .hph-showcase__entry.is-active .hph-showcase__panel{ grid-template-rows: 1fr; }
 .hph-hero--js .hph-showcase__entry.is-active .hph-showcase__panel-inner{ opacity:1; }
-/* Inhalt zieht beim Öffnen leicht gestaffelt nach (Text vor Link) → der Wechsel wirkt als EINE Bewegung */
+/* Inhalt zieht beim Öffnen leicht nach → der Wechsel wirkt als EINE Bewegung */
 .hph-hero--js .hph-showcase__body{ transform: translateY(8px); transition: transform .45s cubic-bezier(.16,1,.3,1); transition-delay:.05s; }
-.hph-hero--js .hph-showcase__link{ transform: translateY(8px); transition: transform .45s cubic-bezier(.16,1,.3,1); transition-delay:.1s; }
-.hph-hero--js .hph-showcase__entry.is-active .hph-showcase__body,
-.hph-hero--js .hph-showcase__entry.is-active .hph-showcase__link{ transform:none; }
+.hph-hero--js .hph-showcase__entry.is-active .hph-showcase__body{ transform:none; }
 
 /* ---------- RECHTS: Bild-Stack (transparente PNGs, schweben auf der weißen Karte) ---------- */
 .hph-showcase__media{
@@ -1104,6 +1026,56 @@
   }
 }
 
+/* ---------- Falzungs-Schnellvergleich: scanbare Tabelle vor dem Akkordeon ----------
+   Beantwortet „welche Falzung?" auf einen Blick (Spendertyp/Entnahme/Format/Einsatz);
+   die Akkordeon-Volltexte darunter bleiben die Fachtiefe (Progressive Disclosure).
+   Mobil horizontal scrollbar; role="region" + tabindex=0 → auch per Tastatur scrollbar. */
+.hph-falztable{
+  margin: 0 0 var(--hph-space-md);
+  border:1px solid var(--hph-hairline);
+  border-radius: clamp(16px,1.8vw,22px);
+  background:#fff;
+  box-shadow:
+    inset 0 1px 0 oklch(0.99 0.004 245 / .9),
+    0 1px 2px oklch(0.30 0.045 245 / .06),
+    0 10px 26px -10px oklch(0.30 0.045 245 / .09);   /* gleiche Schatten-Sprache wie die Karten */
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.hph-falztable:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; }
+.hph-falztable__table{
+  width:100%;
+  min-width:640px;                 /* unter ~640px scrollt die Tabelle, statt zu quetschen */
+  border-collapse:collapse;
+  font-size: clamp(.88rem,.84rem+.16vw,.98rem);
+  line-height:1.45;
+}
+.hph-falztable__table caption{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;   /* nur Screenreader: die sichtbare Überschrift trägt die Sektions-H2 */
+}
+.hph-falztable__table th,
+.hph-falztable__table td{
+  padding: clamp(10px,1.4vw,14px) clamp(14px,1.8vw,20px);
+  text-align:left;
+  vertical-align:top;
+}
+.hph-falztable__table thead th{
+  font-size: clamp(.92rem,.88rem+.16vw,1.02rem);
+  font-weight:700;
+  letter-spacing:-0.01em;
+  color: var(--hph-ink);
+  border-bottom:1px solid var(--hph-hairline);
+}
+.hph-falztable__table tbody th{
+  font-weight:600;
+  color: var(--hph-ink);
+  white-space:nowrap;
+}
+.hph-falztable__table tbody td{ color: var(--hph-ink-soft); font-weight:450; }
+.hph-falztable__table tbody tr + tr th,
+.hph-falztable__table tbody tr + tr td{ border-top:1px solid var(--hph-hairline); }
+
 /* ============================================================================
    SCROLL-REVEAL · die Animationssprache der Seite
    ----------------------------------------------------------------------------
@@ -1131,14 +1103,15 @@
 }
 /* verborgener Startzustand */
 .hph-hero--js .hph-hero__title,
+.hph-hero--js .hph-hero__subtitle,
 .hph-hero--js .hph-hero__media,
 .hph-hero--js .hph-hero__actions,
 .hph-hero--js .hph-hero__trust-item,
 .hph-hero--js .hph-rail__item,
-.hph-hero--js .hph-rail__lead,
 .hph-hero--js .hph-feature__head,
 .hph-hero--js .hph-feature__item,
 .hph-hero--js .hph-showcase__head,
+.hph-hero--js .hph-falztable,
 .hph-hero--js .hph-showcase{
   opacity:0;
   transform: translate3d(0, var(--hph-reveal-y), 0);
@@ -1148,14 +1121,15 @@
 }
 /* eingeblendeter Zielzustand – JS setzt .is-in beim Szenen-Eintritt */
 .hph-hero--js .hph-hero__title.is-in,
+.hph-hero--js .hph-hero__subtitle.is-in,
 .hph-hero--js .hph-hero__media.is-in,
 .hph-hero--js .hph-hero__actions.is-in,
 .hph-hero--js .hph-hero__trust-item.is-in,
 .hph-hero--js .hph-rail__item.is-in,
-.hph-hero--js .hph-rail__lead.is-in,
 .hph-hero--js .hph-feature__head.is-in,
 .hph-hero--js .hph-feature__item.is-in,
 .hph-hero--js .hph-showcase__head.is-in,
+.hph-hero--js .hph-falztable.is-in,
 .hph-hero--js .hph-showcase.is-in{
   opacity:1;
   transform:none;
@@ -1230,14 +1204,15 @@
 /* ---------- Bewegung reduzieren ---------- */
 @media (prefers-reduced-motion: reduce){
   .hph-hero__title,
+  .hph-hero__subtitle,
   .hph-hero__media,
   .hph-hero__actions,
   .hph-hero__trust-item,
   .hph-rail__item,
-  .hph-rail__lead,
   .hph-feature__head,
   .hph-feature__item,
   .hph-showcase__head,
+  .hph-falztable,
   .hph-showcase{ opacity:1 !important; transform:none !important; transition:none !important; }
   .hph-hero__cta{ transition:none !important; }
   /* Hintergrundvideo nicht abspielen -> Standbild zeigen */
@@ -1246,11 +1221,9 @@
     display:block; position:absolute; inset:0;
     width:100%; height:100%; object-fit:cover;
   }
-  .hph-rail__tile, .hph-rail__media img, .hph-rail__media::after, .hph-rail__nav{ transition:none !important; }  .hph-rail__compare, .hph-rail__compare-ico, .hph-rail__compare-bar, .hph-rail__compare-go, .hph-rail__dot{ transition:none !important; }
-  .hph-modal, .hph-modal__backdrop, .hph-modal__dialog, .hph-modal__opt, .hph-modal__close{ transition:none !important; }   /* Mengen-Dialog: ohne Bewegung öffnen/schließen */
-  .hph-modal__dialog{ transform:none !important; }
+  .hph-hero__media-toggle{ display:none !important; }   /* Standbild statt Video → Pause-Toggle überflüssig */
+  .hph-rail__tile, .hph-rail__media img, .hph-rail__media::after, .hph-rail__nav{ transition:none !important; }  .hph-rail__compare, .hph-rail__compare-box, .hph-rail__compare-box svg, .hph-rail__compare-bar, .hph-rail__compare-go, .hph-rail__compare-seg-btn{ transition:none !important; }
   .hph-feature__card, .hph-feature__more, .hph-feature__buy, .hph-feature__img{ transition:none !important; }
-  .hph-feature__badge{ opacity:1 !important; transform:none !important; transition:none !important; }   /* Zertifikats-Chip sofort sichtbar, kein Stempel */
   .hph-feature__buy-label{ transform:none !important; transition:none !important; }                      /* Kauf-Button: Label ruhig … */
   .hph-feature__buy-arrow{ opacity:0 !important; transition:none !important; }                           /* … und kein einschwebender Pfeil */
   .hph-rail__ext, .hph-feature__more svg, .hph-feature__seeall svg{ transition:none !important; transform:none !important; }
@@ -1259,8 +1232,7 @@
      (Opacity bleibt der .is-active-Logik überlassen → weiter genau EIN Bild sichtbar). */
   .hph-showcase, .hph-showcase__panel-inner, .hph-showcase__chevron, .hph-showcase__trigger{ opacity:1 !important; transform:none !important; transition:none !important; }
   .hph-showcase__panel, .hph-showcase__img{ transition:none !important; }
-  .hph-showcase__body, .hph-showcase__link{ transform:none !important; transition:none !important; }   /* gestaffelter Panel-Inhalt: sofort statt Bewegung */
-  .hph-showcase__link svg{ transition:none !important; transform:none !important; }
+  .hph-showcase__body{ transform:none !important; transition:none !important; }   /* Panel-Inhalt: sofort statt Bewegung */
 }
 
 /* ============================================================================
@@ -1296,7 +1268,9 @@
               transform .55s cubic-bezier(.16,1,.3,1);
 }
 .hph-cert-heading.is-in{ opacity:1; transform:none; }
-/* Optionaler Zertifikats-Chip vor der Überschrift (visuell verankert das Siegel-Versprechen) */
+/* Optionaler Zertifikats-Chip vor der Überschrift (visuell verankert das Siegel-Versprechen).
+   Zertifikats-Grün als Literal (sitzt außerhalb des .hph-hero-Token-Scopes) –
+   identisch zu --hph-cert / --hph-cert-wash der Karten-Chips. */
 .hph-cert-heading__badge{
   display:inline-flex;
   align-items:center;
@@ -1304,8 +1278,8 @@
   margin-right: .7em;
   padding:.32em .8em;
   border-radius:980px;
-  background: oklch(0.95 0.014 245);
-  color: #104d6e;
+  background: oklch(0.95 0.022 150);
+  color: oklch(0.44 0.075 150);
   font-family: 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   font-size: clamp(.78rem,.75rem+.1vw,.85rem);
   font-weight:700;
@@ -1324,14 +1298,15 @@
 <noscript>
   <style>
     .hph-hero__title,
+    .hph-hero__subtitle,
     .hph-hero__media,
     .hph-hero__actions,
     .hph-hero__trust-item,
     .hph-rail__item,
-    .hph-rail__lead,
     .hph-feature__head,
     .hph-feature__item,
     .hph-showcase__head,
+    .hph-falztable,
     .hph-showcase{ opacity:1 !important; transform:none !important; }
     .hph-showcase__panel{ grid-template-rows:1fr !important; }
     .hph-showcase__panel-inner, .hph-showcase__img{ opacity:1 !important; }
@@ -1349,9 +1324,15 @@
     <header class="hph-hero__head">
       <h1 class="hph-hero__title" id="hph-hero-title">Papierhandtücher</h1>
 
-      <!-- Kopf-Aktionen: primär in den Produktfinder, sekundär zum Preisvergleich (Produktfinder). href je nach Ziel anpassen. -->
+      <!-- Subline: knappe Value Proposition (Spender-Fit · Staffelpreis · Siegel).
+           Bewusst KEINE Aufzählung aller Falzarten/Lagen: das zeigen Rail und Tabelle darunter. -->
+      <p class="hph-hero__subtitle">Die passende Falzung für Ihren Spender, mit Staffelpreisen ab Karton. Auf Wunsch zertifiziert mit EU Ecolabel oder Blauem Engel.</p>
+
+      <!-- Kopf-Aktionen: primär ins Sortiment (Conversion-Ziel; auf der Kategorieseite fängt der
+           Scroll-Handler unten den Klick ab und scrollt sanft zum Listing – via data-hph-scroll-listing –,
+           sonst normale Navigation), sekundär zum Staffelpreis-Vergleich. href je nach Ziel anpassen. -->
       <div class="hph-hero__actions">
-        <a class="hph-hero__cta hph-hero__cta--primary" href="https://produktfinder.hamburgpapier-shop.de/">Produktfinder starten</a>
+        <a class="hph-hero__cta hph-hero__cta--primary" data-hph-scroll-listing href="https://www.hamburgpapier-shop.de/papierhandtuecher">Zum Sortiment</a>
         <a class="hph-hero__cta hph-hero__cta--ghost" href="https://produktfinder.hamburgpapier-shop.de/vergleich/papierhandtuecher">Staffelpreise vergleichen<svg class="hph-rail__ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
       </div>
     </header>
@@ -1371,6 +1352,12 @@
         <img class="hph-hero__media-still"
              src="https://www.hamburgpapier-shop.de/media/30/5b/45/1780743155/papierhandtuecher-hero-poster.jpg?ts=1780743155"
              alt="" aria-hidden="true" width="600" height="600" loading="lazy" decoding="async">
+        <!-- WCAG 2.2.2: der automatisch loopende Inhalt muss pausierbar sein.
+             Ohne JS per CSS versteckt (Button wäre inert); JS verdrahtet Play/Pause + aria-label. -->
+        <button type="button" class="hph-hero__media-toggle" aria-label="Video pausieren">
+          <svg class="hph-hero__media-toggle-ico hph-hero__media-toggle-ico--pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          <svg class="hph-hero__media-toggle-ico hph-hero__media-toggle-ico--play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.7v12.6a1 1 0 0 0 1.53.85l10.04-6.3a1 1 0 0 0 0-1.7L9.53 4.85A1 1 0 0 0 8 5.7Z"/></svg>
+        </button>
       </figure>
     </div><!-- /.hph-hero__intro -->
 
@@ -1388,35 +1375,43 @@
 
       <ul class="hph-rail__track">
 
+        <!-- Preisanker „ab … € netto/Karton" je Kachel: günstigster Karton-Einzelpreis der
+             jeweiligen Unterkategorie, manuell aus den Listing-Seiten erhoben · Stand 11.06.2026.
+             PFLEGE: Bei jeder Preisänderung mitziehen – ein veralteter „ab"-Preis ist
+             irreführende Werbung (UWG-Risiko). Empfehlung: langfristig dynamisch aus
+             Shopware befüllen (günstigster Karton-Preis je Unterkategorie). -->
+
         <li class="hph-rail__item">
           <a class="hph-rail__tile" href="https://www.hamburgpapier-shop.de/papierhandtuecher-1-lagig">
             <span class="hph-rail__media">
-              <img src="https://www.hamburgpapier-shop.de/media/e2/06/39/1780051194/papierhandtuecher-gruen-022-oekologisch-hochformat.avif?ts=1780051194"
+              <img src="https://www.hamburgpapier-shop.de/media/e2/06/39/1780051194/papierhandtuecher-gruen-022-oekologisch-hochformat.png?ts=1781202324"
                    alt="1-lagig Papierhandtücher mit Z-Falz" width="300" height="380" loading="eager" fetchpriority="high" decoding="async">
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">1-lagig · Z-Falz</span>
-              <span class="hph-rail__hint">ergiebig &amp; sparsam</span>            </span>
+              <span class="hph-rail__hint">ergiebig &amp; sparsam</span>
+              <span class="hph-rail__price">ab 14,07 € netto/Karton</span>
+            </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="lagen:1,falzung:z-falz" aria-label="„1-lagig · Z-Falz“ zum Vergleich hinzufügen">
-            <svg class="hph-rail__compare-ico hph-rail__compare-ico--add" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-            <svg class="hph-rail__compare-ico hph-rail__compare-ico--on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="hph-rail__compare-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Vergleichen
           </button>
         </li>
 
         <li class="hph-rail__item">
           <a class="hph-rail__tile" href="https://www.hamburgpapier-shop.de/papierhandtuecher-2-lagig">
             <span class="hph-rail__media">
-              <img src="https://www.hamburgpapier-shop.de/media/ef/d7/dc/1780051194/ecoline-papierhandtuecher-e023-100-zellstoff-hochformat.avif?ts=1780051194"
+              <img src="https://www.hamburgpapier-shop.de/media/ef/d7/dc/1780051194/ecoline-papierhandtuecher-e023-100-zellstoff-hochformat.png?ts=1781202324"
                    alt="2-lagig Papierhandtücher mit Z-Falz" width="300" height="380" loading="lazy" decoding="async">
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">2-lagig · Z-Falz</span>
-              <span class="hph-rail__hint">weich &amp; saugstark</span>            </span>
+              <span class="hph-rail__hint">weich &amp; saugstark</span>
+              <span class="hph-rail__price">ab 17,21 € netto/Karton</span>
+            </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="lagen:2,falzung:z-falz" aria-label="„2-lagig · Z-Falz“ zum Vergleich hinzufügen">
-            <svg class="hph-rail__compare-ico hph-rail__compare-ico--add" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-            <svg class="hph-rail__compare-ico hph-rail__compare-ico--on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="hph-rail__compare-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Vergleichen
           </button>
         </li>
 
@@ -1428,11 +1423,12 @@
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">3-lagig · Z-Falz</span>
-              <span class="hph-rail__hint">besonders weich</span>            </span>
+              <span class="hph-rail__hint">besonders weich</span>
+              <span class="hph-rail__price">ab 22,08 € netto/Karton</span>
+            </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="lagen:3,falzung:z-falz" aria-label="„3-lagig · Z-Falz“ zum Vergleich hinzufügen">
-            <svg class="hph-rail__compare-ico hph-rail__compare-ico--add" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-            <svg class="hph-rail__compare-ico hph-rail__compare-ico--on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="hph-rail__compare-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Vergleichen
           </button>
         </li>
 
@@ -1445,11 +1441,11 @@
             <span class="hph-rail__text">
               <span class="hph-rail__label">Interfold</span>
               <span class="hph-rail__hint">Einzelentnahme</span>
+              <span class="hph-rail__price">ab 17,69 € netto/Karton</span>
             </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="falzung:interfold" aria-label="„Interfold“ zum Vergleich hinzufügen">
-            <svg class="hph-rail__compare-ico hph-rail__compare-ico--add" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-            <svg class="hph-rail__compare-ico hph-rail__compare-ico--on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="hph-rail__compare-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Vergleichen
           </button>
         </li>
 
@@ -1462,19 +1458,21 @@
             <span class="hph-rail__text">
               <span class="hph-rail__label">C-Falz</span>
               <span class="hph-rail__hint">kompakt gefaltet</span>
+              <span class="hph-rail__price">ab 22,29 € netto/Karton</span>
             </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="falzung:c-falz" aria-label="„C-Falz“ zum Vergleich hinzufügen">
-            <svg class="hph-rail__compare-ico hph-rail__compare-ico--add" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-            <svg class="hph-rail__compare-ico hph-rail__compare-ico--on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="hph-rail__compare-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Vergleichen
           </button>
         </li>
 
         <!-- Kachel "Preise vergleichen" wurde bewusst aus der Foto-Rail entfernt:
              als Funktions-/Tool-Kachel brach sie das kuratierte Produktfoto-Raster.
              Der Produktfinder-Pfad lebt jetzt zweifach intent-getrennt:
-               • Beratung („Passende Falzung finden") in der Leitzeile unter der Rail
-               • Preis/Mengen („Staffelpreise vergleichen") als sekundärer Kopf-CTA. -->
+               • Beratung („Welche Falzung passt?") in der Showcase-Sektion unten
+                 (Schnellvergleichstabelle + Akkordeon + Produktfinder-Link)
+               • Preis/Mengen („Staffelpreise vergleichen") als sekundärer Kopf-CTA
+                 plus „Vergleichen"-Checkbox direkt an den Kacheln. -->
 
       </ul>
     </nav>
@@ -1536,6 +1534,9 @@
               <div class="hph-feature__copy">
                 <span class="hph-feature__badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>EU Ecolabel</span>
                 <h3 class="hph-feature__title">Papierhandtücher<br>mit EU Ecolabel</h3>
+                <!-- TODO Hamburg Papier: Differenzierungs-Aussage fachlich bestätigen
+                     (EU-Ecolabel-Vergabekriterien für Hygienepapier: Fasern + Herstellung) -->
+                <p class="hph-feature__sub">Das Siegel für geringere Umweltbelastung bei Fasern und Herstellung.</p>
                 <div class="hph-feature__actions">
                   <!-- TODO „Weitere Infos"-Ziel ggf. anpassen (aktuell: offizielle EU-Ecolabel-Produktseite) -->
                   <a class="hph-feature__more" href="https://environmental-data.ec.europa.eu/ecolabel/products/product_59468.html" target="_blank" rel="noopener noreferrer" aria-label="Weitere Infos zum EU Ecolabel (öffnet in neuem Tab)">Weitere Infos
@@ -1558,6 +1559,9 @@
               <div class="hph-feature__copy">
                 <span class="hph-feature__badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>Blauer Engel</span>
                 <h3 class="hph-feature__title">Papierhandtücher<br>mit Blauem Engel</h3>
+                <!-- TODO Hamburg Papier: Differenzierungs-Aussage fachlich bestätigen
+                     (Blauer Engel DE-UZ 5: Hygienepapier aus 100 % Altpapier) -->
+                <p class="hph-feature__sub">Das Siegel für Hygienepapier aus 100&nbsp;% Altpapier.</p>
                 <div class="hph-feature__actions">
                   <!-- TODO „Weitere Infos"-Ziel ggf. anpassen (aktuell: offizieller Blauer-Engel-Eintrag) -->
                   <a class="hph-feature__more" href="https://www.blauer-engel.de/de/produkte/herm-kemme-gmbh-papierhandtuecher-grau-25-x-23-cm-zz-falz-1-lagig-490-017" target="_blank" rel="noopener noreferrer" aria-label="Weitere Infos zum Blauen Engel (öffnet in neuem Tab)">Weitere Infos
@@ -1591,7 +1595,7 @@
              FAQ-Markup ausgibt, dieses Skript NICHT zusätzlich einbinden, sondern zusammenführen.
              ==================================================================== -->
         <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Z-Falz (ZZ-Falz): Standard für Zick-Zack-Spender?","acceptedAnswer":{"@type":"Answer","text":"Der Z-Falz (auch ZZ-Falz oder Zickzack-Falz) ist die am weitesten verbreitete Falzung und passt in nahezu jeden Zick-Zack-Spender. Die Blätter liegen ineinandergelegt im Schacht und werden einzeln nach unten entnommen: Pro Zug kommt ein Blatt, das nächste rückt griffbereit nach. Diese berührungsarme Einzelblattentnahme unterstützt HACCP-Bereiche und steuert den Verbrauch, was Cost-in-Use und Abfall senkt. Die richtige Wahl für Sanitärräume mit hohem Durchlauf in Facility Management, Gastronomie, Büro und Industrie."}},{"@type":"Question","name":"Interfold (W-Falz): Einzelblattentnahme bei hohem Durchlauf?","acceptedAnswer":{"@type":"Answer","text":"Beim Interfold (im Shop synonym W-Falz) ist jedes Blatt mehrfach in W-Form gefaltet und so ineinander verschachtelt, dass das entnommene Tuch das nächste automatisch nachzieht und griffbereit bereitstellt. Wie der Z-Falz greift auch der Interfold ineinander, bietet durch die zusätzlichen Falze aber ein größeres ausgefaltetes Format. Er gehört in flache Interfold-Spender (passend bzw. als Alternative zum Tork H2). Berührungsarm und HACCP-geeignet, ideal für stark frequentierte Waschräume mit kontrolliertem Verbrauch und planbaren Nachfüllintervallen."}},{"@type":"Question","name":"C-Falz: das breite Blatt für klassische Spender?","acceptedAnswer":{"@type":"Answer","text":"Beim C-Falz wird das Blatt durch zwei parallele Falze in drei Abschnitte geteilt, die zu einem C übereinandergeklappt werden. Die Tücher liegen lose gestapelt (Lagenfalz) und greifen nicht ineinander, daher kein automatischer Nachzug wie bei Z-Falz oder Interfold. Sie bieten ein großes, breites ausgefaltetes Format und gehören in klassische, offene C-Falz-Spender, nicht in den schmalen Interfold-Schacht. Geeignet für repräsentative Bereiche und Standorte mit überschaubarem Durchlauf; bei strikter HACCP-Führung ist die nachschiebende Falzung meist berührungsärmer."}}]}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Z-Falz (ZZ-Falz): Standard für Zick-Zack-Spender?","acceptedAnswer":{"@type":"Answer","text":"Der Z-Falz (auch ZZ- oder Zickzack-Falz) ist die am weitesten verbreitete Falzung und passt in nahezu jeden Zick-Zack-Spender. Die Blätter greifen ineinander: Pro Zug kommt genau ein Blatt, das nächste rückt griffbereit nach. Das hält die Entnahme berührungsarm und den Verbrauch sparsam. Die richtige Wahl für Waschräume mit hohem Durchlauf."}},{"@type":"Question","name":"Interfold (W-Falz): Einzelblattentnahme bei hohem Durchlauf?","acceptedAnswer":{"@type":"Answer","text":"Beim Interfold (im Shop synonym W-Falz) ist jedes Blatt in W-Form gefaltet und zieht das nächste beim Herausnehmen automatisch nach. Das Blatt ist größer ausgefaltet als beim Z-Falz. Interfold gehört in flache Interfold-Spender (passend bzw. als Alternative zum Tork H2) und eignet sich durch die berührungsarme Einzelentnahme auch für HACCP-Bereiche."}},{"@type":"Question","name":"C-Falz: das breite Blatt für klassische Spender?","acceptedAnswer":{"@type":"Answer","text":"Beim C-Falz wird das Blatt zu einem C übereinandergeklappt. Die Tücher liegen lose gestapelt und greifen nicht ineinander, es gibt also keinen automatischen Nachzug. Dafür ist das Blatt groß und breit ausgefaltet. C-Falz gehört in klassische, offene Spender und passt zu repräsentativen Bereichen mit überschaubarem Durchlauf."}}]}
         </script>
 
         <header class="hph-showcase__head">
@@ -1601,6 +1605,54 @@
             <svg class="hph-showcase__finder-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg>
           </a>
         </header>
+
+        <!-- ====================================================================
+             FALZUNGS-SCHNELLVERGLEICH · scanbare Tabelle vor dem Akkordeon
+             „Erst führen, dann Fachtiefe": die Tabelle beantwortet die Falz-Frage
+             auf einen Blick, das Akkordeon darunter liefert die Volltexte.
+             Inhalte 1:1 aus den Akkordeon-Texten destilliert – KEINE neuen Claims.
+             Barrierefrei: caption (nur Screenreader) + scope-Attribute; mobil
+             horizontal scrollbar (role="region" + tabindex="0" für Tastatur).
+             ==================================================================== -->
+        <div class="hph-falztable" role="region" aria-label="Falzarten im Schnellvergleich" tabindex="0">
+          <table class="hph-falztable__table">
+            <caption>Z-Falz, Interfold und C-Falz im Schnellvergleich: Spendertyp, Entnahme, Blattformat und typischer Einsatz</caption>
+            <thead>
+              <tr>
+                <td></td>
+                <th scope="col">Z-Falz (ZZ-Falz)</th>
+                <th scope="col">Interfold (W-Falz)</th>
+                <th scope="col">C-Falz</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Spendertyp</th>
+                <td>Nahezu jeder Zick-Zack-Spender</td>
+                <td>Flache Interfold-Spender (passend bzw. Alternative zum Tork H2)</td>
+                <td>Klassische, offene C-Falz-Spender</td>
+              </tr>
+              <tr>
+                <th scope="row">Entnahme</th>
+                <td>Einzeln nach unten, das nächste Blatt rückt nach</td>
+                <td>Einzelblatt, das nächste wird automatisch nachgezogen</td>
+                <td>Lose gestapelt, kein automatischer Nachzug</td>
+              </tr>
+              <tr>
+                <th scope="row">Blattformat</th>
+                <td>Kompaktes Standardformat</td>
+                <td>Größer ausgefaltet als der Z-Falz</td>
+                <td>Großes, breites Blatt</td>
+              </tr>
+              <tr>
+                <th scope="row">Typischer Einsatz</th>
+                <td>Sanitärräume mit hohem Durchlauf</td>
+                <td>Stark frequentierte Waschräume mit kontrolliertem Verbrauch</td>
+                <td>Repräsentative Bereiche mit überschaubarem Durchlauf</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <!-- ====================================================================
              SHOWCASE-AKKORDEON  (Apple-„iPad und iPhone"-Stil) · GERÜST
@@ -1630,9 +1682,10 @@
                 </h3>
                 <div class="hph-showcase__panel" id="hph-showcase-panel-1" aria-labelledby="hph-showcase-trigger-1">
                   <div class="hph-showcase__panel-inner">
-                    <p class="hph-showcase__body">Der Z-Falz (auch ZZ-Falz oder Zickzack-Falz) ist die am weitesten verbreitete Falzung und passt in nahezu jeden Zick-Zack-Spender. Die Blätter liegen ineinandergelegt im Schacht und werden einzeln nach unten entnommen: Pro Zug kommt ein Blatt, das nächste rückt griffbereit nach. Diese berührungsarme Einzelblattentnahme unterstützt HACCP-Bereiche und steuert den Verbrauch, was Cost-in-Use und Abfall senkt. Die richtige Wahl für Sanitärräume mit hohem Durchlauf in Facility Management, Gastronomie, Büro und Industrie.</p>
+                    <p class="hph-showcase__body">Der Z-Falz (auch ZZ- oder Zickzack-Falz) ist die am weitesten verbreitete Falzung und passt in nahezu jeden Zick-Zack-Spender. Die Blätter greifen ineinander: Pro Zug kommt genau ein Blatt, das nächste rückt griffbereit nach. Das hält die Entnahme berührungsarm und den Verbrauch sparsam. Die richtige Wahl für Waschräume mit hohem Durchlauf.</p>
                     <img class="hph-showcase__panel-img" src="https://www.hamburgpapier-shop.de/media/a3/18/53/1780938727/erklaerung-z-falzung-fuer-papierhandtuecher.png?ts=1780938727" alt="Z-Falz (ZZ-Falz/Zickzack-Falz): zickzackförmig gefaltetes Papierhandtuch für Zick-Zack-Spender mit berührungsarmer Einzelblattentnahme" width="800" height="800" loading="lazy" decoding="async">
-                    <a class="hph-showcase__link hph-showcase__link--ext" href="https://produktfinder.hamburgpapier-shop.de/papierhandtuecher/ohne-spender" target="_blank" rel="noopener noreferrer" aria-label="Z-Falz Papierhandtücher im Produktfinder wählen (öffnet in neuem Tab)">Z-Falz im Produktfinder wählen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg></a>
+                    <!-- Der frühere „… im Produktfinder wählen"-Link wurde bewusst entfernt: alle drei
+                         Panel-Links zeigten auf dieselbe URL; der EINE Finder-Link im Sektionskopf bleibt. -->
                   </div>
                 </div>
               </div>
@@ -1647,9 +1700,8 @@
                 </h3>
                 <div class="hph-showcase__panel" id="hph-showcase-panel-2" aria-labelledby="hph-showcase-trigger-2">
                   <div class="hph-showcase__panel-inner">
-                    <p class="hph-showcase__body">Beim Interfold (im Shop synonym W-Falz) ist jedes Blatt mehrfach in W-Form gefaltet und so ineinander verschachtelt, dass das entnommene Tuch das nächste automatisch nachzieht und griffbereit bereitstellt. Wie der Z-Falz greift auch der Interfold ineinander, bietet durch die zusätzlichen Falze aber ein größeres ausgefaltetes Format. Er gehört in flache Interfold-Spender (passend bzw. als Alternative zum Tork H2). Berührungsarm und HACCP-geeignet, ideal für stark frequentierte Waschräume mit kontrolliertem Verbrauch und planbaren Nachfüllintervallen.</p>
+                    <p class="hph-showcase__body">Beim Interfold (im Shop synonym W-Falz) ist jedes Blatt in W-Form gefaltet und zieht das nächste beim Herausnehmen automatisch nach. Das Blatt ist größer ausgefaltet als beim Z-Falz. Interfold gehört in flache Interfold-Spender (passend bzw. als Alternative zum Tork H2) und eignet sich durch die berührungsarme Einzelentnahme auch für HACCP-Bereiche.</p>
                     <img class="hph-showcase__panel-img" src="https://www.hamburgpapier-shop.de/media/2b/44/07/1780938769/interfold-falzung-papierhandtuecher-erklaerung.png?ts=1780938769" alt="Interfold-/W-Falzung: ineinandergefaltete Papierhandtücher, die das nächste Blatt zur automatischen Einzelblattentnahme nachziehen" width="800" height="800" loading="lazy" decoding="async">
-                    <a class="hph-showcase__link hph-showcase__link--ext" href="https://produktfinder.hamburgpapier-shop.de/papierhandtuecher/ohne-spender" target="_blank" rel="noopener noreferrer" aria-label="Interfold W-Falz Papierhandtücher im Produktfinder wählen (öffnet in neuem Tab)">Interfold/W-Falz im Produktfinder wählen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg></a>
                   </div>
                 </div>
               </div>
@@ -1664,9 +1716,8 @@
                 </h3>
                 <div class="hph-showcase__panel" id="hph-showcase-panel-3" aria-labelledby="hph-showcase-trigger-3">
                   <div class="hph-showcase__panel-inner">
-                    <p class="hph-showcase__body">Beim C-Falz wird das Blatt durch zwei parallele Falze in drei Abschnitte geteilt, die zu einem C übereinandergeklappt werden. Die Tücher liegen lose gestapelt (Lagenfalz) und greifen nicht ineinander, daher kein automatischer Nachzug wie bei Z-Falz oder Interfold. Sie bieten ein großes, breites ausgefaltetes Format und gehören in klassische, offene C-Falz-Spender, nicht in den schmalen Interfold-Schacht. Geeignet für repräsentative Bereiche und Standorte mit überschaubarem Durchlauf; bei strikter HACCP-Führung ist die nachschiebende Falzung meist berührungsärmer.</p>
+                    <p class="hph-showcase__body">Beim C-Falz wird das Blatt zu einem C übereinandergeklappt. Die Tücher liegen lose gestapelt und greifen nicht ineinander, es gibt also keinen automatischen Nachzug. Dafür ist das Blatt groß und breit ausgefaltet. C-Falz gehört in klassische, offene Spender und passt zu repräsentativen Bereichen mit überschaubarem Durchlauf.</p>
                     <img class="hph-showcase__panel-img" src="https://www.hamburgpapier-shop.de/media/66/67/e5/1780938727/c-falzung-papierhandtuecher.png?ts=1780938727" alt="C-Falz: C-förmig in drei Abschnitte gefaltetes, breiteres Papierhandtuch für klassische, offene Falthandtuch-Spender" width="800" height="800" loading="lazy" decoding="async">
-                    <a class="hph-showcase__link hph-showcase__link--ext" href="https://produktfinder.hamburgpapier-shop.de/papierhandtuecher/ohne-spender" target="_blank" rel="noopener noreferrer" aria-label="C-Falz Papierhandtücher im Produktfinder wählen (öffnet in neuem Tab)">C-Falz im Produktfinder wählen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg></a>
                   </div>
                 </div>
               </div>
@@ -1711,10 +1762,11 @@
     var REVEAL_SCENES = [
       { root: '.hph-hero__intro', seq: [
           ['.hph-hero__title',      0, false],   /* Titel zuerst                         */
-          ['.hph-hero__media',      1, false],   /* Video …                              */
-          ['.hph-hero__actions',    1, false],   /* … und CTAs zusammen                  */
-          ['.hph-rail__item',       2, false],   /* Rail als EINE Einheit (kein Ripple)  */
-          ['.hph-hero__trust-item', 3, false]    /* Trust-Strip unter der Rail           */
+          ['.hph-hero__subtitle',   1, false],   /* Subline …                            */
+          ['.hph-hero__media',      1, false],   /* … und Video zusammen                 */
+          ['.hph-hero__actions',    2, false],   /* CTAs                                 */
+          ['.hph-rail__item',       3, false],   /* Rail als EINE Einheit (kein Ripple)  */
+          ['.hph-hero__trust-item', 4, false]    /* Trust-Strip unter der Rail           */
       ]},
       { root: '.hph-feature', seq: [
           ['.hph-feature__head',    0, false],   /* Sektions-Überschrift …               */
@@ -1722,7 +1774,8 @@
       ]},
       { root: '.hph-showcase-section', seq: [
           ['.hph-showcase__head',   0, false],   /* Überschrift …                        */
-          ['.hph-showcase',         1, false]    /* … dann die Karte                     */
+          ['.hph-falztable',        1, false],   /* … Schnellvergleichstabelle …         */
+          ['.hph-showcase',         2, false]    /* … dann die Akkordeon-Karte           */
       ]}
     ];
 
@@ -1779,6 +1832,32 @@
       });
     }
 
+    /* ---- Video-Pause-Toggle (WCAG 2.2.2): Loop-Video anhalt- und fortsetzbar ----
+       Sichtbar nur unter .hph-hero--js (CSS); bei reduced motion zeigt CSS ohnehin
+       das Standbild und versteckt den Toggle. Icon + aria-label spiegeln sich über
+       die play/pause-Events zurück (deckt auch externe Pausen ab, z. B. Energiesparen). */
+    document.querySelectorAll('.hph-hero__media').forEach(function (media) {
+      var video  = media.querySelector('.hp-hero-video');
+      var toggle = media.querySelector('.hph-hero__media-toggle');
+      if (!video || !toggle) return;
+      var render = function () {
+        var paused = video.paused;
+        toggle.classList.toggle('is-paused', paused);
+        toggle.setAttribute('aria-label', paused ? 'Video abspielen' : 'Video pausieren');
+      };
+      toggle.addEventListener('click', function () {
+        if (video.paused) {
+          var p = video.play();
+          if (p && p.catch) p.catch(function () {});   /* abgelehntes play() (Autoplay-Policy) leise schlucken */
+        } else {
+          video.pause();
+        }
+      });
+      video.addEventListener('play', render);
+      video.addEventListener('pause', render);
+      render();
+    });
+
     /* ---- Slider-Pfeile der Produkt-Rail ---- */
     document.querySelectorAll('.hph-rail').forEach(function (rail) {
       var track = rail.querySelector('.hph-rail__track');
@@ -1805,56 +1884,19 @@
       prev.addEventListener('click', function () { go(-1); });
       next.addEventListener('click', function () { go(1); });
 
-      /* ---- ④ Mobile Dots + Fokus: Punkte zeigen die Scroll-Position, die zentrierte Kachel führt ---- */
-      var items = Array.prototype.slice.call(track.querySelectorAll('.hph-rail__item'));
-      var dotEls = [];
-      if (items.length > 1) {
-        var dotsWrap = document.createElement('div');
-        dotsWrap.className = 'hph-rail__dots';
-        dotsWrap.setAttribute('aria-hidden', 'true');   // visuelle Orientierung; Pfeile + Wischen sind die echte Navigation
-        items.forEach(function (it) {
-          var dot = document.createElement('button');
-          dot.type = 'button';
-          dot.className = 'hph-rail__dot';
-          dot.tabIndex = -1;
-          dot.addEventListener('click', function () {
-            it.scrollIntoView({ inline: 'center', block: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
-          });
-          dotsWrap.appendChild(dot);
-          dotEls.push(dot);
-        });
-        if (rail.parentNode) rail.parentNode.insertBefore(dotsWrap, rail.nextSibling);
-        rail.classList.add('hph-rail--focusable');   // aktiviert das Fokus-Dimmen; ohne JS bleiben alle Kacheln voll sichtbar
-      }
-
-      function activeIndex() {
-        var mid = track.scrollLeft + track.clientWidth / 2, best = 0, bestDist = Infinity;
-        for (var i = 0; i < items.length; i++) {
-          var dist = Math.abs((items[i].offsetLeft + items[i].offsetWidth / 2) - mid);
-          if (dist < bestDist) { bestDist = dist; best = i; }
-        }
-        return best;
-      }
-      function syncActive() {
-        if (!items.length) return;
-        var a = activeIndex();
-        for (var i = 0; i < items.length; i++) {
-          items[i].classList.toggle('is-focused', i === a);
-          if (dotEls[i]) dotEls[i].classList.toggle('is-on', i === a);
-        }
-      }
-
+      /* (Mobile Dots + Fokus-Dimmen wurden bewusst entfernt: Wischen + Scroll-Snap +
+         Rand-Fade + anlugende Kacheln sind Affordance genug; vier parallele
+         Scroll-Signale waren Rauschen. Pfeile bleiben für präzises Blättern.) */
       var rafId = 0;
       function onScroll() {
         if (rafId) return;
         rafId = (window.requestAnimationFrame || function (f) { return setTimeout(f, 16); })(function () {
-          rafId = 0; update(); syncActive();
+          rafId = 0; update();
         });
       }
       track.addEventListener('scroll', onScroll, { passive: true });
       window.addEventListener('resize', onScroll);
       update();
-      syncActive();
 
       /* ---- ③ Vergleichs-Auswahl: ausgewählte Varianten → vorgefilterter Vergleich im Produktfinder ----
          Produktfinder-Schema (Custom-Vergleich): ?vglnach=custom&vglsets=<set>|<set>|…
@@ -1864,9 +1906,10 @@
          Pro Kachel steckt das komplette Set in data-hph-vglset; Sets sind frei mischbar.
          Interfold/C-Falz haben keine vordefinierte Lagenzahl → Set nur „falzung:…" ohne lagen-Paar.
          Der Produktfinder vergleicht maximal 4 Produkte → ab 4 gewählten werden die übrigen Kacheln gesperrt.
-         „Vergleichen" öffnet zuerst die Mengen-Frage (Karton/Palette/Beides); die Wahl wird jedem Set
-         als „versandart:karton|palette" eingefügt (bestätigt per Beispiel-URL: lagen:1,versandart:karton,
-         falzung:z-falz) – „Beides/Egal" lässt die Sets unverändert. */
+         „Vergleichen" ist ein DIREKTLINK in den Produktfinder (kein Modal-Zwischenschritt);
+         die Mengen-Eingrenzung (Alle/Karton/Palette) ist eine Inline-Auswahl in der Bar. Die Wahl
+         wird jedem Set als „versandart:karton|palette" eingefügt (bestätigt per Beispiel-URL:
+         lagen:1,versandart:karton,falzung:z-falz) – „Alle Mengen" lässt die Sets unverändert. */
       var compareBtns = Array.prototype.slice.call(rail.querySelectorAll('.hph-rail__compare'));
       var foot = rail.parentNode ? rail.parentNode.querySelector('.hph-rail__foot') : null;
       if (compareBtns.length && foot) {
@@ -1874,24 +1917,56 @@
         var selected = [];
 
         var bar = document.createElement('div');
-        bar.className = 'hph-rail__compare-bar is-active';   /* dauerhaft sichtbar: leer = Einladung, gefüllt = Aktionen */
+        bar.className = 'hph-rail__compare-bar';   /* is-active setzt renderCompare ab der ersten Auswahl */
         var inner = document.createElement('div');
         inner.className = 'hph-rail__compare-inner';
         var row = document.createElement('div');
         row.className = 'hph-rail__compare-row';
         var countEl = document.createElement('span');
         countEl.className = 'hph-rail__compare-count';
-        /* „Vergleichen" öffnet den Mengen-Dialog statt direkt zu springen */
-        var goEl = document.createElement('button');
-        goEl.type = 'button';
+        /* Mengen-Eingrenzung inline (ersetzt den früheren Mengen-Dialog):
+           Default „Alle Mengen" lässt die Sets unverändert; Karton/Palette wird jedem
+           Set als versandart:… eingefügt (bestätigte Produktfinder-Token). */
+        var versand = '';
+        var segEl = document.createElement('div');
+        segEl.className = 'hph-rail__compare-seg';
+        segEl.setAttribute('role', 'group');
+        segEl.setAttribute('aria-label', 'Liefermenge für den Vergleich');
+        var segBtns = [];
+        [
+          { versand: '',        label: 'Alle Mengen' },
+          { versand: 'karton',  label: 'Karton' },
+          { versand: 'palette', label: 'Palette' }
+        ].forEach(function (s) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'hph-rail__compare-seg-btn' + (s.versand === '' ? ' is-on' : '');
+          b.textContent = s.label;
+          b.setAttribute('aria-pressed', s.versand === '' ? 'true' : 'false');
+          b.addEventListener('click', function () {
+            versand = s.versand;
+            segBtns.forEach(function (sb) {
+              var on = sb === b;
+              sb.classList.toggle('is-on', on);
+              sb.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+            renderCompare();
+          });
+          segEl.appendChild(b);
+          segBtns.push(b);
+        });
+        /* „Vergleichen" = Direktlink in den Produktfinder (kein Modal-Zwischenschritt) */
+        var goEl = document.createElement('a');
         goEl.className = 'hph-rail__compare-go';
-        goEl.setAttribute('aria-haspopup', 'dialog');
+        goEl.target = '_blank';
+        goEl.rel = 'noopener noreferrer';
         goEl.innerHTML = 'Vergleichen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
         var clearEl = document.createElement('button');
         clearEl.type = 'button';
         clearEl.className = 'hph-rail__compare-clear';
         clearEl.textContent = 'Leeren';
         row.appendChild(countEl);
+        row.appendChild(segEl);
         row.appendChild(goEl);
         row.appendChild(clearEl);
 
@@ -1899,116 +1974,29 @@
         bar.appendChild(inner);
         foot.parentNode.insertBefore(bar, foot);
 
-        /* Mengen-Dialog: Wahl wird jedem Set als versandart:… mitgegeben („Beides/Egal" = ohne Zusatz).
-           Token BESTÄTIGT per Produktfinder-Beispiel-URLs: versandart:karton / versandart:palette. */
-        var MENGEN = [
-          { versand: 'karton',  name: 'Karton',        badge: 'Schnellversand möglich',
-            desc: 'Kleine bis mittlere Bestellmengen. Ideal für Büros, Praxen oder als Erstbestellung.' },
-          { versand: 'palette', name: 'Palette',       badge: 'Bester Preis/Menge',
-            desc: 'Großmengen für Hotels, Gastronomie, Industrie. Maximale Ersparnis pro Einheit.' },
-          { versand: '',        name: 'Beides / Egal', badge: '',
-            desc: 'Zeige alle verfügbaren Abpackungsgrößen.' }
-        ];
-        var modal = document.createElement('div');
-        modal.className = 'hph-modal';
-        modal.setAttribute('aria-hidden', 'true');
-        modal.innerHTML = '' +
-          '<div class="hph-modal__backdrop" data-hph-close></div>' +
-          '<div class="hph-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="hph-vgl-modal-title">' +
-            '<div class="hph-modal__head">' +
-              '<div>' +
-                '<h3 class="hph-modal__title" id="hph-vgl-modal-title">Wie viel benötigen Sie?</h3>' +
-                '<p class="hph-modal__sub"></p>' +
-              '</div>' +
-              '<button type="button" class="hph-modal__close" aria-label="Dialog schließen" data-hph-close>' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>' +
-              '</button>' +
-            '</div>' +
-            '<div class="hph-modal__opts"></div>' +
-          '</div>';
-        var optsWrap = modal.querySelector('.hph-modal__opts');
-        var subEl = modal.querySelector('.hph-modal__sub');
-        var optEls = [];
-        MENGEN.forEach(function (m) {
-          var a = document.createElement('a');
-          a.className = 'hph-modal__opt';
-          a.target = '_blank';
-          a.rel = 'noopener noreferrer';
-          a.setAttribute('data-hph-versand', m.versand);
-          a.innerHTML = '<span class="hph-modal__opt-top"><span class="hph-modal__opt-name">' + m.name + '</span>'
-                      + (m.badge ? '<span class="hph-modal__opt-badge">' + m.badge + '</span>' : '') + '</span>'
-                      + '<span class="hph-modal__opt-desc">' + m.desc + '</span>';
-          optsWrap.appendChild(a);
-          optEls.push(a);
-        });
-        /* im Hero verankert (nicht body): erbt so die Farb-Tokens; position:fixed löst vom Layout */
-        (rail.closest('.hph-hero') || document.body).appendChild(modal);
-
-        var lastFocus = null, prevOverflow = '';
-        var openModal = function () {
-          lastFocus = document.activeElement;
-          prevOverflow = document.body.style.overflow;
-          document.body.style.overflow = 'hidden';            /* Seite hinter dem Dialog nicht scrollen */
-          modal.classList.add('is-open');
-          modal.setAttribute('aria-hidden', 'false');
-          if (optEls[0]) optEls[0].focus();
-        };
-        var closeModal = function () {
-          if (!modal.classList.contains('is-open')) return;
-          modal.classList.remove('is-open');
-          modal.setAttribute('aria-hidden', 'true');
-          document.body.style.overflow = prevOverflow;
-          if (lastFocus && lastFocus.focus) lastFocus.focus();  /* Fokus zurück auf „Vergleichen" */
-        };
-        goEl.addEventListener('click', openModal);
-        modal.addEventListener('click', function (e) {
-          if (e.target.closest('[data-hph-close]')) { closeModal(); return; }
-          if (e.target.closest('.hph-modal__opt')) closeModal();   /* Link öffnet parallel im neuen Tab */
-        });
-        document.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape') closeModal();
-        });
-        modal.addEventListener('keydown', function (e) {       /* einfacher Fokus-Kreis im Dialog */
-          if (e.key !== 'Tab') return;
-          var f = modal.querySelectorAll('a[href], button');
-          if (!f.length) return;
-          var first = f[0], last = f[f.length - 1];
-          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-        });
-
         var MAX_COMPARE = 4;   // Limit des Produktfinders: maximal 4 Produkte je Vergleich
         var renderCompare = function () {
           var n = selected.length, full = n >= MAX_COMPARE;
-          bar.classList.toggle('is-empty', n === 0);
-          if (n) {
-            countEl.textContent = (n === 1 ? '1 Variante ausgewählt' : n + ' Varianten ausgewählt')
-                                + (full ? ' · Maximum (' + MAX_COMPARE + ') erreicht' : '');
-          } else {
-            /* Empty-State: erklärt das + und lädt ein, bevor die Funktion benutzt wird */
-            countEl.innerHTML = '<strong>Preise vergleichen?</strong> Wählen Sie mit + bis zu 4 Varianten aus.';
-          }
-          // Deep-Link je Mengen-Option: gewählte Menge wird JEDEM Set mitgegeben.
-          // versandart wird nach dem ersten Paar eingefügt → gleiche Reihenfolge wie die
-          // bestätigten Beispiel-URLs (lagen:1,versandart:karton,falzung:z-falz).
-          optEls.forEach(function (a) {
-            var v = a.getAttribute('data-hph-versand'), sets = [];
-            for (var i = 0; i < selected.length; i++) {
-              if (v) {
-                var parts = selected[i].split(',');
-                parts.splice(1, 0, 'versandart:' + v);
-                sets.push(parts.join(','));
-              } else {
-                sets.push(selected[i]);
-              }
+          bar.classList.toggle('is-active', n > 0);   /* Bar erscheint erst mit der ersten Auswahl */
+          countEl.textContent = (n === 1 ? '1 Variante ausgewählt' : n + ' Varianten ausgewählt')
+                              + (full ? ' · Maximum (' + MAX_COMPARE + ') erreicht'
+                                      : (n === 1 ? ' · bis zu ' + MAX_COMPARE + ' möglich' : ''));
+          // Deep-Link: gewählte Menge wird JEDEM Set mitgegeben. versandart wird nach dem
+          // ersten Paar eingefügt → gleiche Reihenfolge wie die bestätigten Beispiel-URLs
+          // (lagen:1,versandart:karton,falzung:z-falz).
+          var sets = [];
+          for (var i = 0; i < selected.length; i++) {
+            if (versand) {
+              var parts = selected[i].split(',');
+              parts.splice(1, 0, 'versandart:' + versand);
+              sets.push(parts.join(','));
+            } else {
+              sets.push(selected[i]);
             }
-            a.href = n
-              ? COMPARE_BASE + '?vglnach=custom&vglsets=' + encodeURIComponent(sets.join('|'))   // kodiert : , | → %3A %2C %7C
-              : COMPARE_BASE;
-          });
-          subEl.textContent = n === 1 ? 'Für 1 ausgewählte Variante' : 'Für ' + n + ' ausgewählte Varianten';
-          // leere Auswahl (z. B. „Leeren"): Dialog schließen
-          if (!n) closeModal();
+          }
+          goEl.href = n
+            ? COMPARE_BASE + '?vglnach=custom&vglsets=' + encodeURIComponent(sets.join('|'))   // kodiert : , | → %3A %2C %7C
+            : COMPARE_BASE;
           // Maximum erreicht: noch nicht gewählte Kacheln sperren – gewählte bleiben abwählbar
           compareBtns.forEach(function (b) {
             var dis = full && !b.classList.contains('is-on');
@@ -2231,14 +2219,14 @@
         }
       }
 
-      /* ---- „Alle Papierhandtücher ansehen": sanftes Same-Page-Scroll zum Listing ----
-         Der Link zeigt per href auf dieselbe Listing-Seite, auf der diese Hero-Sektion
+      /* ---- „Zum Sortiment" (Kopf-CTA) + „Alle Papierhandtücher ansehen": sanftes Same-Page-Scroll ----
+         Beide Links zeigen per href auf dieselbe Listing-Seite, auf der diese Hero-Sektion
          ohnehin eingebunden ist. Wenn pathname == location.pathname UND das Listing-
          Element existiert, fangen wir den Klick ab und scrollen sanft hin – statt
          einen Reload zu provozieren, der genau dasselbe Endbild produziert.
          Auf einer Vorschau-/Test-Seite ohne Listing greift der Default-Link weiter. */
       try {
-        var seeAllLinks = document.querySelectorAll('.hph-feature__seeall');
+        var seeAllLinks = document.querySelectorAll('.hph-feature__seeall, [data-hph-scroll-listing]');
         Array.prototype.forEach.call(seeAllLinks, function (link) {
           link.addEventListener('click', function (e) {
             try {
