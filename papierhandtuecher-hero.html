@@ -1262,6 +1262,60 @@
   .hph-showcase__body, .hph-showcase__link{ transform:none !important; transition:none !important; }   /* gestaffelter Panel-Inhalt: sofort statt Bewegung */
   .hph-showcase__link svg{ transition:none !important; transform:none !important; }
 }
+
+/* ============================================================================
+   ZERTIFIKATS-FILTER-ÜBERSCHRIFT (Post-Navigation)
+   ----------------------------------------------------------------------------
+   Wird vom Script (siehe unten) EINMAL eingesetzt, sobald die Listing-Seite mit
+   einem der beiden Property-Filtern aufgerufen wird (EU Ecolabel: …399,
+   Blauer Engel: …398). Klärt dem Besucher direkt: „Du siehst nur Produkte mit
+   diesem Siegel" – die Filter-Sidebar links allein erklärt das oft nicht klar genug.
+   Bewusst AUSSERHALB des .hph-hero-Scopes definiert: die Überschrift sitzt
+   ÜBER dem Shopware-Listing (also nicht innerhalb der Hero-Sektion).
+   Sprache identisch zu .hph-feature__heading (Comfortaa, Größe, Tracking,
+   Inkfarbe) → liest als dieselbe Sektions-H2-Sprache des Blocks weiter oben.
+   ---------------------------------------------------------------------------- */
+.hph-cert-heading{
+  display:block;
+  /* gleicher Container wie der Hero/Karten-Block: max-width 1440px, inline-Padding */
+  max-width: 1440px;
+  margin: clamp(28px, 4vw, 56px) auto clamp(14px, 2.2vw, 24px);
+  padding-inline: clamp(16px, 3vw, 40px);
+  font-family: 'Comfortaa', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  font-size: clamp(1.6rem, 1.1rem + 1.9vw, 2.6rem);
+  color: #0a2d47;
+  /* Sticky Shopware-Top-Nav darf die Überschrift beim Scrollen nicht verdecken */
+  scroll-margin-top: clamp(72px, 10vh, 120px);
+  /* Sanftes Reveal: aufsteigen + einblenden (gleiche Sprache wie die Karten oben) */
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity .55s cubic-bezier(.16,1,.3,1),
+              transform .55s cubic-bezier(.16,1,.3,1);
+}
+.hph-cert-heading.is-in{ opacity:1; transform:none; }
+/* Optionaler Zertifikats-Chip vor der Überschrift (visuell verankert das Siegel-Versprechen) */
+.hph-cert-heading__badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.45em;
+  margin-right: .7em;
+  padding:.32em .8em;
+  border-radius:980px;
+  background: oklch(0.95 0.014 245);
+  color: #104d6e;
+  font-family: 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: clamp(.78rem,.75rem+.1vw,.85rem);
+  font-weight:700;
+  letter-spacing:.01em;
+  vertical-align: middle;
+}
+.hph-cert-heading__badge svg{ width:1.15em; height:1.15em; flex:none; }
+@media (prefers-reduced-motion: reduce){
+  .hph-cert-heading{ opacity:1 !important; transform:none !important; transition:none !important; }
+}
 </style>
 
 <!-- Fallback: ohne JavaScript bleibt der Inhalt sichtbar.
@@ -1487,8 +1541,9 @@
                   <a class="hph-feature__more" href="https://environmental-data.ec.europa.eu/ecolabel/products/product_59468.html" target="_blank" rel="noopener noreferrer" aria-label="Weitere Infos zum EU Ecolabel (öffnet in neuem Tab)">Weitere Infos
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg>
                   </a>
-                  <!-- TODO „Jetzt kaufen"-Ziel ggf. auf zertifizierte Produkte anpassen -->
-                  <a class="hph-feature__buy" href="https://www.hamburgpapier-shop.de/papierhandtuecher"><span class="hph-feature__buy-label">Jetzt kaufen</span><svg class="hph-feature__buy-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+                  <!-- „Jetzt kaufen": filtert die Listing-Seite auf EU-Ecolabel-Produkte (Custom-Sortierung, Property-Filter af…399)
+                       data-hph-cert: marker für den Post-Load-Scroll/Heading-Handler unten im Script. -->
+                  <a class="hph-feature__buy" data-hph-cert="ecolabel" href="https://www.hamburgpapier-shop.de/papierhandtuecher?order=ki-custom-sorting&amp;p=1&amp;properties=af000000000000000000000000000399"><span class="hph-feature__buy-label">Jetzt kaufen</span><svg class="hph-feature__buy-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
                 </div>
               </div>
               <div class="hph-feature__media">
@@ -1508,8 +1563,9 @@
                   <a class="hph-feature__more" href="https://www.blauer-engel.de/de/produkte/herm-kemme-gmbh-papierhandtuecher-grau-25-x-23-cm-zz-falz-1-lagig-490-017" target="_blank" rel="noopener noreferrer" aria-label="Weitere Infos zum Blauen Engel (öffnet in neuem Tab)">Weitere Infos
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M19 13.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5.5"/></svg>
                   </a>
-                  <!-- TODO „Jetzt kaufen"-Ziel ggf. auf zertifizierte Produkte anpassen -->
-                  <a class="hph-feature__buy" href="https://www.hamburgpapier-shop.de/papierhandtuecher"><span class="hph-feature__buy-label">Jetzt kaufen</span><svg class="hph-feature__buy-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+                  <!-- „Jetzt kaufen": filtert die Listing-Seite auf Blauer-Engel-Produkte (Custom-Sortierung, Property-Filter af…398)
+                       data-hph-cert: marker für den Post-Load-Scroll/Heading-Handler unten im Script. -->
+                  <a class="hph-feature__buy" data-hph-cert="blauer-engel" href="https://www.hamburgpapier-shop.de/papierhandtuecher?order=ki-custom-sorting&amp;p=1&amp;properties=af000000000000000000000000000398"><span class="hph-feature__buy-label">Jetzt kaufen</span><svg class="hph-feature__buy-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
                 </div>
               </div>
               <div class="hph-feature__media">
@@ -2023,6 +2079,182 @@
       document.querySelectorAll('.hph-showcase__panel').forEach(function (p) { p.style.gridTemplateRows = '1fr'; });
       document.querySelectorAll('.hph-showcase__panel-inner, .hph-showcase__img').forEach(function (el) { el.style.opacity = '1'; el.style.transform = 'none'; el.style.filter = 'none'; });
     }
+
+    /* ============================================================================
+       ZERTIFIKATS-FILTER: Post-Navigation-Scroll + Heading-Einsatz
+       ----------------------------------------------------------------------------
+       Klick auf „Jetzt kaufen" (EU Ecolabel / Blauer Engel) navigiert per <a href>
+       zur Listing-Seite mit dem passenden Property-Filter (af…399 / af…398).
+       Shopware filtert beim Reload server-seitig → unser Script erkennt die
+       Filter-Parameter, sucht das CMS-Produkt-Listing, setzt EINE Überschrift
+       darüber („Unsere Produkte mit EU Ecolabel" / „… Blauem Engel") und scrollt
+       sanft dorthin. Eigener try/catch = Fail-open: bei Fehlern bleibt die Seite
+       einfach so, wie Shopware sie auch ohne diesen Block ausliefert.
+
+       Hinweis Selektor: typische Shopware-6-Klassen für das Listing.
+       Wenn das Theme abweicht, lässt sich der Selektor unten anpassen
+       (cms-element-product-listing / cms-listing-row / .cms-element-product-listing-wrapper).
+       ============================================================================ */
+    try {
+      var CERT_MAP = {
+        'af000000000000000000000000000399': {
+          key: 'ecolabel',
+          heading: 'Unsere Produkte mit EU Ecolabel',
+          badgeLabel: 'EU Ecolabel',
+          /* Blatt-Icon (identisch zur Karten-Badge) */
+          badgeSvg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>'
+        },
+        'af000000000000000000000000000398': {
+          key: 'blauer-engel',
+          heading: 'Unsere Produkte mit Blauem Engel',
+          badgeLabel: 'Blauer Engel',
+          /* Blumen-Icon (identisch zur Karten-Badge) */
+          badgeSvg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>'
+        }
+      };
+
+      /* Primär-Anker: das Listing-Element der Kategorieseite (bestätigt von Hamburg Papier).
+         getElementById statt querySelector: IDs, die mit einer Ziffer beginnen, sind als HTML
+         gültig, aber als CSS-Selektor (#…) ungültig ohne Escape → getElementById ist robuster.
+         OUTER scope, damit BEIDE Handler darauf zugreifen (Cert-Filter UND „Alle ansehen"). */
+      var LISTING_ID = '00000000000000000000000000001027';
+      /* Fallback-Selektoren: falls die ID auf einer anderen Seite/Theme-Variante fehlt, greift
+         der nächste Treffer aus den typischen Shopware-6-Listing-Klassen. */
+      var LISTING_SELECTORS = [
+        '.cms-element-product-listing-wrapper',
+        '.cms-element-product-listing',
+        '.cms-listing-row',
+        '.cms-listing',
+        '[class*="product-listing"]'
+      ];
+      var findListing = function () {
+        var el = document.getElementById(LISTING_ID);
+        if (el) return el;
+        for (var i = 0; i < LISTING_SELECTORS.length; i++) {
+          el = document.querySelector(LISTING_SELECTORS[i]);
+          if (el) return el;
+        }
+        return null;
+      };
+
+      /* Sticky-Nav-Offset für Direkt-Scrolls (ohne eingesetzte Cert-Heading dazwischen).
+         Etwa derselbe Wert wie das scroll-margin-top der .hph-cert-heading. */
+      var SCROLL_OFFSET = 80;
+      var smoothScrollTo = function (el) {
+        if (!el) return;
+        var top = el.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0) - SCROLL_OFFSET;
+        try {
+          window.scrollTo({ top: top, behavior: reduce ? 'auto' : 'smooth' });
+        } catch (err) {
+          /* Älterer Safari ohne Options-Objekt-Support */
+          window.scrollTo(0, top);
+        }
+      };
+
+      /* Filter-Parameter aus der URL lesen. URLSearchParams ist weit verbreitet (alle modernen
+         Browser inkl. IE11-Polyfill nicht nötig) – wenn doch nicht da, brechen wir leise ab. */
+      var params = (typeof URLSearchParams === 'function') ? new URLSearchParams(window.location.search) : null;
+      var properties = params ? (params.get('properties') || '') : '';
+      var activeCert = null;
+      for (var prop in CERT_MAP) {
+        if (Object.prototype.hasOwnProperty.call(CERT_MAP, prop) && properties.indexOf(prop) !== -1) {
+          activeCert = CERT_MAP[prop];
+          break;
+        }
+      }
+
+      if (activeCert) {
+
+        var injectAndScroll = function () {
+          /* Mehrfach-Einsatz verhindern (z. B. bei Shopware-AJAX-Refresh) */
+          if (document.querySelector('.hph-cert-heading[data-hph-cert="' + activeCert.key + '"]')) return true;
+          var listing = findListing();
+          if (!listing) return false;
+
+          /* Vorhandene Cert-Heading aus alter Navigation (anderes Siegel) entfernen */
+          var stale = document.querySelectorAll('.hph-cert-heading');
+          for (var i = 0; i < stale.length; i++) {
+            if (stale[i].parentNode) stale[i].parentNode.removeChild(stale[i]);
+          }
+
+          var h2 = document.createElement('h2');
+          h2.className = 'hph-cert-heading';
+          h2.setAttribute('data-hph-cert', activeCert.key);
+          h2.innerHTML =
+            '<span class="hph-cert-heading__badge">' + activeCert.badgeSvg + activeCert.badgeLabel + '</span>'
+            + activeCert.heading;
+
+          /* Vor das Listing setzen. Der äußerste Wrapper ist meist der bessere Anker (volle Breite). */
+          var anchor = listing.closest('.cms-block') || listing.closest('.cms-section') || listing;
+          anchor.parentNode.insertBefore(h2, anchor);
+
+          /* Reveal + sanfter Scroll. Doppelte rAF: erst Layout-Frame, dann is-in/Scroll – damit
+             die transition den Übergang spielt (ohne rAF wäre opacity 0→1 in derselben Frame). */
+          var doReveal = function () {
+            h2.classList.add('is-in');
+            try {
+              h2.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+            } catch (err) {
+              /* Älterer Safari ohne Smooth-Scroll-Options-Objekt */
+              window.scrollTo(0, h2.getBoundingClientRect().top + window.pageYOffset - 80);
+            }
+          };
+          if (window.requestAnimationFrame) {
+            window.requestAnimationFrame(function () { window.requestAnimationFrame(doReveal); });
+          } else {
+            setTimeout(doReveal, 30);
+          }
+          return true;
+        };
+
+        /* Versuche zuerst sofort, dann nach window.load (bei Bedarf Bilder/Layout warten lassen),
+           dann mit MutationObserver für Themes, die das Listing erst per JS einhängen.
+           Hard-Timeout (8 s) verhindert dauerhaft hängende Observer. */
+        var done = injectAndScroll();
+        if (!done) {
+          var onLoad = function () { if (!done) done = injectAndScroll(); };
+          if (document.readyState === 'complete') {
+            setTimeout(onLoad, 60);
+          } else {
+            window.addEventListener('load', function () { setTimeout(onLoad, 60); }, { once: true });
+          }
+
+          if (!done && 'MutationObserver' in window) {
+            var mo = new MutationObserver(function () {
+              if (done) { mo.disconnect(); return; }
+              done = injectAndScroll();
+              if (done) mo.disconnect();
+            });
+            mo.observe(document.body || document.documentElement, { childList: true, subtree: true });
+            setTimeout(function () { try { mo.disconnect(); } catch (e) {} }, 8000);
+          }
+        }
+      }
+
+      /* ---- „Alle Papierhandtücher ansehen": sanftes Same-Page-Scroll zum Listing ----
+         Der Link zeigt per href auf dieselbe Listing-Seite, auf der diese Hero-Sektion
+         ohnehin eingebunden ist. Wenn pathname == location.pathname UND das Listing-
+         Element existiert, fangen wir den Klick ab und scrollen sanft hin – statt
+         einen Reload zu provozieren, der genau dasselbe Endbild produziert.
+         Auf einer Vorschau-/Test-Seite ohne Listing greift der Default-Link weiter. */
+      try {
+        var seeAllLinks = document.querySelectorAll('.hph-feature__seeall');
+        Array.prototype.forEach.call(seeAllLinks, function (link) {
+          link.addEventListener('click', function (e) {
+            try {
+              /* Tastatur-/Mod-Klicks (neuer Tab, Datei speichern usw.) NICHT abfangen */
+              if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              var linkUrl = new URL(link.getAttribute('href'), location.href);
+              if (linkUrl.pathname !== location.pathname) return;   // andere Seite → normal navigieren
+              var listing = findListing();
+              if (!listing) return;                                  // kein Ziel im DOM → normal navigieren
+              e.preventDefault();
+              smoothScrollTo(listing);
+            } catch (err) { /* fail-open: Default-Navigation läuft */ }
+          });
+        });
+      } catch (e) { /* Fail-open */ }
+    } catch (e) { /* Fail-open: Seite bleibt ungestört. */ }
   } catch (err) {
     /* Fail-open: bei einem Script-Fehler die verborgenen Reveal-Startzustände
        abschalten (entfernt .hph-hero--js → Inhalt sichtbar, Akkordeon offen). */
