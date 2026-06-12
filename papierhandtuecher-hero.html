@@ -1375,11 +1375,14 @@
 
       <ul class="hph-rail__track">
 
-        <!-- Preisanker „ab … € netto/Karton" je Kachel: günstigster Karton-Einzelpreis der
-             jeweiligen Unterkategorie, manuell aus den Listing-Seiten erhoben · Stand 11.06.2026.
-             PFLEGE: Bei jeder Preisänderung mitziehen – ein veralteter „ab"-Preis ist
-             irreführende Werbung (UWG-Risiko). Empfehlung: langfristig dynamisch aus
-             Shopware befüllen (günstigster Karton-Preis je Unterkategorie). -->
+        <!-- Preisanker „ab … € netto / 1.000 Stück" je Kachel: günstigster GRUNDPREIS der
+             jeweils verlinkten Listing-Seite · Stand 12.06.2026.
+             Diese Werte sind nur noch der No-JS-/Fallback-Stand: das Script
+             „GRUNDPREIS-SYNC" (unten) liest die Grundpreise live von den verlinkten
+             Listing-Seiten (10-Minuten-Cache im localStorage) und überschreibt die Spans.
+             Ein veralteter „ab"-Preis wäre irreführende Werbung (UWG-Risiko) – der
+             Fallback hier sollte daher bei Preisänderungen trotzdem gelegentlich
+             mitgezogen werden, ist aber nicht mehr zeitkritisch. -->
 
         <li class="hph-rail__item">
           <a class="hph-rail__tile" href="https://www.hamburgpapier-shop.de/papierhandtuecher-1-lagig">
@@ -1390,7 +1393,7 @@
             <span class="hph-rail__text">
               <span class="hph-rail__label">1-lagig · Z-Falz</span>
               <span class="hph-rail__hint">ergiebig &amp; sparsam</span>
-              <span class="hph-rail__price">ab 14,07 € netto/Karton</span>
+              <span class="hph-rail__price">ab 2,50 € netto / 1.000 Stück</span>
             </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="lagen:1,falzung:z-falz" aria-label="„1-lagig · Z-Falz“ zum Vergleich hinzufügen">
@@ -1407,7 +1410,7 @@
             <span class="hph-rail__text">
               <span class="hph-rail__label">2-lagig · Z-Falz</span>
               <span class="hph-rail__hint">weich &amp; saugstark</span>
-              <span class="hph-rail__price">ab 17,21 € netto/Karton</span>
+              <span class="hph-rail__price">ab 4,29 € netto / 1.000 Stück</span>
             </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="lagen:2,falzung:z-falz" aria-label="„2-lagig · Z-Falz“ zum Vergleich hinzufügen">
@@ -1424,7 +1427,7 @@
             <span class="hph-rail__text">
               <span class="hph-rail__label">3-lagig · Z-Falz</span>
               <span class="hph-rail__hint">besonders weich</span>
-              <span class="hph-rail__price">ab 22,08 € netto/Karton</span>
+              <span class="hph-rail__price">ab 7,15 € netto / 1.000 Stück</span>
             </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="lagen:3,falzung:z-falz" aria-label="„3-lagig · Z-Falz“ zum Vergleich hinzufügen">
@@ -1435,13 +1438,13 @@
         <li class="hph-rail__item">
           <a class="hph-rail__tile" href="https://www.hamburgpapier-shop.de/papierhandtuecher-interfold">
             <span class="hph-rail__media">
-              <img src="https://www.hamburgpapier-shop.de/media/85/f4/d3/1780051194/go-clean-handtowels-superior-3255-papierhandtuecher-weiss-hochformat.avif?ts=1780051194"
+              <img src="https://www.hamburgpapier-shop.de/media/85/f4/d3/1780051194/go-clean-handtowels-superior-3255-papierhandtuecher-weiss-hochformat.avif?ts=1781248368"
                    alt="Interfold Papierhandtücher" width="300" height="380" loading="lazy" decoding="async">
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">Interfold</span>
               <span class="hph-rail__hint">Einzelentnahme</span>
-              <span class="hph-rail__price">ab 17,69 € netto/Karton</span>
+              <span class="hph-rail__price">ab 4,42 € netto / 1.000 Stück</span>
             </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="falzung:interfold" aria-label="„Interfold“ zum Vergleich hinzufügen">
@@ -1452,13 +1455,13 @@
         <li class="hph-rail__item">
           <a class="hph-rail__tile" href="https://www.hamburgpapier-shop.de/papierhandtuecher-c-falz">
             <span class="hph-rail__media">
-              <img src="https://www.hamburgpapier-shop.de/media/a9/0d/a2/1780051194/papierhandtuecher-c-fold-1045-100-cellulose-lila-hochformat.avif?ts=1780051194"
+              <img src="https://www.hamburgpapier-shop.de/media/a9/0d/a2/1780051194/papierhandtuecher-c-fold-1045-100-cellulose-lila-hochformat.avif?ts=1781248623"
                    alt="C-Falz Papierhandtücher" width="300" height="380" loading="lazy" decoding="async">
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">C-Falz</span>
               <span class="hph-rail__hint">kompakt gefaltet</span>
-              <span class="hph-rail__price">ab 22,29 € netto/Karton</span>
+              <span class="hph-rail__price">ab 4,69 € netto / 1.000 Stück</span>
             </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="falzung:c-falz" aria-label="„C-Falz“ zum Vergleich hinzufügen">
@@ -2243,6 +2246,117 @@
         });
       } catch (e) { /* Fail-open */ }
     } catch (e) { /* Fail-open: Seite bleibt ungestört. */ }
+
+    /* ============================================================================
+       GRUNDPREIS-SYNC: Rail-Preise live von den Listing-Seiten
+       ----------------------------------------------------------------------------
+       Jede Rail-Kachel verlinkt auf ihre Unterkategorie-Listing-Seite; deren HTML
+       enthält server-seitig je Produkt den Grundpreis („… €* / 1000 Stück" im
+       Element .product-price-unit). Dieses Script holt pro Kachel die verlinkte
+       Seite (same-origin, da der Block im Shop läuft), nimmt den GÜNSTIGSTEN
+       Grundpreis und schreibt ihn als „ab X,XX € netto / 1.000 Stück" in den
+       Preis-Span. Damit zeigt die Kachel garantiert denselben „ab"-Preis, den der
+       Kunde nach dem Klick im Listing sieht (UWG-sauber).
+
+       Frische: localStorage-Cache mit 10-Minuten-TTL → höchstens alle 10 Min. ein
+       Fetch-Schub pro Browser; bei Rückkehr in den Tab (visibilitychange) wird die
+       TTL erneut geprüft. Gecachte Preise werden sofort angezeigt (auch wenn älter
+       als 10 Min. – sie sind immer frischer als der statische Fallback im Markup).
+
+       Fail-open auf jeder Ebene: schlägt fetch/Parsing fehl (z. B. auf einer
+       Vorschau-Seite außerhalb des Shops → CORS), bleiben die statischen
+       Fallback-Preise aus dem Markup einfach stehen. */
+    try {
+      var GP_TTL_MS  = 10 * 60 * 1000;          // 10 Minuten
+      var GP_KEY     = 'hphRailGrundpreise';     // localStorage-Schlüssel
+      /* Grundpreis-Muster der Listing-Seite: „2,50 €* / 1000 Stück" (dt. Format,
+         Tausenderpunkt sicherheitshalber erlaubt). */
+      var GP_RE      = /(\d{1,3}(?:\.\d{3})*,\d{2})\s*€\*?\s*\/\s*1000\s*Stück/;
+      var GP_MIN_EUR = 0.5, GP_MAX_EUR = 100;    // Plausibilitätsfenster gegen Parser-Ausreißer
+
+      var gpTiles = document.querySelectorAll('.hph-rail__tile');
+      if (gpTiles.length) {
+
+        /* dt. Preisstring („2,50" / „1.234,56") → Zahl */
+        function gpParse(str) { return parseFloat(str.replace(/\./g, '').replace(',', '.')); }
+
+        /* Zahl → „ab 2,50 € netto / 1.000 Stück" */
+        function gpLabel(eur) {
+          return 'ab ' + eur.toFixed(2).replace('.', ',') + ' € netto / 1.000 Stück';
+        }
+
+        /* Preis-Map { "/papierhandtuecher-1-lagig": 2.5, … } in die Spans schreiben */
+        function gpApply(prices) {
+          Array.prototype.forEach.call(gpTiles, function (tile) {
+            try {
+              var span = tile.querySelector('.hph-rail__price');
+              var path = new URL(tile.getAttribute('href'), location.href).pathname;
+              var eur  = prices[path];
+              if (span && typeof eur === 'number' && eur >= GP_MIN_EUR && eur <= GP_MAX_EUR) {
+                span.textContent = gpLabel(eur);
+              }
+            } catch (e) { /* Kachel überspringen, Fallback-Preis bleibt */ }
+          });
+        }
+
+        /* Listing-HTML → günstigster Grundpreis (nur innerhalb des Produkt-Listings
+           suchen, damit z. B. Cross-Selling-Slider den „ab"-Preis nicht verfälschen) */
+        function gpCheapest(html) {
+          var doc   = new DOMParser().parseFromString(html, 'text/html');
+          var scope = doc.querySelector('.cms-element-product-listing') || doc;
+          var units = scope.querySelectorAll('.product-price-unit');
+          var best  = null;
+          Array.prototype.forEach.call(units, function (el) {
+            var m = GP_RE.exec(el.textContent || '');
+            if (!m) return;
+            var eur = gpParse(m[1]);
+            if (eur >= GP_MIN_EUR && eur <= GP_MAX_EUR && (best === null || eur < best)) best = eur;
+          });
+          return best;
+        }
+
+        function gpReadCache() {
+          try { return JSON.parse(localStorage.getItem(GP_KEY) || 'null'); } catch (e) { return null; }
+        }
+
+        function gpRefresh() {
+          var cache = gpReadCache();
+          if (cache && cache.prices && (Date.now() - cache.t) < GP_TTL_MS) return;   // noch frisch
+          if (!window.fetch || !window.DOMParser || !window.URL) return;             // sehr alte Browser: Fallback-Preise
+          var prices  = (cache && cache.prices) || {};
+          var pending = 0;
+          Array.prototype.forEach.call(gpTiles, function (tile) {
+            var href = tile.getAttribute('href');
+            if (!href) return;
+            var path;
+            try { path = new URL(href, location.href).pathname; } catch (e) { return; }
+            pending++;
+            fetch(href, { credentials: 'same-origin' })
+              .then(function (r) { return r.ok ? r.text() : null; })
+              .then(function (html) {
+                var eur = html && gpCheapest(html);
+                if (typeof eur === 'number') prices[path] = eur;
+              })
+              .catch(function () { /* Kategorie behält alten/Fallback-Preis */ })
+              .then(function () {
+                if (--pending > 0) return;
+                gpApply(prices);
+                try { localStorage.setItem(GP_KEY, JSON.stringify({ t: Date.now(), prices: prices })); } catch (e) {}
+              });
+          });
+        }
+
+        /* Start: gecachte Preise sofort zeigen, danach (falls TTL abgelaufen) neu holen */
+        var gpCached = gpReadCache();
+        if (gpCached && gpCached.prices) gpApply(gpCached.prices);
+        gpRefresh();
+
+        /* Lange offene Tabs: bei Rückkehr in den Tab TTL erneut prüfen */
+        document.addEventListener('visibilitychange', function () {
+          if (!document.hidden) { try { gpRefresh(); } catch (e) {} }
+        });
+      }
+    } catch (e) { /* Fail-open: statische Fallback-Preise aus dem Markup bleiben stehen */ }
   } catch (err) {
     /* Fail-open: bei einem Script-Fehler die verborgenen Reveal-Startzustände
        abschalten (entfernt .hph-hero--js → Inhalt sichtbar, Akkordeon offen). */
