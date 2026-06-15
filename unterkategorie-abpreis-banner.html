@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unterkategorie-Ab-Preis-Banner (B2) · Vorschau/Quelle</title>
+</head>
+<body style="margin:0;background:#f3f5f8;font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;">
+
+<!--
+  ============================================================================
+  HAMBURG PAPIER · "AB"-PREIS-BANNER FUER UNTERKATEGORIE-LISTINGS  (Block B2)
+  ============================================================================
+  ZWECK
+  Auf den Papierhandtuch-UNTERKATEGORIE-Listing-Seiten (z. B.
+  /papierhandtuecher-1-lagig) erscheint OBERHALB des Produkt-Listings ein
+  ruhiger Banner mit demselben "ab ... EUR netto / 1.000 Stueck"-Bestpreis, den
+  der Kunde auf der Hauptkategorie an der Rail-Kachel gesehen hat. So findet er
+  den Preis sofort wieder, statt ihn unter den Produkten zu suchen
+  (Konsistenz Hauptkategorie -> Unterkategorie).
+
+  WIE DER PREIS BESTIMMT WIRD (Konsistenz + UWG)
+  Der "ab"-Preis ist der guenstigste GRUNDPREIS der GANZEN Unterkategorie und
+  wird NICHT aus dem aktuell sichtbaren (paginier-/filter-/sortierbaren) Listing
+  gelesen - das koennte je nach Filter/Seite einen zu hohen oder gefilterten
+  Preis zeigen. Stattdessen exakt wie der Hero-GRUNDPREIS-SYNC:
+    1. Sofort aus dem GEMEINSAMEN localStorage-Cache 'hphRailGrundpreise', den
+       der Hero bereits fuellt -> derselbe Wert wie an der Rail-Kachel, ohne Delay.
+    2. Frisch per fetch der EIGENEN Kategorie-URL OHNE Query (ungefiltert/
+       unsortiert) -> DOMParser -> guenstigster '.product-price-unit' im
+       '.cms-element-product-listing'. Das ist exakt dieselbe Quelle/Logik, die
+       der Hero fuer die Rail nutzt -> Haupt- und Unterkategorie zeigen denselben
+       "ab"-Preis. Das Ergebnis wird in denselben Cache zurueckgeschrieben.
+    3. Nur als Notnagel (kein fetch/Cache, z. B. Vorschau): der Wert aus der
+       eigenen Live-DOM.
+  Regex, Plausibilitaetsfenster (0,50-100 EUR), Parse- und Label-Formel sind
+  BYTE-IDENTISCH zum Hero (papierhandtuecher-hero.html, GRUNDPREIS-SYNC).
+  Wird kein plausibler Preis gefunden, bleibt der Banner ausgeblendet
+  (fail-open) -> nie eine falsche Preisaussage.
+
+  >>> VOR GO-LIVE EINMAL PRUEFEN: Die Regex erwartet die Grundpreis-Schreibweise
+      ".../ 1000 Stück" (ohne Tausenderpunkt) - genau wie der bereits produktive
+      Hero-Sync. Auf einer echten Unterkategorie-Seite kurz verifizieren, dass
+      .product-price-unit so rendert. Falls der Shop "/ 1.000 Stück" rendert,
+      Regex HIER UND im Hero (GP_RE) gemeinsam anpassen, damit die Paritaet
+      erhalten bleibt. <<<
+
+  ============================================================================
+  EINBAU  (empfohlener Weg D: ein geteiltes Snippet, kein Theme-Build,
+           keine 5-fache Layout-Pflege, update-sicher)
+  ----------------------------------------------------------------------------
+  ThemeWare Modern Pro -> Theme-Einstellungen -> "Expert Settings" ->
+  Reiter "Others":
+    * Den Inhalt von  >>> CSS-START <<< ... >>> CSS-END <<<
+      in das Feld  "Individual CSS code"  einfuegen (laedt im <head>).
+    * Den Inhalt von  >>> JS-START <<< ... >>> JS-END <<<
+      in das Feld  "Individual JavaScript code"  einfuegen
+      (kompletter <script>-Tag; laeuft am Seitenende).
+  Alternativ als ausgelagerte CSS-/JS-Datei-URL hinterlegen (besser cachebar;
+  spaeter koennte der Hero dieselbe Datei teilen = eine Single Source of Truth).
+
+  Das Snippet laeuft global, aktiviert sich aber ueber den GUARD (SUBCATS-Map)
+  nur auf den 5 Papierhandtuch-Unterkategorien. Der Guard matcht das Pfad-ENDE
+  (endsWith), funktioniert also auch unter einem Sprach-/Channel-Praefix
+  (z. B. /de/papierhandtuecher-1-lagig).
+
+  ----------------------------------------------------------------------------
+  FALLBACK-WEGE (nur falls Weg D nicht passt)
+    A) Pro Unterkategorie ein Erlebniswelt-Layout mit einem HTML-Block
+       ("Custom code (HTML/CSS/JS)") ganz oben in der obersten Section; denselben
+       CSS+JS-Inhalt einfuegen. Funktioniert ohne Expert-Settings-Zugriff,
+       kostet aber 5-fache Layout-Pflege.
+    C) Twig-Override (serverseitig, flackerfrei): im abgeleiteten Theme
+       storefront/element/cms-element-product-listing.html.twig ueberschreiben,
+       Bestpreis aus product.calculatedCheapestPrice.referencePrice rendern und
+       per parent() das Listing darunter setzen. Robusteste, aber aufwendigste
+       Variante (Child-Theme + theme:compile). referencePrice ist nur serverseitig
+       (Twig) verfuegbar, nicht im Client-JS.
+    NICHT geeignet: category.description (wird per sw_sanitize gefiltert ->
+       Inline-JS faellt raus; taugt nur fuer statischen Text = Konsistenzrisiko).
+
+  ----------------------------------------------------------------------------
+  PFLEGE / ANPASSEN
+    * Neue/umbenannte Unterkategorie -> SUBCATS-Map unten ergaenzen
+      (Pfad -> Anzeige-Label = Rail-Label). Die Pfade muessen zu den Rail-Links
+      im Hero passen (gleiche Cache-Schluessel).
+    * Optik ist auf .hph-catbanner gescoped (kollidiert nicht mit dem Theme);
+      Farb-Disziplin wie im Hero: Navy/Hairline, KEIN Petrol (--hph-action),
+      kein Zertifikats-Gruen. Betonung des Preises rein ueber den Tonwert
+      (dunkelste Navy-Stufe), nicht ueber einen Farbsprung.
+    * SCHRIFT/DSGVO: Der Banner nutzt 'Open Sans' und faellt sauber auf system-ui
+      zurueck. Fuer eine 1:1-Optik wie an der Rail sollte 'Open Sans' im Theme
+      verfuegbar / selbst gehostet sein (Google Fonts NICHT per <link> nachladen
+      -> IP-Uebermittlung, abmahnfaehig; siehe DSGVO-Hinweis im Hero-Block).
+
+  Diese Datei ist Quelle + lokale Vorschau. Der <body>-Wrapper oben dient nur der
+  Vorschau und wird NICHT mit ins Theme kopiert. Ins Shop-Theme gehoeren nur die
+  zwei markierten Bloecke (CSS-START..CSS-END und JS-START..JS-END).
+  ============================================================================
+-->
+
+
+<!-- >>> CSS-START >>>  (Feld "Individual CSS code") -->
+<style>
+/* "Ab"-Preis-Banner fuer Unterkategorie-Listings. Vollstaendig auf .hph-catbanner
+   gescoped; Tokens 1:1 aus papierhandtuecher-hero.html (auf der Listing-Seite
+   fehlen die :root-Vars des Hero-Blocks, daher hier lokal gespiegelt). */
+.hph-catbanner{
+  --hph-ink:        #0a2d47;                 /* Ueberschrift/Haupttext (Navy) */
+  --hph-ink-soft:   #4b5867;                 /* gedaempfter Text */
+  --hph-ink-mute:   oklch(0.52 0.028 245);   /* tertiaere, AA-konforme Stufe */
+  --hph-ink-strong: oklch(0.26 0.05 245);    /* dunkelste Stufe: Preisanker (Tonwert-Betonung) */
+  --hph-brand:      #4b6b8b;                  /* Navy-Akzent NUR fuer Icons */
+  --hph-hairline:   oklch(0.30 0.045 245 / .12);
+
+  box-sizing:border-box;
+  display:flex;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:.35em .85em;
+  margin:0 0 clamp(14px, 2vw, 22px);
+  padding:clamp(10px, 1.4vw, 14px) clamp(14px, 1.8vw, 20px);
+  border:1px solid var(--hph-hairline);
+  border-radius:12px;
+  background:linear-gradient(180deg, #ffffff, oklch(0.985 0.004 245));
+  box-shadow:
+    inset 0 1px 0 oklch(0.99 0.004 245 / .9),
+    0 10px 26px -16px oklch(0.30 0.045 245 / .12);
+  color:var(--hph-ink);
+  font-family:'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.hph-catbanner *,
+.hph-catbanner *::before,
+.hph-catbanner *::after{ box-sizing:border-box; }
+
+/* fail-open: solange kein plausibler Preis feststeht, ist der Banner aus.
+   !important schlaegt das display:flex der Komponente (sonst bliebe er sichtbar). */
+.hph-catbanner[hidden]{ display:none !important; }
+
+/* kleines Preisschild-Icon (Navy = erlaubte Icon-Ebene), reine Wiedererkennung */
+.hph-catbanner__icon{
+  width:1.15em; height:1.15em; flex:none;
+  align-self:center;
+  color:var(--hph-brand);
+}
+.hph-catbanner__label{
+  font-weight:700;
+  letter-spacing:-0.01em;
+  color:var(--hph-ink);
+  font-size:clamp(.98rem, .93rem + .25vw, 1.14rem);
+}
+.hph-catbanner__note{
+  font-weight:400;
+  color:var(--hph-ink-mute);
+  font-size:clamp(.82rem, .78rem + .12vw, .9rem);
+}
+.hph-catbanner__price{
+  margin-left:auto;                 /* Preis nach rechts (breite Viewports) */
+  font-weight:700;
+  color:var(--hph-ink-strong);      /* Tonwert-Betonung statt Farbsprung */
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+  font-size:clamp(1.02rem, .96rem + .4vw, 1.25rem);
+}
+/* schmale Viewports: Preis bricht in eine eigene Zeile, bleibt linksbuendig */
+@media (max-width:560px){
+  .hph-catbanner{ gap:.3em .6em; }
+  .hph-catbanner__price{ margin-left:0; flex-basis:100%; }
+}
+</style>
+<!-- <<< CSS-END <<< -->
+
+
+<!-- >>> JS-START >>>  (Feld "Individual JavaScript code") -->
+<script>
+(function () {
+  'use strict';
+  try {
+    /* ---- 1) Anzeige-/Cache-Konfiguration: Pfad -> Anzeige-Label (= Rail-Label) ----
+       Pfade identisch zu den Rail-Kachel-Links im Hero (gleiche Cache-Schluessel).
+       Bei neuer/umbenannter Unterkategorie hier ergaenzen. */
+    var SUBCATS = {
+      '/papierhandtuecher-1-lagig':   '1-lagig · Z-Falz',
+      '/papierhandtuecher-2-lagig':   '2-lagig · Z-Falz',
+      '/papierhandtuecher-3-lagig':   '3-lagig · Z-Falz',
+      '/papierhandtuecher-interfold': 'Interfold',
+      '/papierhandtuecher-c-falz':    'C-Falz'
+    };
+
+    /* ---- 2) GUARD: nur auf den 5 Unterkategorie-Listings aktiv ----
+       Pfad-ENDE vergleichen (das fuehrende '/' im Key erzwingt eine Segmentgrenze)
+       -> robust auch unter Sprach-/Channel-Praefix (/de/papierhandtuecher-1-lagig). */
+    var path = (location.pathname || '').replace(/\/+$/, '') || '/';
+    var label = null, cacheKey = null;
+    for (var key in SUBCATS) {
+      if (!Object.prototype.hasOwnProperty.call(SUBCATS, key)) continue;
+      if (path === key || path.length > key.length && path.slice(-key.length) === key) {
+        label = SUBCATS[key];
+        cacheKey = key;     /* gleicher Schluessel wie der Hero (ohne Praefix) -> Cache-Paritaet */
+        break;
+      }
+    }
+    if (!label) return;
+
+    /* ---- 3) Parse-Logik IDENTISCH zum Hero-GRUNDPREIS-SYNC (garantierte Konsistenz) ---- */
+    var GP_KEY    = 'hphRailGrundpreise';     /* gemeinsamer Cache mit dem Hero */
+    var GP_TTL_MS = 10 * 60 * 1000;           /* 10 Minuten */
+    var GP_RE     = /(\d{1,3}(?:\.\d{3})*,\d{2})\s*€\*?\s*\/\s*1000\s*Stück/;
+    var GP_MIN    = 0.5, GP_MAX = 100;        /* Plausibilitaetsfenster gegen Parser-Ausreisser */
+    function gpParse(str) { return parseFloat(str.replace(/\./g, '').replace(',', '.')); }
+    function gpLabel(eur) { return 'ab ' + eur.toFixed(2).replace('.', ',') + ' € netto / 1.000 Stück'; }
+    function gpOk(eur)    { return typeof eur === 'number' && eur >= GP_MIN && eur <= GP_MAX; }
+
+    /* guenstigsten Grundpreis in einem Wurzelknoten (Live-DOM ODER gefetchtes Document)
+       suchen - nur innerhalb .cms-element-product-listing, damit Cross-Selling-Slider
+       den "ab"-Preis nicht verfaelschen. */
+    function gpCheapest(root) {
+      if (!root || !root.querySelectorAll) return null;
+      var scope = root.querySelector('.cms-element-product-listing') || root;
+      var units = scope.querySelectorAll('.product-price-unit');
+      var best  = null;
+      Array.prototype.forEach.call(units, function (el) {
+        var m = GP_RE.exec(el.textContent || '');
+        if (!m) return;
+        var eur = gpParse(m[1]);
+        if (gpOk(eur) && (best === null || eur < best)) best = eur;
+      });
+      return best;
+    }
+
+    /* ---- 4) Gemeinsamer Cache (Schluessel/Format wie der Hero) ---- */
+    function readCache() {
+      try { return JSON.parse(localStorage.getItem(GP_KEY) || 'null'); } catch (e) { return null; }
+    }
+    function cachedPrice() {
+      var c = readCache();
+      if (c && c.prices) {
+        var v = c.prices[path];
+        if (typeof v !== 'number') v = c.prices[cacheKey];
+        if (gpOk(v)) return { eur: v, fresh: (Date.now() - (c.t || 0)) < GP_TTL_MS };
+      }
+      return null;
+    }
+    function writeCache(eur) {
+      try {
+        var c = readCache() || { t: 0, prices: {} };
+        if (!c.prices) c.prices = {};
+        c.prices[cacheKey] = eur;   /* Hero-Schluessel -> beide Seiten teilen denselben Wert */
+        c.t = Date.now();
+        localStorage.setItem(GP_KEY, JSON.stringify(c));
+      } catch (e) {}
+    }
+
+    /* ---- 5) Banner-DOM: einmal anlegen, robust OBERHALB des Listings halten ---- */
+    var ICON = '<svg class="hph-catbanner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"'
+             + ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+             + '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414'
+             + 'l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42Z"/>'
+             + '<circle cx="7.5" cy="7.5" r="1.1"/></svg>';
+
+    function findWrap() {
+      return document.querySelector('.cms-element-product-listing-wrapper')
+          || document.querySelector('.cms-element-product-listing');
+    }
+
+    var currentEur = null;   /* stabiler Kategorie-Bestpreis (ungefiltert), unabhaengig von Filter/Sort */
+
+    /* legt den Banner an (falls noetig) und sorgt dafuer, dass er direkt VOR dem
+       Listing-Wrapper sitzt; spiegelt currentEur idempotent in den DOM (kein Loop,
+       keine ueberfluessigen aria-live-Ansagen). */
+    function paint() {
+      var wrap = findWrap();
+      var b = document.querySelector('.hph-catbanner');
+
+      if (!b) {
+        if (!wrap || !wrap.parentNode) return;   /* noch kein Listing -> spaeter erneut (Observer) */
+        b = document.createElement('div');
+        b.className = 'hph-catbanner';
+        b.setAttribute('role', 'note');
+        b.hidden = true;
+        b.innerHTML = ICON
+          + '<span class="hph-catbanner__label"></span>'
+          + '<span class="hph-catbanner__note">günstigster Preis der Kategorie</span>'
+          + '<span class="hph-catbanner__price" aria-live="polite"></span>';
+        b.querySelector('.hph-catbanner__label').textContent = label;
+      }
+      /* (re)platzieren: ueberlebt AJAX-Inhaltstausch; bei vollem Wrapper-Austausch neu davor setzen */
+      if (wrap && wrap.parentNode && b.nextElementSibling !== wrap) {
+        wrap.parentNode.insertBefore(b, wrap);
+      }
+
+      var priceEl = b.querySelector('.hph-catbanner__price');
+      if (gpOk(currentEur)) {
+        var txt = gpLabel(currentEur);
+        if (priceEl.textContent !== txt) priceEl.textContent = txt;   /* nur bei echter Aenderung */
+        if (b.hidden) b.hidden = false;
+      } else if (!b.hidden) {
+        b.hidden = true;   /* fail-open */
+      }
+    }
+
+    function setPrice(eur) {
+      if (gpOk(eur)) currentEur = eur;
+      paint();
+    }
+
+    /* ---- 6) Frischer, UNGEFILTERTER Kategoriepreis per fetch (Quelle der Wahrheit, = Hero) ---- */
+    function refreshFromNetwork() {
+      if (!window.fetch || !window.DOMParser) return;
+      fetch(location.pathname, { credentials: 'same-origin' })   /* eigene URL OHNE Query -> ungefiltert */
+        .then(function (r) { return r.ok ? r.text() : null; })
+        .then(function (html) {
+          if (!html) return;
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          var eur = gpCheapest(doc);
+          if (gpOk(eur)) { writeCache(eur); setPrice(eur); }
+        })
+        .catch(function () { /* fail-open: Cache/Live-DOM bleibt stehen */ });
+    }
+
+    /* ---- 7) Start ---- */
+    function start() {
+      /* a) Sofort aus gemeinsamem Cache (identisch zum Hero), sonst Live-DOM-Notnagel */
+      var c = cachedPrice();
+      if (c) setPrice(c.eur);
+      else {
+        var live = gpCheapest(document);
+        if (gpOk(live)) setPrice(live); else paint();   /* Banner ggf. hidden anlegen */
+      }
+
+      /* b) Frischen ungefilterten Wert holen, wenn Cache fehlt/abgelaufen */
+      if (!c || !c.fresh) refreshFromNetwork();
+
+      /* c) Banner-Platzierung robust halten: spaet erscheinendes oder per AJAX
+            ausgetauschtes Listing -> paint() (idempotent) erneut. Beobachtet einen
+            stabilen Vorfahren, damit auch ein voller Wrapper-Austausch erfasst wird. */
+      try {
+        var floor = document.getElementById('content-main')
+                 || document.querySelector('.cms-listing-col, .cms-page, main')
+                 || document.body;
+        if (window.MutationObserver && floor) {
+          var t;
+          new MutationObserver(function () { clearTimeout(t); t = setTimeout(paint, 150); })
+            .observe(floor, { childList: true, subtree: true });
+        }
+      } catch (e) {}
+
+      /* d) Optionaler offizieller Listing-Hook (Preis ist ohnehin filter-stabil; dient nur
+            dazu, den Banner nach einem AJAX-Refresh prompt wieder zu platzieren).
+            getPluginInstances('Listing') liefert eine Map (.size/.forEach), KEIN Array.
+            Beim ersten Lauf existieren die Plugins evtl. noch nicht -> auch auf 'load' versuchen. */
+      function hookListing() {
+        try {
+          var pm = window.PluginManager;
+          var insts = pm && pm.getPluginInstances ? pm.getPluginInstances('Listing') : null;
+          if (insts && insts.size) {
+            insts.forEach(function (p) {
+              if (p && p.$emitter && p.$emitter.subscribe) {
+                p.$emitter.subscribe('Listing/afterRenderResponse', paint);
+              }
+            });
+          }
+        } catch (e) {}
+      }
+      hookListing();
+      window.addEventListener('load', hookListing);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', start);
+    } else {
+      start();
+    }
+  } catch (e) {
+    /* Fail-open: bei jedem Fehler bleibt die Seite unveraendert (kein Banner). */
+  }
+})();
+</script>
+<!-- <<< JS-END <<< -->
+
+</body>
+</html>

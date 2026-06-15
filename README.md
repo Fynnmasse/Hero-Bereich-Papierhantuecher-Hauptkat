@@ -33,6 +33,12 @@ Eigenständiger Hero-Bereich für die Shopware-6-Kategorieseite **Papierhandtüc
 - [`papierhandtuecher-hero.html`](papierhandtuecher-hero.html) – fertiger,
   selbst-enthaltener Block (HTML + gescopetes CSS + Vanilla-JS, keine Libraries).
   Alle Klassen unter dem Präfix `.hph-`, kollidiert nicht mit dem Theme.
+- [`unterkategorie-abpreis-banner.html`](unterkategorie-abpreis-banner.html) –
+  Block **B2**: geteiltes CSS+JS-Snippet, das auf den Unterkategorie-Listing-Seiten
+  oberhalb des Produkt-Listings denselben „ab …€“-Bestpreis zeigt wie die Rail
+  (gemeinsamer localStorage-Cache + Fetch der ungefilterten Kategorie-URL; Guard,
+  fail-open, AJAX-fest). Einbau-Anleitung + Fallback-Wege A/C im Datei-Kopf;
+  Einbau via ThemeWare Expert Settings → Others → Individual JS/CSS.
 
 ## Einbindung in Shopware (Erlebniswelt)
 
@@ -78,10 +84,13 @@ C-Falz 22,29 €). Sie müssen bei jeder Preisänderung **mitgezogen** werden �
 ein veralteter „ab“-Preis ist irreführende Werbung (UWG-Risiko). Empfehlung:
 langfristig dynamisch aus Shopware befüllen.
 
-> **Nächster Schritt (B2):** Auf den Unterkategorie-Listing-Seiten soll derselbe
-> "ab …€"-Bestpreis als wiedererkennbarer Banner oberhalb des Produkt-Listings
-> erscheinen (geplant via geteiltem JS/CSS über die ThemeWare Expert Settings;
-> liest live denselben Grundpreis wie die Rail – Konsistenz Haupt→Unterkategorie).
+> **Block B2 ist umgesetzt:** Den „ab …€“-Bestpreis zeigt jetzt
+> [`unterkategorie-abpreis-banner.html`](unterkategorie-abpreis-banner.html) auf den
+> Unterkategorie-Seiten – Quelle/Regex/Label identisch zum Rail-Grundpreis-Sync,
+> gespeist aus dem gemeinsamen localStorage-Cache + einem Fetch der **ungefilterten**
+> Kategorie-URL (also konsistent zur Rail und unabhängig von Filter/Sortierung/Seite).
+> Vor Go-live einmal die Grundpreis-Schreibweise „/ 1000 Stück“ an einer echten
+> Unterkategorie verifizieren (Detail im Datei-Kopf).
 
 ## Robustheit
 
