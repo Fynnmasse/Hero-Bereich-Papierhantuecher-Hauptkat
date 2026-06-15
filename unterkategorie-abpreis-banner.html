@@ -18,6 +18,9 @@
   der Kunde auf der Hauptkategorie an der Rail-Kachel gesehen hat. So findet er
   den Preis sofort wieder, statt ihn unter den Produkten zu suchen
   (Konsistenz Hauptkategorie -> Unterkategorie).
+  Der angezeigte Preis ist zugleich ein Link zum guenstigsten Artikel, der genau
+  diesen Grundpreis stellt (Detail-Link der betreffenden Produktkachel aus der
+  UNGEFILTERTEN Kategorieseite -> derselbe Artikel, der den "ab"-Preis bestimmt).
 
   WIE DER PREIS BESTIMMT WIRD (Konsistenz + UWG)
   Der "ab"-Preis ist der guenstigste GRUNDPREIS der GANZEN Unterkategorie und
@@ -108,10 +111,13 @@
 .hph-catbanner{
   --hph-ink:        #0a2d47;                 /* Ueberschrift/Haupttext (Navy) */
   --hph-ink-soft:   #4b5867;                 /* gedaempfter Text */
-  --hph-ink-mute:   oklch(0.52 0.028 245);   /* tertiaere, AA-konforme Stufe */
-  --hph-ink-strong: oklch(0.26 0.05 245);    /* dunkelste Stufe: Preisanker (Tonwert-Betonung) */
-  --hph-brand:      #4b6b8b;                  /* Navy-Akzent NUR fuer Icons */
-  --hph-hairline:   oklch(0.30 0.045 245 / .12);
+  /* Farben als Hex/rgba statt oklch(): der Theme-SCSS-Compiler (scssphp) kennt
+     oklch() nicht und bricht sonst mit "parse error" ab. Werte = sRGB-Abbild der
+     Hero-Tokens (oklch(0.52 0.028 245) / oklch(0.26 0.05 245) / 0.30 0.045 245). */
+  --hph-ink-mute:   #5c6b78;                 /* tertiaere, AA-konforme Stufe (5.5:1 auf Weiss) */
+  --hph-ink-strong: #0c263a;                 /* dunkelste Stufe: Preisanker (Tonwert-Betonung) */
+  --hph-brand:      #4b6b8b;                 /* Navy-Akzent NUR fuer Icons */
+  --hph-hairline:   rgba(25, 48, 67, .12);
 
   box-sizing:border-box;
   display:flex;
@@ -122,10 +128,10 @@
   padding:clamp(10px, 1.4vw, 14px) clamp(14px, 1.8vw, 20px);
   border:1px solid var(--hph-hairline);
   border-radius:12px;
-  background:linear-gradient(180deg, #ffffff, oklch(0.985 0.004 245));
+  background:linear-gradient(180deg, #ffffff, #f8fafd);
   box-shadow:
-    inset 0 1px 0 oklch(0.99 0.004 245 / .9),
-    0 10px 26px -16px oklch(0.30 0.045 245 / .12);
+    inset 0 1px 0 rgba(250, 252, 254, .9),
+    0 10px 26px -16px rgba(25, 48, 67, .12);
   color:var(--hph-ink);
   font-family:'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing:antialiased;
@@ -164,7 +170,22 @@
   font-variant-numeric:tabular-nums;
   white-space:nowrap;
   font-size:clamp(16px, 1.6vw, 20px);
+  text-decoration:none;             /* Grundzustand; Link-Affordance nur bei [href] (s. u.) */
 }
+/* Sobald der guenstigste Artikel bekannt ist, wird der Preis ein Link dorthin.
+   Ruhige Affordance (Hairline-Unterstrich), erst beim Hover/Fokus voll sichtbar -
+   bleibt im "ruhigen Banner"-Duktus, kein Farbsprung. */
+.hph-catbanner__price[href]{
+  cursor:pointer;
+  text-decoration:underline;
+  text-decoration-color:var(--hph-hairline);
+  text-underline-offset:3px;
+  text-decoration-thickness:1px;
+  transition:text-decoration-color .15s ease;
+}
+.hph-catbanner__price[href]:hover,
+.hph-catbanner__price[href]:focus-visible{ text-decoration-color:currentColor; }
+.hph-catbanner__price:focus-visible{ outline:2px solid var(--hph-ink-strong); outline-offset:3px; border-radius:4px; }
 /* schmale Viewports: Preis bricht in eine eigene Zeile, bleibt linksbuendig */
 @media (max-width:560px){
   .hph-catbanner{ gap:.3em .6em; }
@@ -214,9 +235,25 @@
     function gpLabel(eur) { return 'ab ' + eur.toFixed(2).replace('.', ',') + ' € netto / 1.000 Stück'; }
     function gpOk(eur)    { return typeof eur === 'number' && eur >= GP_MIN && eur <= GP_MAX; }
 
+    /* Produkt-Detail-Link zur Preiszeile finden: vom .product-price-unit hoch zur
+       Produktkachel, dort der Titel-Link (Fallbacks: Bild-Link / erster a[href]).
+       Relativ ODER absolut -> immer gegen die aktuelle URL aufgeloest. null = kein Link. */
+    function gpHref(el) {
+      try {
+        var box = (el.closest && (el.closest('.product-box') || el.closest('.card') || el.closest('article'))) || null;
+        if (!box) return null;
+        var a = box.querySelector('a.product-name')
+             || box.querySelector('a.product-image-link')
+             || box.querySelector('a[href]');
+        var raw = a && a.getAttribute('href');
+        if (!raw || raw.charAt(0) === '#') return null;
+        return new URL(raw, location.href).href;
+      } catch (e) { return null; }
+    }
+
     /* guenstigsten Grundpreis in einem Wurzelknoten (Live-DOM ODER gefetchtes Document)
        suchen - nur innerhalb .cms-element-product-listing, damit Cross-Selling-Slider
-       den "ab"-Preis nicht verfaelschen. */
+       den "ab"-Preis nicht verfaelschen. Liefert {eur, href} des guenstigsten Artikels. */
     function gpCheapest(root) {
       if (!root || !root.querySelectorAll) return null;
       var scope = root.querySelector('.cms-element-product-listing') || root;
@@ -226,7 +263,7 @@
         var m = GP_RE.exec(el.textContent || '');
         if (!m) return;
         var eur = gpParse(m[1]);
-        if (gpOk(eur) && (best === null || eur < best)) best = eur;
+        if (gpOk(eur) && (best === null || eur < best.eur)) best = { eur: eur, href: gpHref(el) };
       });
       return best;
     }
@@ -235,20 +272,30 @@
     function readCache() {
       try { return JSON.parse(localStorage.getItem(GP_KEY) || 'null'); } catch (e) { return null; }
     }
-    function cachedPrice() {
+    function cachedBest() {
       var c = readCache();
       if (c && c.prices) {
         var v = c.prices[path];
         if (typeof v !== 'number') v = c.prices[cacheKey];
-        if (gpOk(v)) return { eur: v, fresh: (Date.now() - (c.t || 0)) < GP_TTL_MS };
+        if (gpOk(v)) {
+          /* Link nur uebernehmen, wenn er zum gecachten Preis gehoert (der Hero
+             aktualisiert nur c.prices, nicht c.hrefs -> sonst koennte der Link veralten). */
+          var hb = c.hrefs && (c.hrefs[path] || c.hrefs[cacheKey]);
+          var href = (hb && hb.eur === v && typeof hb.href === 'string') ? hb.href : null;
+          return { eur: v, href: href, fresh: (Date.now() - (c.t || 0)) < GP_TTL_MS };
+        }
       }
       return null;
     }
-    function writeCache(eur) {
+    function writeCache(eur, href) {
       try {
         var c = readCache() || { t: 0, prices: {} };
         if (!c.prices) c.prices = {};
-        c.prices[cacheKey] = eur;   /* Hero-Schluessel -> beide Seiten teilen denselben Wert */
+        c.prices[cacheKey] = eur;   /* Hero-Schluessel -> beide Seiten teilen denselben Wert (Zahl, Hero-Parität) */
+        if (href) {                 /* Links in separater Map -> Hero-Lesen/-Schreiben bleibt unberuehrt */
+          if (!c.hrefs) c.hrefs = {};
+          c.hrefs[cacheKey] = { eur: eur, href: href };   /* an Preis gekoppelt = Stale-Schutz */
+        }
         c.t = Date.now();
         localStorage.setItem(GP_KEY, JSON.stringify(c));
       } catch (e) {}
@@ -266,11 +313,12 @@
           || document.querySelector('.cms-element-product-listing');
     }
 
-    var currentEur = null;   /* stabiler Kategorie-Bestpreis (ungefiltert), unabhaengig von Filter/Sort */
+    var currentEur  = null;   /* stabiler Kategorie-Bestpreis (ungefiltert), unabhaengig von Filter/Sort */
+    var currentHref = null;   /* Detail-Link des Artikels, der diesen Preis stellt (sobald aufgeloest) */
 
     /* legt den Banner an (falls noetig) und sorgt dafuer, dass er direkt VOR dem
-       Listing-Wrapper sitzt; spiegelt currentEur idempotent in den DOM (kein Loop,
-       keine ueberfluessigen aria-live-Ansagen). */
+       Listing-Wrapper sitzt; spiegelt currentEur/currentHref idempotent in den DOM
+       (kein Loop, keine ueberfluessigen aria-live-Ansagen). */
     function paint() {
       var wrap = findWrap();
       var b = document.querySelector('.hph-catbanner');
@@ -284,7 +332,7 @@
         b.innerHTML = ICON
           + '<span class="hph-catbanner__label"></span>'
           + '<span class="hph-catbanner__note">günstigster Preis der Kategorie</span>'
-          + '<span class="hph-catbanner__price" aria-live="polite"></span>';
+          + '<a class="hph-catbanner__price" aria-live="polite"></a>';   /* wird zum Link, sobald der Artikel bekannt ist */
         b.querySelector('.hph-catbanner__label').textContent = label;
       }
       /* (re)platzieren: ueberlebt AJAX-Inhaltstausch; bei vollem Wrapper-Austausch neu davor setzen */
@@ -296,14 +344,29 @@
       if (gpOk(currentEur)) {
         var txt = gpLabel(currentEur);
         if (priceEl.textContent !== txt) priceEl.textContent = txt;   /* nur bei echter Aenderung */
+        /* Preis -> Link zum guenstigsten Artikel, sobald bekannt; sonst reiner Text (kein href = nicht fokussierbar) */
+        if (currentHref) {
+          if (priceEl.getAttribute('href') !== currentHref) priceEl.setAttribute('href', currentHref);
+          if (!priceEl.getAttribute('aria-label')) priceEl.setAttribute('aria-label', 'Zum günstigsten Artikel der Kategorie');
+        } else if (priceEl.hasAttribute('href')) {
+          priceEl.removeAttribute('href');
+          priceEl.removeAttribute('aria-label');
+        }
         if (b.hidden) b.hidden = false;
       } else if (!b.hidden) {
         b.hidden = true;   /* fail-open */
       }
     }
 
-    function setPrice(eur) {
-      if (gpOk(eur)) currentEur = eur;
+    function setBest(best) {
+      if (best && gpOk(best.eur)) {
+        if (best.eur !== currentEur) {
+          currentEur  = best.eur;
+          currentHref = best.href || null;   /* neuer Preis -> nur passender Link, sonst KEINER (kein Stale-Link) */
+        } else if (best.href) {
+          currentHref = best.href;           /* gleicher Preis, Link jetzt aufgeloest -> nachziehen */
+        }
+      }
       paint();
     }
 
@@ -315,8 +378,8 @@
         .then(function (html) {
           if (!html) return;
           var doc = new DOMParser().parseFromString(html, 'text/html');
-          var eur = gpCheapest(doc);
-          if (gpOk(eur)) { writeCache(eur); setPrice(eur); }
+          var best = gpCheapest(doc);
+          if (best && gpOk(best.eur)) { writeCache(best.eur, best.href); setBest(best); }
         })
         .catch(function () { /* fail-open: Cache/Live-DOM bleibt stehen */ });
     }
@@ -324,15 +387,16 @@
     /* ---- 7) Start ---- */
     function start() {
       /* a) Sofort aus gemeinsamem Cache (identisch zum Hero), sonst Live-DOM-Notnagel */
-      var c = cachedPrice();
-      if (c) setPrice(c.eur);
+      var c = cachedBest();
+      if (c) setBest(c);
       else {
         var live = gpCheapest(document);
-        if (gpOk(live)) setPrice(live); else paint();   /* Banner ggf. hidden anlegen */
+        if (live && gpOk(live.eur)) setBest(live); else paint();   /* Banner ggf. hidden anlegen */
       }
 
-      /* b) Frischen ungefilterten Wert holen, wenn Cache fehlt/abgelaufen */
-      if (!c || !c.fresh) refreshFromNetwork();
+      /* b) Frischen ungefilterten Wert holen, wenn Cache fehlt/abgelaufen ODER der Link
+            noch nicht aufgeloest ist (Hero fuellt nur den Preis, nicht den Produkt-Link). */
+      if (!c || !c.fresh || !currentHref) refreshFromNetwork();
 
       /* c) Banner-Platzierung robust halten: spaet erscheinendes oder per AJAX
             ausgetauschtes Listing -> paint() (idempotent) erneut. Beobachtet einen
