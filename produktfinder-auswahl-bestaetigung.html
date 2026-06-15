@@ -73,7 +73,7 @@
   background: oklch(0.93 0.03 245); color: var(--hph-brand-dark);
 }
 .hph-auswahl__ico svg{ width:15px; height:15px; }
-.hph-auswahl__title{ font-weight:700; font-size: clamp(1rem,calc(.95rem + .3vw),1.18rem); letter-spacing:-0.01em; color: var(--hph-ink); }   /* calc()-Wrap: scssphp addiert rem+vw sonst zur Compile-Zeit */
+.hph-auswahl__title{ font-weight:700; font-size: clamp(16px,1.3vw,18.5px); letter-spacing:-0.01em; color: var(--hph-ink); }   /* feste Pixelgroesse: SCSS-sicher und mobil stabil */
 .hph-auswahl__count{ margin-left:.2em; font-size:.85rem; font-weight:600; color: var(--hph-ink-mute); }
 .hph-auswahl__chips{ list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px; }
 .hph-auswahl__chip{

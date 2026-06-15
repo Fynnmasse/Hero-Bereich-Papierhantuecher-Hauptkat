@@ -148,14 +148,14 @@
   font-weight:700;
   letter-spacing:-0.01em;
   color:var(--hph-ink);
-  /* calc()-Wrap um rem+vw: Shopware kompiliert dieses CSS-Feld als SCSS (scssphp);
-     ohne calc() wird rem+vw zur Compile-Zeit addiert (Incompatible units vw and rem). */
-  font-size:clamp(.98rem, calc(.93rem + .25vw), 1.14rem);
+  /* Feste Pixelgroessen ohne gemischte Einheiten: der Theme-SCSS-Compiler verarbeitet das
+     sicher und es bleibt mobil stabil, da das Theme die Root-Schrift verkleinert. */
+  font-size:clamp(16px, 1.3vw, 18px);
 }
 .hph-catbanner__note{
   font-weight:400;
   color:var(--hph-ink-mute);
-  font-size:clamp(.82rem, calc(.78rem + .12vw), .9rem);
+  font-size:clamp(13px, 1vw, 14px);
 }
 .hph-catbanner__price{
   margin-left:auto;                 /* Preis nach rechts (breite Viewports) */
@@ -163,7 +163,7 @@
   color:var(--hph-ink-strong);      /* Tonwert-Betonung statt Farbsprung */
   font-variant-numeric:tabular-nums;
   white-space:nowrap;
-  font-size:clamp(1.02rem, calc(.96rem + .4vw), 1.25rem);
+  font-size:clamp(16px, 1.6vw, 20px);
 }
 /* schmale Viewports: Preis bricht in eine eigene Zeile, bleibt linksbuendig */
 @media (max-width:560px){
