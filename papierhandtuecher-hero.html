@@ -98,6 +98,15 @@
 .hph-hero *::before,
 .hph-hero *::after{ box-sizing:border-box; }
 
+/* Shopware-/ThemeWare-Theme setzt global a:hover{ text-decoration:underline } – im Hero
+   unterbinden (alle unsere Links tragen eigene Hover-Stile: Farbwechsel bzw. animierter
+   Unterstrich; der Theme-Unterstrich würde sie doppeln/verfälschen). !important schlägt
+   die globale Theme-Regel unabhängig von deren Spezifität. */
+.hph-hero a,
+.hph-hero a:hover,
+.hph-hero a:focus,
+.hph-hero a:active{ text-decoration:none !important; }
+
 /* ---- Comfortaa nur für SEKTIONS-Überschriften (H1 + Sektions-H2) ----
    Bewusst NICHT für Überschriften in den Karten: Feature-Card-Titel und die
    längeren Akkordeon-Fragen laufen in Open Sans (besser lesbar bei kleineren
@@ -175,42 +184,79 @@
   transition: background-color .2s ease, color .2s ease,
               transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease;
 }
-/* primär = gefüllte Aktions-Pill (gleiche Sprache wie .hph-feature__buy) */
+/* primär = gefüllte Aktions-Pill mit „Pushable"-Tiefe: weicher Schattenstapel + dunklere
+   Unterkante als Tasten-Tiefe; hebt bei Hover an und wird beim Klick eingedrückt
+   (Mechanik nach dem Vorbild, Farben aus unserem System) */
 .hph-hero__cta--primary{
   padding:.82em 1.6em;
   border-radius:980px;
   background: var(--hph-action);
   color: var(--hph-on-brand);
+  box-shadow:
+    0 2px 4px oklch(0.30 0.045 245 / .22),
+    0 7px 13px -3px oklch(0.30 0.045 245 / .20),
+    var(--hph-action-dark) 0 -3px 0 inset;        /* dunkle Unterkante = Tasten-Tiefe */
+  will-change: box-shadow, transform;
 }
 @media (hover:hover) and (pointer:fine){
   .hph-hero__cta--primary:hover{
-    background: var(--hph-action-dark);
-    transform:translateY(-1px);
-    box-shadow:0 8px 20px oklch(0.30 0.045 245 / .20);
+    transform: translateY(-2px);
+    box-shadow:
+      0 4px 8px oklch(0.30 0.045 245 / .28),
+      0 7px 13px -3px oklch(0.30 0.045 245 / .22),
+      var(--hph-action-dark) 0 -3px 0 inset;
   }
 }
-.hph-hero__cta--primary:active{ transform:translateY(0) scale(.97); transition-duration:.1s; }
+.hph-hero__cta--primary:active{
+  transform: translateY(2px);
+  box-shadow: var(--hph-action-dark) 0 3px 8px inset;   /* eingedrückt */
+  transition-duration:.1s;
+}
 .hph-hero__cta--primary:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; }
-/* sekundär = ruhige TONALE Pill (klares Sekundär-Gewicht neben dem gefüllten Primär,
-   damit der B2B-Preis-/Vergleichspfad nicht der leiseste Touchpoint der Seite ist) */
+/* sekundär = animierter Text-Link (kein Button-Hintergrund): der Unterstrich fährt bei Hover
+   von links ein und der Pfeil rückt nach. Klares Sekundär-Gewicht neben dem gefüllten Primär.
+   Mechanik nach dem Vorbild, Farben aus unserem System. */
 .hph-hero__cta--ghost{
-  padding:.7em 1.25em;
-  border-radius:980px;
+  padding:0;
+  background:none;
   color: var(--hph-brand);
-  background: oklch(0.95 0.014 245);
+  gap:.5em;
+  white-space:normal;          /* langer Satz darf auf schmalen Screens umbrechen */
+}
+.hph-hero__cta-underline{
+  position:relative;
+  padding-bottom:4px;          /* Platz für den einfahrenden Unterstrich */
+}
+.hph-hero__cta-underline::after{
+  content:"";
+  position:absolute;
+  left:0; bottom:0;
+  width:100%;
+  height:2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: bottom right;        /* zieht sich beim Verlassen nach rechts zurück */
+  transition: transform .25s ease-out;
+}
+.hph-hero__cta--ghost svg{
+  transform: translateX(-8px);           /* Pfeil im Ruhezustand leicht eingezogen */
+  transition: transform .3s ease;
 }
 @media (hover:hover) and (pointer:fine){
-  .hph-hero__cta--ghost:hover{ color: var(--hph-brand-dark); background: oklch(0.92 0.02 245); transform: translateY(-1px); box-shadow: 0 4px 12px oklch(0.30 0.045 245 / .12); }
-  .hph-hero__cta--ghost:hover .hph-rail__ext{ transform: translateX(2px); }
+  .hph-hero__cta--ghost:hover{ color: var(--hph-brand-dark); }
+  .hph-hero__cta--ghost:hover .hph-hero__cta-underline::after{ transform: scaleX(1); transform-origin: bottom left; }  /* fährt von links ein */
+  .hph-hero__cta--ghost:hover svg{ transform: translateX(0); }                                                         /* Pfeil rückt nach */
 }
-.hph-hero__cta--ghost:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
+.hph-hero__cta--ghost:active svg{ transform: scale(.9); }
+.hph-hero__cta--ghost:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:4px; }
 .hph-hero__cta svg{ width:1em; height:1em; flex:none; }
-.hph-hero__cta--ghost .hph-rail__ext{ width:.82em; height:.82em; margin-left:0; color:inherit; }
 
 /* ---------- Trust-Strip: schlanke Faktenzeile, KEINE Karten ---------- */
 .hph-hero__trust{
   list-style:none;
-  margin: var(--hph-space-sm) 0 0;   /* sitzt jetzt im Kopf, direkt unter der Subline */
+  /* Volle-Breite-Band zwischen Kopf-Band und Rail: in der schmalen Textspalte brachen die drei
+     Einträge zwangsläufig um (~830px Inhalt in einer ~600–740px breiten Spalte). */
+  margin: var(--hph-space-md) 0 var(--hph-space-sm);
   padding:0;
   display:flex;
   flex-wrap:wrap;
@@ -231,10 +277,13 @@
   border-left:1px solid var(--hph-hairline);
 }
 .hph-hero__trust-item svg{ width:1.15em; height:1.15em; flex:none; color: var(--hph-brand); }
-/* auf schmalen Viewports umbrechen lassen und die Linien weglassen */
+/* Volle Breite hält den Strip bis zum Stapel-Breakpoint einzeilig; sobald er darunter umbricht,
+   die Trennlinien weglassen – sonst trüge das erste Element der zweiten Zeile eine führende Haarlinie. */
+@media (max-width:860px){
+  .hph-hero__trust-item + .hph-hero__trust-item{ border-left:0; padding-left:0; }
+}
 @media (max-width:560px){
   .hph-hero__trust{ gap:10px 18px; }
-  .hph-hero__trust-item + .hph-hero__trust-item{ border-left:0; padding-left:0; }
 }
 
 /* ---------- Kopf-Band: Text links, Hintergrundvideo rechts ---------- */
@@ -251,7 +300,7 @@
   position:relative; margin:0; overflow:hidden;
   /* KEIN festes aspect-ratio auf Desktop: das Medium nimmt per align-items:stretch die
      Höhe der Textspalte an, damit kein Höhen-Überschuss die Rail nach unten drückt. */
-  min-height: clamp(230px, 16vw, 300px);           /* Untergrenze, falls die Textspalte kurz ist · flacher gedeckelt: auf breiten Screens zwang 360px den kurzen Text in eine große Zentrier-Lücke unter der Trust-Zeile */
+  min-height: clamp(176px, 13vw, 200px);           /* Untergrenze, falls die Textspalte kurz ist · nach dem Verschieben der CTAs unter die Rail trägt die Spalte nur noch Titel + Subline (~135–180px); flacher Boden hält das Video nah an der Texthöhe und vermeidet die große Zentrier-Lücke */
   border-radius: clamp(20px, 2vw, 28px);          /* identisch zu den Feature-Karten */
   border:1px solid var(--hph-hairline);
   background: linear-gradient(135deg, oklch(0.96 0.012 245), oklch(0.90 0.022 245)); /* Fallback-Fläche bis das Video lädt */
@@ -322,6 +371,11 @@
 /* ---------- Product-Rail ---------- */
 .hph-rail{
   position:relative;        /* Anker für die Slider-Pfeile */
+  /* Rail reagiert auf ihre EIGENE Breite statt auf den Viewport: in der Erlebniswelt ist die
+     CMS-Spalte oft schmaler als der Viewport – mit Viewport-Media-Queries lief die Rail dort
+     über („abgeschnitten"). Als benannter Container schaltet sie korrekt in den Slider-Modus,
+     sobald IHRE Breite < 861px ist. (named → matcht nie einen Theme-Container.) */
+  container: hph-rail / inline-size;
   margin-top: var(--hph-space-xs);
   /* zentrale Maße – pro Breakpoint übersteuerbar (mobil größer) */
   --hph-media-w: clamp(92px, 11vw, 118px);
@@ -923,38 +977,38 @@
 .hph-feature__more:hover svg{ transform: translateX(3px); }
 .hph-feature__more:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; border-radius:6px; }
 
-/* „Jetzt kaufen" – gefüllte Aktions-Pill (gleiche Sprache wie .hph-hero__cta--primary) */
+/* „Jetzt kaufen" – gefüllter Button (blau) mit invertiertem Hover (→ weiß) + nachrückendem Pfeil.
+   Grundzustand: blau gefüllt, weißer Text/Pfeil. Hover: weiße Fläche, blauer Text/Pfeil.
+   Der blaue Rahmen bleibt durchgängig (grenzt den weißen Hover-Zustand auf der weißen Karte ab). */
 .hph-feature__buy{
-  position:relative;        /* Anker für den einschwebenden Hover-Pfeil */
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:.6em 1.25em;
-  border-radius:980px;
+  position:relative;                 /* Anker für das absolut gesetzte Pfeil-Icon */
+  display:inline-block;
+  min-width:9.5em;
+  padding:.62em 1.1em .62em 2.7em;   /* links Platz für den Pfeil reservieren */
+  border-radius:11px;
   background: var(--hph-action);
+  border:.14em solid var(--hph-action);
   color: var(--hph-on-brand);
   font-weight:600;
   font-size: clamp(.95rem,.92rem + .15vw,1.05rem);
   line-height:1.1;
+  text-align:right;
   text-decoration:none;
   white-space:nowrap;
-  transition: background-color .2s ease, transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease;
+  transition: background-color .5s ease, color .5s ease, border-color .5s ease,
+              transform .15s cubic-bezier(.16,1,.3,1), box-shadow .2s ease;
 }
-/* Hover-Pfeil: Label rückt links, Chevron gleitet in den freigewordenen Platz –
-   Button-Breite bleibt fix (nur transform/opacity → kein Layout-Shift) */
-.hph-feature__buy-label{ display:inline-block; transition: transform .25s cubic-bezier(.16,1,.3,1); }
 .hph-feature__buy-arrow{
-  position:absolute; right:.7em; top:50%;
-  width:.85em; height:.85em;
-  opacity:0; transform: translate(-5px,-50%);
-  transition: opacity .2s ease, transform .25s cubic-bezier(.16,1,.3,1);
+  position:absolute; left:.95em; top:50%;
+  width:1.4em; height:1.4em;
+  transform: translateY(-50%);
+  transition: transform .5s ease;
 }
 @media (hover:hover) and (pointer:fine){
-  .hph-feature__buy:hover{ background: var(--hph-action-dark); transform:translateY(-1px); box-shadow:0 6px 16px oklch(0.30 0.045 245 / .18); }
-  .hph-feature__buy:hover .hph-feature__buy-label{ transform: translateX(-.4em); }
-  .hph-feature__buy:hover .hph-feature__buy-arrow{ opacity:1; transform: translate(0,-50%); }
+  .hph-feature__buy:hover{ background:#fff; color: var(--hph-action); }
+  .hph-feature__buy:hover .hph-feature__buy-arrow{ transform: translate(5px,-50%); }   /* Pfeil rückt nach rechts */
 }
-.hph-feature__buy:active{ transform:translateY(0) scale(.97); transition-duration:.1s; }
+.hph-feature__buy:active{ transform: scale(.97); transition-duration:.1s; }
 .hph-feature__buy:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:3px; }
 
 /* Medien: Foto sitzt zentriert am unteren Rand. Höhe + Breite werden begrenzt,
@@ -1254,10 +1308,10 @@
   transform:none;
 }
 
-/* ---------- Responsiv: echter Slider ab Tablet abwärts ----------
-   Slider-Affordance (Pfeile + festes Snapping) schon ab ≤860px – deckungsgleich mit der
-   Intro-Stapelung –, damit die Rail im Bereich 721–860px nicht ohne Hinweis überläuft. */
-@media (max-width:860px){
+/* ---------- Responsiv: echter Slider, sobald die RAIL-BREITE (nicht der Viewport) ≤860px ist ----------
+   Slider-Affordance (Pfeile + festes Snapping) – greift jetzt auch, wenn die Rail in einer
+   schmalen CMS-Spalte sitzt, obwohl der Viewport breit ist. */
+@container hph-rail (max-width:860px){
   .hph-rail__track{
     scroll-snap-type:x mandatory;
     margin-inline:0;                /* Inline-Ausgleich zurücknehmen … */
@@ -1268,13 +1322,12 @@
   .hph-rail__nav{ display:grid; }   /* Pfeile einblenden */
 }
 /* (die Scroll-Mechanik selbst gilt bereits global an .hph-rail__track) */
-@media (max-width:720px){
-  .hph-rail{
-    /* deutlich größere Produktbilder auf dem Handy */
+@container hph-rail (max-width:720px){
+  .hph-rail__track{
+    /* deutlich größere Produktbilder auf dem Handy (Variablen auf dem Track, da Container-Queries
+       das Container-Element .hph-rail selbst nicht stylen können) */
     --hph-media-w: 128px;
     --hph-media-h: 104px;
-  }
-  .hph-rail__track{
     gap:12px;                       /* einheitlicher, kompakter Abstand */
     /* Produkte weichen am Rand sanft aus, wenn sie unter den Chevron scrollen.
        Schmaler Fade (10px): deutet das Ausblenden am Rand nur an. */
@@ -1283,19 +1336,30 @@
   }
 }
 
-/* ---------- Desktop: Produkt-Rail füllt die volle Breite (5 gleiche Spalten) ----------
-   Ab Tablet aufwärts passen alle 5 Falzungen nebeneinander: gleichmäßig verteilt,
-   freistehende Produkte – kein Leerraum rechts neben einer links geclusterten Rail. */
-@media (min-width:861px){
-  .hph-rail{
+/* ---------- Rail breit genug (≥861px EIGENE Breite): volle Breite, 5 gleiche Spalten ----------
+   Alle 5 Falzungen nebeneinander, gleichmäßig verteilt – kein Leerraum rechts. */
+@container hph-rail (min-width:861px){
+  .hph-rail__track{
     --hph-media-w: clamp(112px, 11vw, 150px);
     --hph-media-h: clamp(88px, 9vw, 116px);
-    margin-top: var(--hph-space-xs);   /* Rail rückt näher an die Trust-Zeile (eng) */
+    justify-content:space-between;
   }
-  .hph-rail__track{ justify-content:space-between; }
   .hph-rail__item{ flex:1 1 0; }      /* fünf gleich breite Spalten über die volle Breite */
   .hph-rail__tile{ width:100%; gap: clamp(16px, 1.7vw, 26px); }   /* mehr Luft zwischen größerem Foto und Titel */
 }
+
+/* ---------- Slider-Affordance an den TATSÄCHLICHEN Überlauf gekoppelt (JS setzt .hph-rail--nav) ----------
+   Greift unabhängig vom Breakpoint: auch wenn der 5-Spalten-Modus aktiv ist, die Kacheln aber
+   nicht in die (Erlebniswelt-)Spalte passen → Pfeile einblenden + Rand für die Chevrons + Snap,
+   statt die Rail rechts abzuschneiden. */
+.hph-rail--nav .hph-rail__nav{ display:grid; }
+.hph-rail--nav .hph-rail__track{
+  margin-inline:0;
+  padding-inline:24px;
+  scroll-padding-inline:24px;
+  scroll-snap-type:x mandatory;
+}
+.hph-rail--nav .hph-rail__item{ scroll-snap-align:start; }
 
 /* ---------- Feature-Karten: auf dem Handy als horizontaler Swipe-Slider ----------
    Native scroll-snap (kein JS): wischen, die nächste Karte lugt am Rand hervor. */
@@ -1334,6 +1398,8 @@
   .hph-falztable,
   .hph-showcase{ opacity:1 !important; transform:none !important; transition:none !important; }
   .hph-hero__cta{ transition:none !important; }
+  .hph-hero__cta--ghost svg{ transform:none !important; transition:none !important; }
+  .hph-hero__cta-underline::after{ transition:none !important; }
   /* Hintergrundvideo nicht abspielen -> Standbild zeigen */
   .hph-hero__media .hp-hero-video{ display:none; }
   .hph-hero__media-still{
@@ -1343,8 +1409,7 @@
   .hph-hero__media-toggle{ display:none !important; }   /* Standbild statt Video → Pause-Toggle überflüssig */
   .hph-rail__tile, .hph-rail__media img, .hph-rail__media::after, .hph-rail__nav{ transition:none !important; }  .hph-rail__compare, .hph-rail__compare-box, .hph-rail__compare-box svg, .hph-rail__compare-bar, .hph-rail__compare-go, .hph-rail__compare-seg-btn{ transition:none !important; }
   .hph-feature__card, .hph-feature__more, .hph-feature__buy, .hph-feature__img{ transition:none !important; }
-  .hph-feature__buy-label{ transform:none !important; transition:none !important; }                      /* Kauf-Button: Label ruhig … */
-  .hph-feature__buy-arrow{ opacity:0 !important; transition:none !important; }                           /* … und kein einschwebender Pfeil */
+  .hph-feature__buy-arrow{ transform: translateY(-50%) !important; transition:none !important; }          /* Kauf-Button: Pfeil bleibt ruhig zentriert */
   .hph-rail__ext, .hph-feature__more svg, .hph-feature__seeall svg{ transition:none !important; transform:none !important; }
   .hph-rail__track, .hph-feature__grid{ scroll-behavior:auto; }
   /* Showcase: Reveal/Chevron/Trigger/Panel-Text sofort; Bilder NUR ohne Crossfade
@@ -1445,33 +1510,16 @@
 
       <!-- Subline: Sortiments-Überblick der Hauptkategorie in EINEM Satz – wie ein
            Inhaltsverzeichnis der Seite (Falzarten · Lagen · Liefermenge Karton/Palette).
-           Zertifikate & Lieferzeit nennt der Trust-Strip direkt darunter, den
+           Zertifikate & Lieferzeit nennt das Trust-Strip-Band unter dem Kopf, den
            Staffelpreis tragen Kopf-CTA und Rail-Preisanker – hier nicht doppeln. -->
       <p class="hph-hero__subtitle">Z-Falz, Interfold oder C-Falz, 1- bis 3-lagig: lieferbar vom Karton bis zur Palette.</p>
-
-      <!-- Trust-Strip: belegbare B2B-Fakten, jetzt direkt unter der Subline (zuvor unter der Rail).
-           KEINE Karten, nur Icon + Text mit Haarlinien getrennt. Inhalte nur ändern, wenn die Aussage stimmt. -->
-      <ul class="hph-hero__trust" aria-label="Vertrauensmerkmale">
-        <li class="hph-hero__trust-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42Z"/><circle cx="7.5" cy="7.5" r="1.1"/></svg>
-          Staffelpreise ab Karton
-        </li>
-        <li class="hph-hero__trust-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
-          EU Ecolabel &amp; Blauer Engel
-        </li>
-        <li class="hph-hero__trust-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
-          Lieferung in ca. 4 Werktagen
-        </li>
-      </ul>
 
       <!-- Kopf-Aktionen: primär ins Sortiment (Conversion-Ziel; auf der Kategorieseite fängt der
            Scroll-Handler unten den Klick ab und scrollt sanft zum Listing – via data-hph-scroll-listing –,
            sonst normale Navigation), sekundär zum Produktfinder. href je nach Ziel anpassen. -->
       <div class="hph-hero__actions">
         <a class="hph-hero__cta hph-hero__cta--primary" data-hph-scroll-listing href="https://www.hamburgpapier-shop.de/papierhandtuecher">Zum ganzen Sortiment</a>
-        <a class="hph-hero__cta hph-hero__cta--ghost" href="https://produktfinder.hamburgpapier-shop.de/">Hier das richtige Papierhandtuch finden<svg class="hph-rail__ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+        <a class="hph-hero__cta hph-hero__cta--ghost" href="https://produktfinder.hamburgpapier-shop.de/"><span class="hph-hero__cta-underline">Unsicher? Hier das richtige Papierhandtuch finden</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
       </div>
     </header>
 
@@ -1498,6 +1546,24 @@
         </button>
       </figure>
     </div><!-- /.hph-hero__intro -->
+
+    <!-- Trust-Strip: belegbare B2B-Fakten als volle-Breite-Band unter dem Kopf (zuvor in der schmalen
+         Textspalte – dort brachen die drei Einträge zwangsläufig zweizeilig um). KEINE Karten,
+         nur Icon + Text mit Haarlinien getrennt. Inhalte nur ändern, wenn die Aussage stimmt. -->
+    <ul class="hph-hero__trust" aria-label="Vertrauensmerkmale">
+      <li class="hph-hero__trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42Z"/><circle cx="7.5" cy="7.5" r="1.1"/></svg>
+        Staffelpreise ab Karton
+      </li>
+      <li class="hph-hero__trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+        EU Ecolabel &amp; Blauer Engel
+      </li>
+      <li class="hph-hero__trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+        Lieferung in ca. 4 Werktagen
+      </li>
+    </ul>
 
     <!-- 2) Product-Rail (Unterkategorien) -->
     <!-- Pro Kachel: href, Bild (src/alt), Label und Klartext-Hint anpassen. -->
@@ -1664,7 +1730,7 @@
                   </a>
                   <!-- „Jetzt kaufen": filtert die Listing-Seite auf EU-Ecolabel-Produkte (Custom-Sortierung, Property-Filter af…399)
                        data-hph-cert: marker für den Post-Load-Scroll/Heading-Handler unten im Script. -->
-                  <a class="hph-feature__buy" data-hph-cert="ecolabel" href="https://www.hamburgpapier-shop.de/papierhandtuecher?order=ki-custom-sorting&amp;p=1&amp;properties=af000000000000000000000000000399"><span class="hph-feature__buy-label">Jetzt kaufen</span><svg class="hph-feature__buy-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+                  <a class="hph-feature__buy" data-hph-cert="ecolabel" href="https://www.hamburgpapier-shop.de/papierhandtuecher?order=ki-custom-sorting&amp;p=1&amp;properties=af000000000000000000000000000399"><svg class="hph-feature__buy-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>Jetzt kaufen</a>
                 </div>
               </div>
               <div class="hph-feature__media">
@@ -1689,7 +1755,7 @@
                   </a>
                   <!-- „Jetzt kaufen": filtert die Listing-Seite auf Blauer-Engel-Produkte (Custom-Sortierung, Property-Filter af…398)
                        data-hph-cert: marker für den Post-Load-Scroll/Heading-Handler unten im Script. -->
-                  <a class="hph-feature__buy" data-hph-cert="blauer-engel" href="https://www.hamburgpapier-shop.de/papierhandtuecher?order=ki-custom-sorting&amp;p=1&amp;properties=af000000000000000000000000000398"><span class="hph-feature__buy-label">Jetzt kaufen</span><svg class="hph-feature__buy-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+                  <a class="hph-feature__buy" data-hph-cert="blauer-engel" href="https://www.hamburgpapier-shop.de/papierhandtuecher?order=ki-custom-sorting&amp;p=1&amp;properties=af000000000000000000000000000398"><svg class="hph-feature__buy-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>Jetzt kaufen</a>
                 </div>
               </div>
               <div class="hph-feature__media">
@@ -1884,8 +1950,8 @@
           ['.hph-hero__title',      0, false],   /* Titel zuerst                         */
           ['.hph-hero__subtitle',   1, false],   /* Subline …                            */
           ['.hph-hero__media',      1, false],   /* … und Video zusammen                 */
-          ['.hph-hero__trust-item', 2, false],   /* Trust-Strip jetzt im Kopf (unter der Subline) */
-          ['.hph-hero__actions',    2, false],   /* CTAs                                 */
+          ['.hph-hero__trust-item', 2, false],   /* Trust-Strip-Band (volle Breite unter dem Kopf-Band) */
+          ['.hph-hero__actions',    2, false],   /* CTAs (zurück im Kopf, unter der Subline) */
           ['.hph-rail__item',       3, false]    /* Rail als EINE Einheit (kein Ripple)  */
       ]},
       { root: '.hph-feature', seq: [
@@ -1994,7 +2060,9 @@
       }
       // Pfeile am Anfang/Ende ausblenden
       function update() {
-        var max = track.scrollWidth - track.clientWidth - 1;
+        var overflow = track.scrollWidth - track.clientWidth;
+        rail.classList.toggle('hph-rail--nav', overflow > 1);   /* Pfeile NUR bei echtem Überlauf */
+        var max = overflow - 1;
         prev.disabled = track.scrollLeft <= 0;
         next.disabled = track.scrollLeft >= max;
       }
@@ -2016,6 +2084,13 @@
       }
       track.addEventListener('scroll', onScroll, { passive: true });
       window.addEventListener('resize', onScroll);
+      /* Auch auf Breiten-Änderungen der RAIL selbst reagieren (CMS-Spalte schmaler als der
+         Viewport, spätes Layout/Nachladen in der Erlebniswelt): sonst bliebe der „weiter"-Pfeil
+         fälschlich deaktiviert und die Rail wirkte abgeschnitten. */
+      if (window.ResizeObserver) { new ResizeObserver(onScroll).observe(track); }
+      /* Nach dem Laden der Web-Schrift neu messen: der ResizeObserver feuert nicht, wenn nur der
+         Textinhalt (und damit scrollWidth) wächst, die Track-Box aber gleich breit bleibt. */
+      if (document.fonts && document.fonts.ready) { document.fonts.ready.then(onScroll); }
       update();
 
       /* ---- ③ Vergleichs-Auswahl: ausgewählte Varianten → vorgefilterter Vergleich im Produktfinder ----
