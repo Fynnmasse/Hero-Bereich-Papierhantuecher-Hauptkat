@@ -41,6 +41,13 @@ Eigenständiger Hero-Bereich für die Shopware-6-Kategorieseite **Papierhandtüc
   (gemeinsamer localStorage-Cache + Fetch der ungefilterten Kategorie-URL; Guard,
   fail-open, AJAX-fest). Einbau-Anleitung + Fallback-Wege A/C im Datei-Kopf;
   Einbau via ThemeWare Expert Settings → Others → Individual JS/CSS.
+- [`produktfinder-auswahl-bestaetigung.html`](produktfinder-auswahl-bestaetigung.html) –
+  CSS+JS-Snippet für die **Produktfinder-Vergleichsseite**: liest die vom Hero-Modal
+  übergebenen URL-Parameter (`vglnach`/`vglsets`), übersetzt sie in lesbare Labels und
+  zeigt oben eine **„Ihre Auswahl"-Bestätigung** (Varianten + Liefermenge) – damit der
+  Kunde sieht, dass die Übergabe funktioniert hat. XSS-sicher, fail-open, Mount via
+  `[data-hph-auswahl-mount]`. Einbau-Anleitung im Datei-Kopf (eigenes System →
+  Custom-Code-Einbindung nötig).
 
 ## Einbindung in Shopware (Erlebniswelt)
 

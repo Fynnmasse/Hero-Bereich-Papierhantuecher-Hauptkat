@@ -735,8 +735,25 @@
 .hph-vgl__remove:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:2px; }
 @media (hover:hover) and (pointer:fine){ .hph-vgl__remove:hover{ background: oklch(0.93 0.02 245); color: var(--hph-ink); } }
 
-.hph-vgl__qty{ margin-bottom: var(--hph-space-sm); }
-.hph-vgl__qty-label{ display:block; margin-bottom:8px; font-size:.85rem; font-weight:600; color: var(--hph-ink-soft); }
+/* Liefermenge: als eigene, abgesetzte Karte mit klarer Überschrift + Hinweis, damit die
+   Auswahl im Modal nicht untergeht; Segmente full-width, aktiver Zustand deutlich (Navy). */
+.hph-vgl__qty{
+  margin-bottom: var(--hph-space-sm);
+  padding: clamp(12px,1.6vw,16px);
+  border:1px solid var(--hph-hairline);
+  border-radius:14px;
+  background: oklch(0.985 0.004 245);
+}
+.hph-vgl__qty-label{ display:block; margin-bottom:10px; font-size:1rem; font-weight:700; color: var(--hph-ink); }
+.hph-vgl__qty .hph-rail__compare-seg{ display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; }
+.hph-vgl__qty .hph-rail__compare-seg-btn{ padding:.72em .5em; text-align:center; font-size:.9rem; }
+.hph-vgl__qty .hph-rail__compare-seg-btn.is-on{
+  background: oklch(0.93 0.03 245);     /* klarer Navy-Tint statt fast-weiß */
+  border-color: var(--hph-brand);
+  color: var(--hph-brand-dark);
+  font-weight:700;
+}
+.hph-vgl__qty-hint{ margin:10px 0 0; font-size:.82rem; line-height:1.4; color: var(--hph-ink-mute); }
 
 .hph-vgl__foot{
   display:flex; align-items:center; gap: clamp(12px,1.6vw,18px);
@@ -2073,8 +2090,9 @@
             '<p class="hph-vgl__lead">Liefermenge wählen und den direkten Vergleich im Produktfinder öffnen.</p>' +
             '<ul class="hph-vgl__list"></ul>' +
             '<div class="hph-vgl__qty">' +
-              '<span class="hph-vgl__qty-label">Liefermenge</span>' +
+              '<span class="hph-vgl__qty-label">Liefermenge wählen</span>' +
               '<div class="hph-rail__compare-seg" role="group" aria-label="Liefermenge für den Vergleich"></div>' +
+              '<p class="hph-vgl__qty-hint">Grenzt den Vergleich auf die gewünschte Abnahmemenge ein – Karton oder Palette.</p>' +
             '</div>' +
           '</div>' +
           '<div class="hph-vgl__foot">' +

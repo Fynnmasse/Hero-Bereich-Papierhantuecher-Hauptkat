@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Produktfinder · „Ihre Auswahl"-Bestätigung · Vorschau/Quelle</title>
+</head>
+<body style="margin:0;background:#f3f5f8;font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;">
+
+<!--
+  ============================================================================
+  HAMBURG PAPIER · „IHRE AUSWAHL"-BESTÄTIGUNG auf der PRODUKTFINDER-VERGLEICHSSEITE
+  ============================================================================
+  ZWECK
+  Wenn der Kunde im Hero-Modal auf „Im Produktfinder vergleichen" klickt, landet er auf
+  produktfinder.hamburgpapier-shop.de/vergleich/papierhandtuecher?vglnach=custom&vglsets=…
+  Dieses Snippet zeigt dort GANZ OBEN eine ruhige Bestätigung „Ihre Auswahl" mit den
+  gewählten Varianten + Liefermenge – damit sofort klar ist: die Übergabe hat funktioniert.
+
+  WIE
+  Es liest ausschließlich die URL-Parameter, die der Hero ohnehin mitschickt
+  (vglnach=custom, vglsets=<set>|<set>|…, Tokens lagen:N, falzung:z-falz|interfold|c-falz,
+  versandart:karton|palette) und übersetzt sie in lesbare Labels (1-lagig · Z-Falz · Karton).
+  Kein Backend, kein Tracking. Erscheint NUR, wenn ein vglsets-Parameter vorhanden ist
+  (sonst passiert nichts – fail-open). Texteinfügung XSS-sicher per textContent.
+
+  ============================================================================
+  EINBAU
+  ----------------------------------------------------------------------------
+  Voraussetzung: Auf der Produktfinder-Seite muss eigenes CSS+JS eingebunden werden können
+  (Template/Theme des Produktfinders, ein Tag-Manager o. Ä.). Der Produktfinder ist ein
+  eigenes System – ohne diese Möglichkeit lässt sich dort nichts anzeigen.
+    * Den Block zwischen  >>> CSS-START <<< … >>> CSS-END <<<  ins Seiten-CSS / <head> einbinden.
+    * Den Block zwischen  >>> JS-START  <<< … >>> JS-END  <<<  (kompletter <script>-Tag)
+      am Seitenende einbinden. Alternativ beides als ausgelagerte Datei-URL.
+
+  PLATZIERUNG (Mount)
+  Standard: Das Banner wird als erstes Element in <main> eingehängt (sonst oben in <body>).
+  Für einen exakten Ort im Produktfinder einem Container das Attribut
+  data-hph-auswahl-mount geben – dann wird das Banner dort als erstes Kind eingefügt.
+
+  PFLEGE
+  Neue/umbenannte Varianten → Maps LAGEN/FALZ/MENGE unten ergänzen (müssen zu den
+  data-hph-vglset-Tokens der Hero-Rail passen). Optik .hph-auswahl-gescoped, Tokens lokal
+  gespiegelt (Open Sans + system-ui-Fallback; kein Google-<link> → DSGVO).
+
+  Diese Datei ist Quelle + lokale Vorschau (der <body>-Wrapper unten simuliert eine
+  Produktfinder-Seite und wird NICHT mit übernommen – nur die zwei markierten Blöcke).
+  ============================================================================
+-->
+
+
+<!-- >>> CSS-START >>> -->
+<style>
+.hph-auswahl{
+  --hph-ink:#0a2d47; --hph-ink-soft:#4b5867; --hph-ink-mute:oklch(0.52 0.028 245);
+  --hph-brand:#4b6b8b; --hph-brand-dark:#104d6e; --hph-hairline:oklch(0.30 0.045 245 / .12);
+  font-family:'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  box-sizing:border-box; display:block; margin:0 0 clamp(16px,2.5vw,24px); color:var(--hph-ink);
+  -webkit-font-smoothing:antialiased;
+}
+.hph-auswahl *, .hph-auswahl *::before, .hph-auswahl *::after{ box-sizing:border-box; }
+.hph-auswahl__inner{
+  max-width:1320px; margin-inline:auto;
+  padding: clamp(12px,1.8vw,18px) clamp(14px,2vw,22px);
+  border:1px solid var(--hph-hairline); border-radius:14px;
+  background:linear-gradient(180deg,#fff,oklch(0.985 0.004 245));
+  box-shadow: inset 0 1px 0 oklch(0.99 0.004 245 / .9), 0 10px 26px -16px oklch(0.30 0.045 245 / .12);
+}
+.hph-auswahl__head{ display:flex; align-items:center; gap:.6em; margin-bottom:10px; }
+.hph-auswahl__ico{
+  display:grid; place-items:center; width:26px; height:26px; flex:none; border-radius:50%;
+  background: oklch(0.93 0.03 245); color: var(--hph-brand-dark);
+}
+.hph-auswahl__ico svg{ width:15px; height:15px; }
+.hph-auswahl__title{ font-weight:700; font-size: clamp(1rem,.95rem+.3vw,1.18rem); letter-spacing:-0.01em; color: var(--hph-ink); }
+.hph-auswahl__count{ margin-left:.2em; font-size:.85rem; font-weight:600; color: var(--hph-ink-mute); }
+.hph-auswahl__chips{ list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px; }
+.hph-auswahl__chip{
+  display:inline-flex; align-items:center; gap:.5em;
+  padding:.42em .8em; border:1px solid var(--hph-hairline); border-radius:980px;
+  background:#fff; font-size:.92rem; font-weight:600; color: var(--hph-ink); white-space:nowrap;
+}
+.hph-auswahl__menge{
+  font-size:.78rem; font-weight:600; color: var(--hph-brand-dark);
+  background: oklch(0.95 0.014 245); border-radius:980px; padding:.15em .6em;
+}
+.hph-auswahl__note{ margin:10px 0 0; font-size:.84rem; color: var(--hph-ink-soft); }
+@media (prefers-reduced-motion: no-preference){
+  .hph-auswahl__inner{ animation: hph-auswahl-in .3s cubic-bezier(.16,1,.3,1) both; }
+  @keyframes hph-auswahl-in{ from{ opacity:0; transform: translateY(-6px); } to{ opacity:1; transform:none; } }
+}
+</style>
+<!-- <<< CSS-END <<< -->
+
+
+<!-- >>> JS-START >>> -->
+<script>
+(function () {
+  'use strict';
+  try {
+    // Tokens der Hero-Rail (data-hph-vglset) -> lesbare Labels. Bei neuen Varianten ergänzen.
+    var LAGEN = { '1': '1-lagig', '2': '2-lagig', '3': '3-lagig' };
+    var FALZ  = { 'z-falz': 'Z-Falz', 'interfold': 'Interfold', 'c-falz': 'C-Falz' };
+    var MENGE = { 'karton': 'Karton', 'palette': 'Palette' };
+    var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+
+    function decodeSet(setStr) {
+      var t = {};
+      setStr.split(',').forEach(function (pair) {
+        var i = pair.indexOf(':'); if (i < 0) return;
+        t[pair.slice(0, i).trim()] = pair.slice(i + 1).trim();
+      });
+      var parts = [];
+      if (t.lagen && LAGEN[t.lagen]) parts.push(LAGEN[t.lagen]);
+      if (t.falzung && FALZ[t.falzung]) parts.push(FALZ[t.falzung]);
+      return { name: parts.join(' · ') || setStr, menge: (t.versandart && MENGE[t.versandart]) || '' };
+    }
+
+    function readItems() {
+      var raw;
+      try { raw = new URLSearchParams(location.search).get('vglsets'); } catch (e) { raw = null; }
+      if (!raw) return [];   // nicht von unserem Vergleich -> fail-open
+      return raw.split('|').map(function (s) { return s.trim(); }).filter(Boolean).map(decodeSet);
+    }
+
+    function build(items) {
+      var sec = document.createElement('section');
+      sec.className = 'hph-auswahl';
+      sec.setAttribute('role', 'status');
+      sec.setAttribute('aria-live', 'polite');
+
+      var inner = document.createElement('div'); inner.className = 'hph-auswahl__inner';
+      var head = document.createElement('div'); head.className = 'hph-auswahl__head';
+      var ico = document.createElement('span'); ico.className = 'hph-auswahl__ico'; ico.setAttribute('aria-hidden', 'true'); ico.innerHTML = CHECK;
+      var title = document.createElement('span'); title.className = 'hph-auswahl__title'; title.textContent = 'Ihre Auswahl';
+      var count = document.createElement('span'); count.className = 'hph-auswahl__count';
+      count.textContent = items.length + (items.length === 1 ? ' Variante' : ' Varianten');
+      head.appendChild(ico); head.appendChild(title); head.appendChild(count);
+
+      var ul = document.createElement('ul'); ul.className = 'hph-auswahl__chips';
+      items.forEach(function (it) {
+        var li = document.createElement('li'); li.className = 'hph-auswahl__chip';
+        li.textContent = it.name;                                   // XSS-sicher (textContent)
+        if (it.menge) {
+          li.appendChild(document.createTextNode(' '));
+          var m = document.createElement('span'); m.className = 'hph-auswahl__menge'; m.textContent = it.menge;
+          li.appendChild(m);
+        }
+        ul.appendChild(li);
+      });
+
+      var note = document.createElement('p'); note.className = 'hph-auswahl__note';
+      note.textContent = 'Diese Varianten werden hier gegenübergestellt.';
+
+      inner.appendChild(head); inner.appendChild(ul); inner.appendChild(note);
+      sec.appendChild(inner);
+      return sec;
+    }
+
+    function render() {
+      var old = document.querySelector('.hph-auswahl');
+      if (old && old.parentNode) old.parentNode.removeChild(old);   // bei URL-Wechsel neu aufbauen
+      var items = readItems();
+      if (!items.length) return;
+      var mount = document.querySelector('[data-hph-auswahl-mount]')
+               || document.querySelector('main')
+               || document.body;
+      if (!mount) return;
+      mount.insertBefore(build(items), mount.firstChild);
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render);
+    else render();
+    window.addEventListener('popstate', render);   // SPA-/History-Wechsel
+  } catch (e) { /* fail-open: keine Bestätigung, Seite unverändert */ }
+})();
+</script>
+<!-- <<< JS-END <<< -->
+
+
+<!-- ===== Nur lokale Vorschau: simuliert eine Produktfinder-Vergleichsseite ===== -->
+<main style="max-width:1100px;margin:0 auto;padding:24px;">
+  <h1 style="color:#0a2d47;font-size:1.6rem;margin:0 0 16px;">Produktfinder · Vergleich (Mock)</h1>
+  <p style="color:#4b5867;">Hier rendert der Produktfinder normalerweise die Gegenüberstellung.</p>
+</main>
+
+</body>
+</html>
