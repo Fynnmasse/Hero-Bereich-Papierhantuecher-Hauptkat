@@ -154,6 +154,12 @@
      im Wort getrennt werden. overflow-wrap bleibt als Notbremse. */
   overflow-wrap:break-word;
 }
+/* Sehr schmale Phones (<380px): Titel so weit verkleinern, dass das Kompositum
+   „Papierhandtücher" einzeilig bleibt, statt via overflow-wrap mitten im Wort zu
+   brechen – genau dieser Mittwort-Bruch soll laut Kommentar oben nie passieren. */
+@media (max-width:380px){
+  .hph-hero__title{ font-size: clamp(1.65rem, 8.3vw, 2.05rem); }
+}
 .hph-hero__subtitle{
   margin: clamp(12px,1.8vw,16px) 0 0;
   max-width: 58ch;
@@ -189,6 +195,7 @@
    (Mechanik nach dem Vorbild, Farben aus unserem System) */
 .hph-hero__cta--primary{
   padding:.82em 1.6em;
+  min-height:44px;          /* Touch-Target solide ≥44px (war ~43,7px); Text via align-items:center mittig */
   border-radius:980px;
   background: var(--hph-action);
   color: var(--hph-on-brand);
@@ -222,6 +229,7 @@
   color: var(--hph-brand);
   gap:.5em;
   white-space:normal;          /* langer Satz darf auf schmalen Screens umbrechen */
+  min-height:44px;             /* unsichtbare Tap-Fläche ≥44px (WCAG 2.5.5 / Touch); Text bleibt via align-items:center zentriert – kein Button-Look, richtet sich an Primär-CTA aus */
 }
 .hph-hero__cta-underline{
   position:relative;
@@ -254,9 +262,8 @@
 /* ---------- Trust-Strip: schlanke Faktenzeile, KEINE Karten ---------- */
 .hph-hero__trust{
   list-style:none;
-  /* Volle-Breite-Band zwischen Kopf-Band und Rail: in der schmalen Textspalte brachen die drei
-     Einträge zwangsläufig um (~830px Inhalt in einer ~600–740px breiten Spalte). */
-  margin: var(--hph-space-md) 0 var(--hph-space-sm);
+  /* Volle-Breite-Band unter der Rail, vor dem unteren Bereich. */
+  margin: var(--hph-space-sm) 0 0;
   padding:0;
   display:flex;
   flex-wrap:wrap;
@@ -554,7 +561,7 @@
   top:18px;                /* = Bildoberkante (12px Track- + 6px Kachel-Padding) */
   bottom:16px;             /* = Titel-Unterkante (6px Kachel- + 10px Track-Padding) */
   z-index:3;
-  width:38px;
+  width:44px;            /* Touch-Target ≥44px (war 38px); Chevron bleibt via place-items:center mittig */
   padding:0;
   border:0;
   border-radius:0;                            /* scharfkantiges Rechteck */
@@ -816,6 +823,26 @@
 }
 .hph-vgl__cancel{ margin-right:auto; }   /* „Abbrechen" links, CTA rechts */
 
+/* Modal-Controls als vollwertige Touch-Targets (≥44px, Touch-DoD): Close/Remove/
+   Mengen-Segmente/CTA „Im Produktfinder vergleichen". Icon bleibt klein, nur die
+   Tap-Fläche wächst (Remove transparent, Close heller Kreis). */
+.hph-vgl__close{ width:44px; height:44px; margin:0; }
+.hph-vgl__remove{ width:44px; height:44px; }
+.hph-vgl__go{ min-height:44px; }
+.hph-vgl__qty .hph-rail__compare-seg-btn{ min-height:44px; display:flex; align-items:center; justify-content:center; }
+
+/* Modal auf sehr schmalen Phones (≤420px): Footer stapeln + Segmente/CTA einpassen,
+   sonst schneidet das overflow:hidden des Modals den CTA „Im Produktfinder
+   vergleichen", das „Palette"-Segment und das Close-× am rechten Rand ab. */
+@media (max-width:420px){
+  .hph-vgl__foot{ flex-direction:column-reverse; align-items:stretch; gap:10px; }
+  .hph-vgl__cancel{ margin-right:0; text-align:center; padding:.5em; }
+  .hph-vgl__go{ justify-content:center; white-space:normal; }
+  .hph-vgl__qty .hph-rail__compare-seg-btn{ white-space:normal; min-width:0; padding:.6em .35em; }
+  .hph-vgl__title{ font-size:1.06rem; min-width:0; overflow-wrap:break-word; }  /* Titel weicht, damit der 44px-Close nicht aus der Rundecke gedrängt + geclippt wird */
+  .hph-vgl__close{ margin:0; }
+}
+
 /* Reduced Motion: keine Bewegung, nur (kurzer) Opazitaets-Wechsel */
 @media (prefers-reduced-motion: reduce){
   .hph-vgl{ transform:none; }
@@ -982,8 +1009,10 @@
    Der blaue Rahmen bleibt durchgängig (grenzt den weißen Hover-Zustand auf der weißen Karte ab). */
 .hph-feature__buy{
   position:relative;                 /* Anker für das absolut gesetzte Pfeil-Icon */
-  display:inline-block;
+  display:inline-flex;
+  align-items:center;                /* Text vertikal mittig in der ≥44px-Tap-Fläche */
   min-width:9.5em;
+  min-height:44px;                   /* Touch-Target ≥44px (war ~40px); Pfeil bleibt absolut zentriert */
   padding:.62em 1.1em .62em 2.7em;   /* links Platz für den Pfeil reservieren */
   border-radius:11px;
   background: var(--hph-action);
@@ -1197,6 +1226,10 @@
     height:auto;
     margin: clamp(14px, 3.5vw, 20px) auto 0;
   }
+  /* Beratungs-Link mobil: eigene Zeile, Text darf umbrechen – sonst ragte er bei
+     320px als 357px-Inline-Flex (flex:0 0 auto) um ~53px aus dem Viewport. */
+  .hph-showcase__finder{ flex:1 1 100%; min-width:0; }
+  .hph-showcase__finder span{ min-width:0; }
 }
 
 /* ---------- Falzungs-Schnellvergleich: scanbare Tabelle vor dem Akkordeon ----------
@@ -1508,12 +1541,6 @@
     <header class="hph-hero__head">
       <h1 class="hph-hero__title" id="hph-hero-title">Papierhandtücher</h1>
 
-      <!-- Subline: Sortiments-Überblick der Hauptkategorie in EINEM Satz – wie ein
-           Inhaltsverzeichnis der Seite (Falzarten · Lagen · Liefermenge Karton/Palette).
-           Zertifikate & Lieferzeit nennt das Trust-Strip-Band unter dem Kopf, den
-           Staffelpreis tragen Kopf-CTA und Rail-Preisanker – hier nicht doppeln. -->
-      <p class="hph-hero__subtitle">Z-Falz, Interfold oder C-Falz, 1- bis 3-lagig: lieferbar vom Karton bis zur Palette.</p>
-
       <!-- Kopf-Aktionen: primär ins Sortiment (Conversion-Ziel; auf der Kategorieseite fängt der
            Scroll-Handler unten den Klick ab und scrollt sanft zum Listing – via data-hph-scroll-listing –,
            sonst normale Navigation), sekundär zum Produktfinder. href je nach Ziel anpassen. -->
@@ -1546,24 +1573,6 @@
         </button>
       </figure>
     </div><!-- /.hph-hero__intro -->
-
-    <!-- Trust-Strip: belegbare B2B-Fakten als volle-Breite-Band unter dem Kopf (zuvor in der schmalen
-         Textspalte – dort brachen die drei Einträge zwangsläufig zweizeilig um). KEINE Karten,
-         nur Icon + Text mit Haarlinien getrennt. Inhalte nur ändern, wenn die Aussage stimmt. -->
-    <ul class="hph-hero__trust" aria-label="Vertrauensmerkmale">
-      <li class="hph-hero__trust-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42Z"/><circle cx="7.5" cy="7.5" r="1.1"/></svg>
-        Staffelpreise ab Karton
-      </li>
-      <li class="hph-hero__trust-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
-        EU Ecolabel &amp; Blauer Engel
-      </li>
-      <li class="hph-hero__trust-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
-        Lieferung in ca. 4 Werktagen
-      </li>
-    </ul>
 
     <!-- 2) Product-Rail (Unterkategorien) -->
     <!-- Pro Kachel: href, Bild (src/alt), Label und Klartext-Hint anpassen. -->
@@ -1683,6 +1692,23 @@
 
       </ul>
     </nav>
+
+    <!-- Trust-Strip: belegbare B2B-Fakten als volle-Breite-Band unter der Rail. KEINE Karten,
+         nur Icon + Text mit Haarlinien getrennt. Inhalte nur ändern, wenn die Aussage stimmt. -->
+    <ul class="hph-hero__trust" aria-label="Vertrauensmerkmale">
+      <li class="hph-hero__trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42Z"/><circle cx="7.5" cy="7.5" r="1.1"/></svg>
+        Staffelpreise ab Karton
+      </li>
+      <li class="hph-hero__trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+        EU Ecolabel &amp; Blauer Engel
+      </li>
+      <li class="hph-hero__trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+        Lieferung in ca. 4 Werktagen
+      </li>
+    </ul>
 
   </div>
 
@@ -1948,11 +1974,10 @@
     var REVEAL_SCENES = [
       { root: '.hph-hero__intro', seq: [
           ['.hph-hero__title',      0, false],   /* Titel zuerst                         */
-          ['.hph-hero__subtitle',   1, false],   /* Subline …                            */
-          ['.hph-hero__media',      1, false],   /* … und Video zusammen                 */
-          ['.hph-hero__trust-item', 2, false],   /* Trust-Strip-Band (volle Breite unter dem Kopf-Band) */
-          ['.hph-hero__actions',    2, false],   /* CTAs (zurück im Kopf, unter der Subline) */
-          ['.hph-rail__item',       3, false]    /* Rail als EINE Einheit (kein Ripple)  */
+          ['.hph-hero__media',      1, false],   /* Video zusammen mit …                 */
+          ['.hph-hero__actions',    1, false],   /* … CTAs                               */
+          ['.hph-rail__item',       2, false],   /* Rail als EINE Einheit (kein Ripple)  */
+          ['.hph-hero__trust-item', 3, false]    /* Trust-Strip unter der Rail           */
       ]},
       { root: '.hph-feature', seq: [
           ['.hph-feature__head',    0, false],   /* Sektions-Überschrift …               */
