@@ -10,13 +10,15 @@ Eigenständiger Hero-Bereich für die Shopware-6-Kategorieseite **Papierhandtüc
    und **„Hier das richtige Papierhandtuch finden“** (sekundär, tonale Pill, Link zum
    Produktfinder). Rechts ein stummes Loop-Video mit **Pause-Toggle**.
 2. **Product-Rail** – 5 verlinkte Unterkategorie-Kacheln (1-/2-/3-lagig Z-Falz,
-   Interfold, C-Falz), je mit Klartext-Hint, dem Qualifier
+   Interfold, C-Falz), je mit dem Qualifier
    **„günstigster Preis der Kategorie“** und dem **„ab …€ netto / 1.000 Stück“-Preisanker**
    (der Qualifier stellt klar: der Ab-Preis gilt für die ganze Unterkategorie, nicht für das Foto).
    Dazu eine beschriftete **„Vergleichen“-Checkbox** je Kachel (selbsterklärend,
-   kein nacktes Icon); die Vergleichs-Bar erscheint erst mit der ersten Auswahl
-   und führt per Direktlink in den vorgefilterten Produktfinder-Vergleich
-   (Mengen-Eingrenzung Alle/Karton/Palette inline).
+   kein nacktes Icon); ab der ersten Auswahl erscheint eine schlanke Bar, deren
+   **„Vergleichen“** ein **Modal** (natives `<dialog>`) öffnet: gewählte Varianten
+   (einzeln entfernbar), Liefermenge (Alle/Karton/Palette) und der Direktlink in den
+   vorgefilterten Produktfinder-Vergleich. Fokus-Trap, ESC und Backdrop-Klick inklusive;
+   `prefers-reduced-motion` respektiert.
 3. **Feature-Karten „Ausgezeichnet nachhaltig“** – EU Ecolabel und Blauer Engel,
    je mit Differenzierungszeile (was das Siegel konkret auszeichnet), „Weitere
    Infos“ (offizielle Siegel-Seite) und „Jetzt kaufen“ (Listing mit Siegel-Filter;

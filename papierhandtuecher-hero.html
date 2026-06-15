@@ -453,7 +453,7 @@
    jetzt im Kopf direkt unter der Subline. Die Vergleichs-Bar wird per JS direkt unter
    die Rail gehängt – siehe rail.parentNode.insertBefore weiter unten.) */
 
-/* Label + Klartext-Hint als enger Textblock; Foto und Text rücken als eine Einheit
+/* Label + Preisanker als enger Textblock; Foto und Text rücken als eine Einheit
    zusammen (kleiner Tile-Gap), die dezente Standlinie trägt die optische Trennung. */
 .hph-rail__text{
   display:flex;
@@ -461,14 +461,6 @@
   align-items:center;
   gap:4px;
   width:100%;
-}
-.hph-rail__hint{
-  font-size: clamp(.76rem,.72rem+.12vw,.84rem);
-  font-weight:400;
-  line-height:1.2;
-  text-align:center;
-  color: var(--hph-ink-mute);
-  white-space:nowrap;
 }
 /* „ab"-Preisanker: harte Einkäufer-Eckzahl direkt an der Kachel (Design-Prinzip 5).
    Tabular-Ziffern: die Preise stehen über alle 5 Kacheln ruhig nebeneinander. */
@@ -659,6 +651,104 @@
   .hph-rail__compare-go:hover{ background: var(--hph-action-dark); transform:translateY(-1px); box-shadow:0 6px 16px oklch(0.30 0.045 245 / .18); }
   .hph-rail__compare-clear:hover{ color: var(--hph-brand-dark); }
   .hph-rail__compare-seg-btn:hover{ color: var(--hph-brand-dark); border-color: var(--hph-brand-light); }
+}
+
+/* ============================================================================
+   ③ VERGLEICHS-MODAL (natives <dialog>, per JS erzeugt)
+   Fokus-Trap, ESC und Top-Layer kommen vom <dialog> (escaped das overflow:hidden
+   des Hero). Bewegung nach Emil-Kowalski-Prinzipien: Backdrop-Fade + Panel
+   scale(.96)+opacity, transform-origin:center (Default), ease-out ~220ms (Enter) /
+   schneller wirkender Exit via @starting-style + transition-behavior:allow-discrete.
+   Nur transform/opacity animiert; ohne Browser-Support oeffnet/schliesst es ohne
+   Animation (graceful), ohne <dialog>-Support faellt der Trigger auf den Direktlink. */
+.hph-vgl{
+  width: min(92vw, 460px);
+  max-height: min(86vh, 640px);
+  margin:auto;                          /* im Viewport zentriert (Top-Layer) */
+  padding:0; border:0;
+  border-radius: clamp(16px, 2vw, 22px);
+  background:#fff; color: var(--hph-ink);
+  box-shadow: 0 1px 2px oklch(0.30 0.045 245 / .10), 0 24px 60px -16px oklch(0.30 0.045 245 / .30);
+  overflow:hidden;                      /* runde Ecken clippen; Body scrollt intern */
+  font-family: var(--hph-font-text);
+  /* geschlossener/Exit-Zustand; Enter-Startwert via @starting-style[open] */
+  opacity:0;
+  transform: scale(.96) translateY(8px);
+  transition: opacity .22s cubic-bezier(.16,1,.3,1),
+              transform .22s cubic-bezier(.16,1,.3,1),
+              display .22s, overlay .22s;
+  transition-behavior: allow-discrete;
+}
+.hph-vgl[open]{
+  display:flex; flex-direction:column;  /* nur offen sichtbar; geschlossen greift UA display:none */
+  opacity:1; transform:none;
+}
+@starting-style{
+  .hph-vgl[open]{ opacity:0; transform: scale(.96) translateY(8px); }
+}
+.hph-vgl::backdrop{
+  background: oklch(0.22 0.04 245 / .42);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  opacity:0;
+  transition: opacity .22s ease, display .22s, overlay .22s;
+  transition-behavior: allow-discrete;
+}
+.hph-vgl[open]::backdrop{ opacity:1; }
+@starting-style{ .hph-vgl[open]::backdrop{ opacity:0; } }
+
+.hph-vgl__head{
+  display:flex; align-items:flex-start; justify-content:space-between; gap: var(--hph-space-sm);
+  padding: clamp(18px,2.4vw,24px) clamp(18px,2.4vw,26px) clamp(10px,1.4vw,14px);
+}
+.hph-vgl__title{
+  margin:0; font-family: var(--hph-font-head);
+  font-size: clamp(1.15rem,1.05rem+.5vw,1.4rem); font-weight:700; letter-spacing:-0.02em; line-height:1.15;
+  color: var(--hph-ink);
+}
+.hph-vgl__close{
+  flex:none; display:grid; place-items:center; width:34px; height:34px; margin:-3px -4px 0 0;
+  padding:0; border:0; border-radius:50%; background: oklch(0.95 0.012 245); color: var(--hph-ink-soft);
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+  transition: background-color .18s ease, color .18s ease, transform .16s cubic-bezier(.16,1,.3,1);
+}
+.hph-vgl__close svg{ width:17px; height:17px; }
+.hph-vgl__close:active{ transform: scale(.92); transition-duration:.1s; }
+.hph-vgl__close:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:2px; }
+@media (hover:hover) and (pointer:fine){ .hph-vgl__close:hover{ background: oklch(0.92 0.02 245); color: var(--hph-ink); } }
+
+.hph-vgl__body{ padding:0 clamp(18px,2.4vw,26px); overflow-y:auto; }
+.hph-vgl__lead{ margin:0 0 var(--hph-space-sm); color: var(--hph-ink-soft); font-size: clamp(.9rem,.86rem+.2vw,1rem); line-height:1.45; }
+.hph-vgl__list{ list-style:none; margin:0 0 var(--hph-space-md); padding:0; display:flex; flex-direction:column; gap:8px; }
+.hph-vgl__item{
+  display:flex; align-items:center; gap:.6em;
+  padding:.55em .6em .55em .9em; border:1px solid var(--hph-hairline); border-radius:12px;
+  background: oklch(0.985 0.004 245);
+}
+.hph-vgl__item-label{ flex:1 1 auto; min-width:0; font-weight:600; font-size:.96rem; color: var(--hph-ink); }
+.hph-vgl__remove{
+  flex:none; display:grid; place-items:center; width:28px; height:28px; padding:0; border:0; border-radius:50%;
+  background:transparent; color: var(--hph-ink-mute); cursor:pointer; -webkit-tap-highlight-color:transparent;
+  transition: background-color .18s ease, color .18s ease, transform .16s cubic-bezier(.16,1,.3,1);
+}
+.hph-vgl__remove svg{ width:15px; height:15px; }
+.hph-vgl__remove:active{ transform: scale(.9); transition-duration:.1s; }
+.hph-vgl__remove:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:2px; }
+@media (hover:hover) and (pointer:fine){ .hph-vgl__remove:hover{ background: oklch(0.93 0.02 245); color: var(--hph-ink); } }
+
+.hph-vgl__qty{ margin-bottom: var(--hph-space-sm); }
+.hph-vgl__qty-label{ display:block; margin-bottom:8px; font-size:.85rem; font-weight:600; color: var(--hph-ink-soft); }
+
+.hph-vgl__foot{
+  display:flex; align-items:center; gap: clamp(12px,1.6vw,18px);
+  padding: clamp(12px,1.6vw,16px) clamp(18px,2.4vw,26px) clamp(18px,2.4vw,24px);
+  border-top:1px solid var(--hph-hairline);
+}
+.hph-vgl__cancel{ margin-right:auto; }   /* „Abbrechen" links, CTA rechts */
+
+/* Reduced Motion: keine Bewegung, nur (kurzer) Opazitaets-Wechsel */
+@media (prefers-reduced-motion: reduce){
+  .hph-vgl{ transform:none; }
+  @starting-style{ .hph-vgl[open]{ transform:none; opacity:0; } }
 }
 
 /* ============================================================================
@@ -1423,7 +1513,6 @@
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">1-lagig · Z-Falz</span>
-              <span class="hph-rail__hint">ergiebig &amp; sparsam</span>
               <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
               <span class="hph-rail__price">ab 2,50 € netto / 1.000 Stück</span>
             </span>
@@ -1441,7 +1530,6 @@
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">2-lagig · Z-Falz</span>
-              <span class="hph-rail__hint">weich &amp; saugstark</span>
               <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
               <span class="hph-rail__price">ab 4,29 € netto / 1.000 Stück</span>
             </span>
@@ -1459,7 +1547,6 @@
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">3-lagig · Z-Falz</span>
-              <span class="hph-rail__hint">besonders weich</span>
               <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
               <span class="hph-rail__price">ab 7,15 € netto / 1.000 Stück</span>
             </span>
@@ -1477,7 +1564,6 @@
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">Interfold</span>
-              <span class="hph-rail__hint">Einzelentnahme</span>
               <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
               <span class="hph-rail__price">ab 4,42 € netto / 1.000 Stück</span>
             </span>
@@ -1495,7 +1581,6 @@
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">C-Falz</span>
-              <span class="hph-rail__hint">kompakt gefaltet</span>
               <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
               <span class="hph-rail__price">ab 4,69 € netto / 1.000 Stück</span>
             </span>
@@ -1924,31 +2009,85 @@
          Pro Kachel steckt das komplette Set in data-hph-vglset; Sets sind frei mischbar.
          Interfold/C-Falz haben keine vordefinierte Lagenzahl → Set nur „falzung:…" ohne lagen-Paar.
          Der Produktfinder vergleicht maximal 4 Produkte → ab 4 gewählten werden die übrigen Kacheln gesperrt.
-         „Vergleichen" ist ein DIREKTLINK in den Produktfinder (kein Modal-Zwischenschritt);
-         die Mengen-Eingrenzung (Alle/Karton/Palette) ist eine Inline-Auswahl in der Bar. Die Wahl
-         wird jedem Set als „versandart:karton|palette" eingefügt (bestätigt per Beispiel-URL:
-         lagen:1,versandart:karton,falzung:z-falz) – „Alle Mengen" lässt die Sets unverändert. */
+         „Vergleichen" in der Bar öffnet ein MODAL (natives <dialog>): gewählte Varianten (einzeln
+         entfernbar), Mengen-Eingrenzung (Alle/Karton/Palette) und der Direktlink in den Produktfinder.
+         Die Mengen-Wahl wird jedem Set als „versandart:karton|palette" eingefügt (bestätigt per
+         Beispiel-URL: lagen:1,versandart:karton,falzung:z-falz) – „Alle Mengen" lässt die Sets unverändert. */
       var compareBtns = Array.prototype.slice.call(rail.querySelectorAll('.hph-rail__compare'));
       if (compareBtns.length && rail.parentNode) {
         var COMPARE_BASE = 'https://produktfinder.hamburgpapier-shop.de/vergleich/papierhandtuecher';
-        var selected = [];
+        var MAX_COMPARE  = 4;          // Produktfinder vergleicht maximal 4 Produkte
+        var heroRoot = rail.closest('.hph-hero') || document.body;
+        var selected = [];             // gewählte vglset-Strings (Reihenfolge = Klick-Reihenfolge)
+        var versand  = '';             // '' | 'karton' | 'palette'
 
-        var bar = document.createElement('div');
-        bar.className = 'hph-rail__compare-bar';   /* is-active setzt renderCompare ab der ersten Auswahl */
-        var inner = document.createElement('div');
-        inner.className = 'hph-rail__compare-inner';
-        var row = document.createElement('div');
-        row.className = 'hph-rail__compare-row';
-        var countEl = document.createElement('span');
-        countEl.className = 'hph-rail__compare-count';
-        /* Mengen-Eingrenzung inline (ersetzt den früheren Mengen-Dialog):
-           Default „Alle Mengen" lässt die Sets unverändert; Karton/Palette wird jedem
-           Set als versandart:… eingefügt (bestätigte Produktfinder-Token). */
-        var versand = '';
-        var segEl = document.createElement('div');
-        segEl.className = 'hph-rail__compare-seg';
-        segEl.setAttribute('role', 'group');
-        segEl.setAttribute('aria-label', 'Liefermenge für den Vergleich');
+        // Label + Button je vglset aus der zugehörigen Kachel (für Modal-Liste + Toggle)
+        var labelByset = {}, btnByset = {};
+        compareBtns.forEach(function (btn) {
+          var set = btn.getAttribute('data-hph-vglset') || '';
+          btnByset[set] = btn;
+          var item = btn.closest('.hph-rail__item');
+          var lab  = item && item.querySelector('.hph-rail__label');
+          labelByset[set] = lab ? lab.textContent.trim() : 'Variante';
+        });
+
+        // Produktfinder-Deep-Link aus Auswahl + Menge (versandart nach dem ersten Paar – bestätigte Reihenfolge)
+        function buildUrl() {
+          if (!selected.length) return COMPARE_BASE;
+          var sets = selected.map(function (s) {
+            if (!versand) return s;
+            var parts = s.split(',');
+            parts.splice(1, 0, 'versandart:' + versand);
+            return parts.join(',');
+          });
+          return COMPARE_BASE + '?vglnach=custom&vglsets=' + encodeURIComponent(sets.join('|'));   // kodiert : , | → %3A %2C %7C
+        }
+
+        /* ---- schlanke Bar unter der Rail: Zähler + „Vergleichen" (öffnet Modal) + „Leeren" ---- */
+        var bar = document.createElement('div'); bar.className = 'hph-rail__compare-bar';
+        var inner = document.createElement('div'); inner.className = 'hph-rail__compare-inner';
+        var row = document.createElement('div'); row.className = 'hph-rail__compare-row';
+        var countEl = document.createElement('span'); countEl.className = 'hph-rail__compare-count';
+        var openEl = document.createElement('button');
+        openEl.type = 'button';
+        openEl.className = 'hph-rail__compare-go';
+        openEl.innerHTML = 'Vergleichen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+        var clearEl = document.createElement('button');
+        clearEl.type = 'button'; clearEl.className = 'hph-rail__compare-clear'; clearEl.textContent = 'Leeren';
+        row.appendChild(countEl); row.appendChild(openEl); row.appendChild(clearEl);
+        inner.appendChild(row); bar.appendChild(inner);
+        rail.parentNode.insertBefore(bar, rail.nextSibling);   /* Bar direkt unter der Rail */
+
+        /* ---- Vergleichs-Modal: natives <dialog> (Fokus-Trap, ESC, Top-Layer vom Browser) ---- */
+        var dlg = document.createElement('dialog');
+        dlg.className = 'hph-vgl';
+        dlg.setAttribute('aria-labelledby', 'hph-vgl-title');
+        dlg.innerHTML =
+          '<div class="hph-vgl__head">' +
+            '<h2 class="hph-vgl__title" id="hph-vgl-title">Papierhandtücher vergleichen</h2>' +
+            '<button type="button" class="hph-vgl__close" aria-label="Vergleich schließen">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>' +
+            '</button>' +
+          '</div>' +
+          '<div class="hph-vgl__body">' +
+            '<p class="hph-vgl__lead">Liefermenge wählen und den direkten Vergleich im Produktfinder öffnen.</p>' +
+            '<ul class="hph-vgl__list"></ul>' +
+            '<div class="hph-vgl__qty">' +
+              '<span class="hph-vgl__qty-label">Liefermenge</span>' +
+              '<div class="hph-rail__compare-seg" role="group" aria-label="Liefermenge für den Vergleich"></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="hph-vgl__foot">' +
+            '<button type="button" class="hph-rail__compare-clear hph-vgl__cancel">Abbrechen</button>' +
+            '<a class="hph-rail__compare-go hph-vgl__go" target="_blank" rel="noopener noreferrer">Im Produktfinder vergleichen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>' +
+          '</div>';
+        heroRoot.appendChild(dlg);
+
+        var listEl = dlg.querySelector('.hph-vgl__list');
+        var segEl  = dlg.querySelector('.hph-rail__compare-seg');
+        var goEl   = dlg.querySelector('.hph-vgl__go');
+
+        // Mengen-Segmente (im Modal)
         var segBtns = [];
         [
           { versand: '',        label: 'Alle Mengen' },
@@ -1967,78 +2106,83 @@
               sb.classList.toggle('is-on', on);
               sb.setAttribute('aria-pressed', on ? 'true' : 'false');
             });
-            renderCompare();
+            goEl.href = buildUrl();
           });
-          segEl.appendChild(b);
-          segBtns.push(b);
+          segEl.appendChild(b); segBtns.push(b);
         });
-        /* „Vergleichen" = Direktlink in den Produktfinder (kein Modal-Zwischenschritt) */
-        var goEl = document.createElement('a');
-        goEl.className = 'hph-rail__compare-go';
-        goEl.target = '_blank';
-        goEl.rel = 'noopener noreferrer';
-        goEl.innerHTML = 'Vergleichen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
-        var clearEl = document.createElement('button');
-        clearEl.type = 'button';
-        clearEl.className = 'hph-rail__compare-clear';
-        clearEl.textContent = 'Leeren';
-        row.appendChild(countEl);
-        row.appendChild(segEl);
-        row.appendChild(goEl);
-        row.appendChild(clearEl);
 
-        inner.appendChild(row);
-        bar.appendChild(inner);
-        rail.parentNode.insertBefore(bar, rail.nextSibling);   /* Bar direkt unter der Rail (Trust-Strip ist in den Kopf gewandert) */
+        var X_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 
-        var MAX_COMPARE = 4;   // Limit des Produktfinders: maximal 4 Produkte je Vergleich
-        var renderCompare = function () {
+        function renderBar() {
           var n = selected.length, full = n >= MAX_COMPARE;
           bar.classList.toggle('is-active', n > 0);   /* Bar erscheint erst mit der ersten Auswahl */
           countEl.textContent = (n === 1 ? '1 Variante ausgewählt' : n + ' Varianten ausgewählt')
                               + (full ? ' · Maximum (' + MAX_COMPARE + ') erreicht'
                                       : (n === 1 ? ' · bis zu ' + MAX_COMPARE + ' möglich' : ''));
-          // Deep-Link: gewählte Menge wird JEDEM Set mitgegeben. versandart wird nach dem
-          // ersten Paar eingefügt → gleiche Reihenfolge wie die bestätigten Beispiel-URLs
-          // (lagen:1,versandart:karton,falzung:z-falz).
-          var sets = [];
-          for (var i = 0; i < selected.length; i++) {
-            if (versand) {
-              var parts = selected[i].split(',');
-              parts.splice(1, 0, 'versandart:' + versand);
-              sets.push(parts.join(','));
-            } else {
-              sets.push(selected[i]);
-            }
-          }
-          goEl.href = n
-            ? COMPARE_BASE + '?vglnach=custom&vglsets=' + encodeURIComponent(sets.join('|'))   // kodiert : , | → %3A %2C %7C
-            : COMPARE_BASE;
           // Maximum erreicht: noch nicht gewählte Kacheln sperren – gewählte bleiben abwählbar
           compareBtns.forEach(function (b) {
             var dis = full && !b.classList.contains('is-on');
             b.classList.toggle('is-disabled', dis);
             b.setAttribute('aria-disabled', dis ? 'true' : 'false');
           });
-        };
+        }
+
+        function renderList() {
+          listEl.innerHTML = '';
+          selected.forEach(function (set) {
+            var li = document.createElement('li'); li.className = 'hph-vgl__item';
+            var lab = document.createElement('span'); lab.className = 'hph-vgl__item-label';
+            lab.textContent = labelByset[set] || 'Variante';
+            var rm = document.createElement('button');
+            rm.type = 'button'; rm.className = 'hph-vgl__remove';
+            rm.setAttribute('aria-label', (labelByset[set] || 'Variante') + ' aus dem Vergleich entfernen');
+            rm.innerHTML = X_ICON;
+            rm.addEventListener('click', function () { toggle(set, false); if (!selected.length) closeModal(); });
+            li.appendChild(lab); li.appendChild(rm); listEl.appendChild(li);
+          });
+        }
+
+        // zentrale Auswahl-Mutation (Kachel-Checkbox UND Modal-Entfernen nutzen sie)
+        function toggle(set, on) {
+          var at = selected.indexOf(set);
+          if (on && at < 0) { if (selected.length >= MAX_COMPARE) return; selected.push(set); }   // Sicherheitsnetz
+          else if (!on && at > -1) { selected.splice(at, 1); }
+          var btn = btnByset[set];
+          if (btn) { btn.classList.toggle('is-on', on); btn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+          renderBar(); renderList(); goEl.href = buildUrl();
+        }
+
+        /* ---- Öffnen/Schließen (Exit-Animation via CSS allow-discrete) ---- */
+        var lastFocus = null;
+        function openModal() {
+          if (!selected.length) return;
+          if (typeof dlg.showModal !== 'function') { window.open(buildUrl(), '_blank', 'noopener'); return; }   // Fallback ohne <dialog>
+          if (dlg.open) return;
+          lastFocus = document.activeElement;
+          renderList(); goEl.href = buildUrl();
+          dlg.showModal();
+        }
+        function closeModal() { if (dlg.open) dlg.close(); }
+
+        openEl.addEventListener('click', openModal);
+        dlg.querySelector('.hph-vgl__close').addEventListener('click', closeModal);
+        dlg.querySelector('.hph-vgl__cancel').addEventListener('click', closeModal);
+        dlg.addEventListener('click', function (e) { if (e.target === dlg) closeModal(); });   /* Backdrop-Klick schließt */
+        dlg.addEventListener('close', function () { if (lastFocus && lastFocus.focus) lastFocus.focus(); });   /* Fokus zurück */
+        goEl.addEventListener('click', function () { setTimeout(closeModal, 0); });   /* neuer Tab öffnet, Modal schließen */
+
+        clearEl.addEventListener('click', function () {
+          selected.slice().forEach(function (set) { toggle(set, false); });
+        });
+
         compareBtns.forEach(function (btn) {
           btn.addEventListener('click', function () {
             var set = btn.getAttribute('data-hph-vglset') || '';
-            var at = selected.indexOf(set), on;
-            if (at > -1) { selected.splice(at, 1); on = false; }
-            else if (selected.length >= MAX_COMPARE) { return; }   // Sicherheitsnetz (Kachel ist ohnehin gesperrt)
-            else { selected.push(set); on = true; }
-            btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-            btn.classList.toggle('is-on', on);
-            renderCompare();
+            toggle(set, !btn.classList.contains('is-on'));
           });
         });
-        clearEl.addEventListener('click', function () {
-          selected = [];
-          compareBtns.forEach(function (b) { b.setAttribute('aria-pressed', 'false'); b.classList.remove('is-on'); });
-          renderCompare();
-        });
-        renderCompare();
+
+        renderBar();
       }
     });
 
