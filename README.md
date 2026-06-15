@@ -4,25 +4,27 @@ Eigenständiger Hero-Bereich für die Shopware-6-Kategorieseite **Papierhandtüc
 (Erlebniswelt, Element „HTML“). Aufbau von oben nach unten:
 
 1. **Kopf** – H1 „Papierhandtücher“ + Subline (Value Proposition: Falzarten,
-   1–3-lagig, Karton/Palette mit Staffelpreis, Siegel) + zwei CTAs:
-   **„Zum Sortiment“** (primär, gefüllte Pill) und **„Staffelpreise vergleichen“**
-   (sekundär, tonale Pill). Rechts ein stummes Loop-Video mit **Pause-Toggle**.
+   1–3-lagig, Karton/Palette mit Staffelpreis, Siegel) + **Trust-Strip** direkt unter
+   der Subline (belegbare B2B-Fakten: Staffelpreise ab Karton, EU Ecolabel & Blauer
+   Engel, Lieferzeit) + zwei CTAs: **„Zum ganzen Sortiment“** (primär, gefüllte Pill)
+   und **„Hier das richtige Papierhandtuch finden“** (sekundär, tonale Pill, Link zum
+   Produktfinder). Rechts ein stummes Loop-Video mit **Pause-Toggle**.
 2. **Product-Rail** – 5 verlinkte Unterkategorie-Kacheln (1-/2-/3-lagig Z-Falz,
-   Interfold, C-Falz), je mit Klartext-Hint und **„ab …€ netto/Karton“-Preisanker**.
+   Interfold, C-Falz), je mit Klartext-Hint, dem Qualifier
+   **„günstigster Preis der Kategorie“** und dem **„ab …€ netto / 1.000 Stück“-Preisanker**
+   (der Qualifier stellt klar: der Ab-Preis gilt für die ganze Unterkategorie, nicht für das Foto).
    Dazu eine beschriftete **„Vergleichen“-Checkbox** je Kachel (selbsterklärend,
    kein nacktes Icon); die Vergleichs-Bar erscheint erst mit der ersten Auswahl
    und führt per Direktlink in den vorgefilterten Produktfinder-Vergleich
    (Mengen-Eingrenzung Alle/Karton/Palette inline).
-3. **Trust-Strip** – belegbare B2B-Fakten (Staffelpreise ab Karton, EU Ecolabel &
-   Blauer Engel, Lieferzeit).
-4. **Feature-Karten „Ausgezeichnet nachhaltig“** – EU Ecolabel und Blauer Engel,
+3. **Feature-Karten „Ausgezeichnet nachhaltig“** – EU Ecolabel und Blauer Engel,
    je mit Differenzierungszeile (was das Siegel konkret auszeichnet), „Weitere
    Infos“ (offizielle Siegel-Seite) und „Jetzt kaufen“ (Listing mit Siegel-Filter;
    das Script setzt nach der Navigation eine Filter-Überschrift und scrollt hin).
-5. **Falzungs-Schnellvergleich** – scanbare Tabelle (Spendertyp, Entnahme,
+4. **Falzungs-Schnellvergleich** – scanbare Tabelle (Spendertyp, Entnahme,
    Blattformat, typischer Einsatz × Z-Falz/Interfold/C-Falz), destilliert aus den
    Akkordeon-Texten.
-6. **Showcase-Akkordeon „Welche Falzung passt zu Ihrem Spender?“** – drei
+5. **Showcase-Akkordeon „Welche Falzung passt zu Ihrem Spender?“** – drei
    kompakte Erklärtexte mit wechselndem Falz-Schema-Bild, dazu FAQPage-JSON-LD
    (wortgleich mit den sichtbaren Texten; beim Ändern der Panel-Texte mitziehen).
 
@@ -75,6 +77,11 @@ Die „ab …€ netto/Karton“-Preise an den Rail-Kacheln sind **manuell erhob
 C-Falz 22,29 €). Sie müssen bei jeder Preisänderung **mitgezogen** werden –
 ein veralteter „ab“-Preis ist irreführende Werbung (UWG-Risiko). Empfehlung:
 langfristig dynamisch aus Shopware befüllen.
+
+> **Nächster Schritt (B2):** Auf den Unterkategorie-Listing-Seiten soll derselbe
+> "ab …€"-Bestpreis als wiedererkennbarer Banner oberhalb des Produkt-Listings
+> erscheinen (geplant via geteiltem JS/CSS über die ThemeWare Expert Settings;
+> liest live denselben Grundpreis wie die Rail – Konsistenz Haupt→Unterkategorie).
 
 ## Robustheit
 

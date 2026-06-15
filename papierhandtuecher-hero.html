@@ -16,7 +16,7 @@
   2. Den kompletten Block zwischen  >>> COPY START <<<  und  >>> COPY END <<<
      kopieren und in das HTML-Feld einfügen (style + section + script).
   3. Bei Bedarf anpassen:
-       - Kopf-CTAs: href von „Zum Sortiment" und „Staffelpreise vergleichen"
+       - Kopf-CTAs: href von „Zum ganzen Sortiment" und „Hier das richtige Papierhandtuch finden"
        - Trust-Strip: nur belegbare Aussagen (Staffelpreise, Zertifikate, Lieferzeit)
        - Rail-Kacheln: href, Bild (src/alt) und Label je <li>
        - Info-Karten: Bild (src/alt), Titel, Teaser, Volltext und Links je Karte
@@ -210,7 +210,7 @@
 /* ---------- Trust-Strip: schlanke Faktenzeile, KEINE Karten ---------- */
 .hph-hero__trust{
   list-style:none;
-  margin:0;   /* Position/Abstand jetzt über .hph-rail__foot (rechts unter der Rail) */
+  margin: var(--hph-space-sm) 0 0;   /* sitzt jetzt im Kopf, direkt unter der Subline */
   padding:0;
   display:flex;
   flex-wrap:wrap;
@@ -449,15 +449,9 @@
    Überbrückt die Falz-/Lagen-Fachsprache: ein kurzer Klartext-Hinweis plus
    „ab"-Preisanker unter jedem Foto (scanbare Eckdaten direkt an der Kachel). */
 
-/* Fuß-Zeile unter der Rail: Trust-Strip, linksbündig; bricht bei Enge um */
-.hph-rail__foot{
-  display:flex;
-  align-items:flex-end;
-  flex-wrap:wrap;
-  gap: clamp(10px,1.6vw,18px) clamp(16px,3vw,40px);
-  margin-top: var(--hph-space-sm);
-}
-.hph-rail__foot .hph-hero__trust{ margin-left:0; }   /* linksbündig (gleiche Kante wie Rail/Titel) */
+/* (Der frühere Trust-Strip-Fuß unter der Rail ist entfallen: Der Trust-Strip sitzt
+   jetzt im Kopf direkt unter der Subline. Die Vergleichs-Bar wird per JS direkt unter
+   die Rail gehängt – siehe rail.parentNode.insertBefore weiter unten.) */
 
 /* Label + Klartext-Hint als enger Textblock; Foto und Text rücken als eine Einheit
    zusammen (kleiner Tile-Gap), die dezente Standlinie trägt die optische Trennung. */
@@ -479,7 +473,7 @@
 /* „ab"-Preisanker: harte Einkäufer-Eckzahl direkt an der Kachel (Design-Prinzip 5).
    Tabular-Ziffern: die Preise stehen über alle 5 Kacheln ruhig nebeneinander. */
 .hph-rail__price{
-  margin-top:2px;
+  margin-top:1px;   /* sitzt jetzt unter dem .hph-rail__pricenote-Qualifier */
   font-size: clamp(.78rem,.74rem+.12vw,.86rem);
   font-weight:600;
   line-height:1.2;
@@ -487,6 +481,24 @@
   color: var(--hph-ink-strong);   /* dunkelste Stufe: Tonwert-Sprung führt den Einkäufer-Blick zum Preis */
   font-variant-numeric: tabular-nums;
   white-space:nowrap;
+}
+
+/* "günstigster Preis der Kategorie"-Qualifier ÜBER dem Preis (Geschwister-Span vor
+   .hph-rail__price): macht klar, dass der "ab"-Preis der günstigste Grundpreis der
+   GESAMTEN Unterkategorie ist, nicht des einzelnen Fotos. Der GRUNDPREIS-SYNC setzt
+   nur .hph-rail__price.textContent, dieser Span bleibt unberührt. */
+.hph-rail__pricenote{
+  margin-top:1px;
+  font-size: clamp(.68rem,.65rem+.1vw,.74rem);
+  font-weight:400;
+  line-height:1.15;
+  text-align:center;
+  color: var(--hph-ink-mute);   /* tertiäre, AA-konforme Stufe, kein neuer Farbakzent */
+  white-space:nowrap;
+  letter-spacing:.005em;
+}
+@media (max-width:380px){   /* sehr enge Mobiles: zweizeilig statt abschneiden */
+  .hph-rail__pricenote{ white-space:normal; max-width:16ch; margin-inline:auto; }
 }
 
 /* ---------- Slider-Pfeile: weiße Box mit weichem Schatten, nur mobil ---------- */
@@ -1326,16 +1338,33 @@
 
       <!-- Subline: Sortiments-Überblick der Hauptkategorie in EINEM Satz – wie ein
            Inhaltsverzeichnis der Seite (Falzarten · Lagen · Liefermenge Karton/Palette).
-           Zertifikate & Lieferzeit nennt der Trust-Strip unter der Rail, den
+           Zertifikate & Lieferzeit nennt der Trust-Strip direkt darunter, den
            Staffelpreis tragen Kopf-CTA und Rail-Preisanker – hier nicht doppeln. -->
       <p class="hph-hero__subtitle">Z-Falz, Interfold oder C-Falz, 1- bis 3-lagig: lieferbar vom Karton bis zur Palette.</p>
 
+      <!-- Trust-Strip: belegbare B2B-Fakten, jetzt direkt unter der Subline (zuvor unter der Rail).
+           KEINE Karten, nur Icon + Text mit Haarlinien getrennt. Inhalte nur ändern, wenn die Aussage stimmt. -->
+      <ul class="hph-hero__trust" aria-label="Vertrauensmerkmale">
+        <li class="hph-hero__trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42Z"/><circle cx="7.5" cy="7.5" r="1.1"/></svg>
+          Staffelpreise ab Karton
+        </li>
+        <li class="hph-hero__trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+          EU Ecolabel &amp; Blauer Engel
+        </li>
+        <li class="hph-hero__trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+          Lieferung in ca. 4 Werktagen
+        </li>
+      </ul>
+
       <!-- Kopf-Aktionen: primär ins Sortiment (Conversion-Ziel; auf der Kategorieseite fängt der
            Scroll-Handler unten den Klick ab und scrollt sanft zum Listing – via data-hph-scroll-listing –,
-           sonst normale Navigation), sekundär zum Staffelpreis-Vergleich. href je nach Ziel anpassen. -->
+           sonst normale Navigation), sekundär zum Produktfinder. href je nach Ziel anpassen. -->
       <div class="hph-hero__actions">
-        <a class="hph-hero__cta hph-hero__cta--primary" data-hph-scroll-listing href="https://www.hamburgpapier-shop.de/papierhandtuecher">Zum Sortiment</a>
-        <a class="hph-hero__cta hph-hero__cta--ghost" href="https://produktfinder.hamburgpapier-shop.de/vergleich/papierhandtuecher">Staffelpreise vergleichen<svg class="hph-rail__ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+        <a class="hph-hero__cta hph-hero__cta--primary" data-hph-scroll-listing href="https://www.hamburgpapier-shop.de/papierhandtuecher">Zum ganzen Sortiment</a>
+        <a class="hph-hero__cta hph-hero__cta--ghost" href="https://produktfinder.hamburgpapier-shop.de/">Hier das richtige Papierhandtuch finden<svg class="hph-rail__ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
       </div>
     </header>
 
@@ -1395,6 +1424,7 @@
             <span class="hph-rail__text">
               <span class="hph-rail__label">1-lagig · Z-Falz</span>
               <span class="hph-rail__hint">ergiebig &amp; sparsam</span>
+              <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
               <span class="hph-rail__price">ab 2,50 € netto / 1.000 Stück</span>
             </span>
           </a>
@@ -1412,6 +1442,7 @@
             <span class="hph-rail__text">
               <span class="hph-rail__label">2-lagig · Z-Falz</span>
               <span class="hph-rail__hint">weich &amp; saugstark</span>
+              <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
               <span class="hph-rail__price">ab 4,29 € netto / 1.000 Stück</span>
             </span>
           </a>
@@ -1429,6 +1460,7 @@
             <span class="hph-rail__text">
               <span class="hph-rail__label">3-lagig · Z-Falz</span>
               <span class="hph-rail__hint">besonders weich</span>
+              <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
               <span class="hph-rail__price">ab 7,15 € netto / 1.000 Stück</span>
             </span>
           </a>
@@ -1446,6 +1478,7 @@
             <span class="hph-rail__text">
               <span class="hph-rail__label">Interfold</span>
               <span class="hph-rail__hint">Einzelentnahme</span>
+              <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
               <span class="hph-rail__price">ab 4,42 € netto / 1.000 Stück</span>
             </span>
           </a>
@@ -1463,6 +1496,7 @@
             <span class="hph-rail__text">
               <span class="hph-rail__label">C-Falz</span>
               <span class="hph-rail__hint">kompakt gefaltet</span>
+              <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
               <span class="hph-rail__price">ab 4,69 € netto / 1.000 Stück</span>
             </span>
           </a>
@@ -1476,32 +1510,11 @@
              Der Produktfinder-Pfad lebt jetzt zweifach intent-getrennt:
                • Beratung („Welche Falzung passt?") in der Showcase-Sektion unten
                  (Schnellvergleichstabelle + Akkordeon + Produktfinder-Link)
-               • Preis/Mengen („Staffelpreise vergleichen") als sekundärer Kopf-CTA
+               • Produktfinder („Hier das richtige Papierhandtuch finden") als sekundärer Kopf-CTA
                  plus „Vergleichen"-Checkbox direkt an den Kacheln. -->
 
       </ul>
     </nav>
-
-    <!-- Fuß-Zeile UNTER der Rail: Trust-Strip mit belegbaren B2B-Fakten, rechts ausgerichtet. -->
-    <div class="hph-rail__foot">
-
-      <!-- Trust-Strip: belegbare B2B-Fakten, rechts unter der Rail. KEINE Karten, nur Icon + Text mit Haarlinien getrennt.
-           Inhalte nur ändern, wenn die Aussage stimmt – falsche Trust-Claims sind schlimmer als keine. -->
-      <ul class="hph-hero__trust" aria-label="Vertrauensmerkmale">
-        <li class="hph-hero__trust-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42Z"/><circle cx="7.5" cy="7.5" r="1.1"/></svg>
-          Staffelpreise ab Karton
-        </li>
-        <li class="hph-hero__trust-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
-          EU Ecolabel &amp; Blauer Engel
-        </li>
-        <li class="hph-hero__trust-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
-          Lieferung in ca. 4 Werktagen
-        </li>
-      </ul>
-    </div>
 
   </div>
 
@@ -1769,9 +1782,9 @@
           ['.hph-hero__title',      0, false],   /* Titel zuerst                         */
           ['.hph-hero__subtitle',   1, false],   /* Subline …                            */
           ['.hph-hero__media',      1, false],   /* … und Video zusammen                 */
+          ['.hph-hero__trust-item', 2, false],   /* Trust-Strip jetzt im Kopf (unter der Subline) */
           ['.hph-hero__actions',    2, false],   /* CTAs                                 */
-          ['.hph-rail__item',       3, false],   /* Rail als EINE Einheit (kein Ripple)  */
-          ['.hph-hero__trust-item', 4, false]    /* Trust-Strip unter der Rail           */
+          ['.hph-rail__item',       3, false]    /* Rail als EINE Einheit (kein Ripple)  */
       ]},
       { root: '.hph-feature', seq: [
           ['.hph-feature__head',    0, false],   /* Sektions-Überschrift …               */
@@ -1916,8 +1929,7 @@
          wird jedem Set als „versandart:karton|palette" eingefügt (bestätigt per Beispiel-URL:
          lagen:1,versandart:karton,falzung:z-falz) – „Alle Mengen" lässt die Sets unverändert. */
       var compareBtns = Array.prototype.slice.call(rail.querySelectorAll('.hph-rail__compare'));
-      var foot = rail.parentNode ? rail.parentNode.querySelector('.hph-rail__foot') : null;
-      if (compareBtns.length && foot) {
+      if (compareBtns.length && rail.parentNode) {
         var COMPARE_BASE = 'https://produktfinder.hamburgpapier-shop.de/vergleich/papierhandtuecher';
         var selected = [];
 
@@ -1977,7 +1989,7 @@
 
         inner.appendChild(row);
         bar.appendChild(inner);
-        foot.parentNode.insertBefore(bar, foot);
+        rail.parentNode.insertBefore(bar, rail.nextSibling);   /* Bar direkt unter der Rail (Trust-Strip ist in den Kopf gewandert) */
 
         var MAX_COMPARE = 4;   // Limit des Produktfinders: maximal 4 Produkte je Vergleich
         var renderCompare = function () {
