@@ -527,44 +527,14 @@
    jetzt im Kopf direkt unter der Subline. Die Vergleichs-Bar wird per JS direkt unter
    die Rail gehängt – siehe rail.parentNode.insertBefore weiter unten.) */
 
-/* Label + Preisanker als enger Textblock; Foto und Text rücken als eine Einheit
-   zusammen (kleiner Tile-Gap), die dezente Standlinie trägt die optische Trennung. */
+/* Label als Textblock; Foto und Text rücken als eine Einheit zusammen
+   (kleiner Tile-Gap), die dezente Standlinie trägt die optische Trennung. */
 .hph-rail__text{
   display:flex;
   flex-direction:column;
   align-items:center;
   gap:4px;
   width:100%;
-}
-/* „ab"-Preisanker: harte Einkäufer-Eckzahl direkt an der Kachel (Design-Prinzip 5).
-   Tabular-Ziffern: die Preise stehen über alle 5 Kacheln ruhig nebeneinander. */
-.hph-rail__price{
-  margin-top:1px;   /* sitzt jetzt unter dem .hph-rail__pricenote-Qualifier */
-  font-size: clamp(calc(.78 * var(--hph-u)),calc(.74 * var(--hph-u))+.12vw,calc(.86 * var(--hph-u)));
-  font-weight:600;
-  line-height:1.2;
-  text-align:center;
-  color: var(--hph-ink-strong);   /* dunkelste Stufe: Tonwert-Sprung führt den Einkäufer-Blick zum Preis */
-  font-variant-numeric: tabular-nums;
-  white-space:nowrap;
-}
-
-/* "günstigster Preis der Kategorie"-Qualifier ÜBER dem Preis (Geschwister-Span vor
-   .hph-rail__price): macht klar, dass der "ab"-Preis der günstigste Grundpreis der
-   GESAMTEN Unterkategorie ist, nicht des einzelnen Fotos. Der GRUNDPREIS-SYNC setzt
-   nur .hph-rail__price.textContent, dieser Span bleibt unberührt. */
-.hph-rail__pricenote{
-  margin-top:1px;
-  font-size: clamp(calc(.68 * var(--hph-u)),calc(.65 * var(--hph-u))+.1vw,calc(.74 * var(--hph-u)));
-  font-weight:400;
-  line-height:1.15;
-  text-align:center;
-  color: var(--hph-ink-mute);   /* tertiäre, AA-konforme Stufe, kein neuer Farbakzent */
-  white-space:nowrap;
-  letter-spacing:.005em;
-}
-@media (max-width:380px){   /* sehr enge Mobiles: zweizeilig statt abschneiden */
-  .hph-rail__pricenote{ white-space:normal; max-width:16ch; margin-inline:auto; }
 }
 
 /* ---------- Slider-Pfeile: weiße Box mit weichem Schatten, nur mobil ---------- */
@@ -665,23 +635,134 @@
   .hph-rail__compare:hover .hph-rail__compare-box{ border-color: var(--hph-brand); }
 }
 
-/* ③ Vergleichs-Bar: erscheint erst mit der ersten Auswahl (kein dauerhafter
-   Leer-Zustand above the fold – die „Vergleichen"-Checkbox an den Kacheln trägt die Einladung).
-   Inhalt: Zähler + Mengen-Auswahl + „Vergleichen" (Direktlink) + „Leeren". */
-.hph-rail__compare-bar{
-  width:100%; display:grid; grid-template-rows:0fr; opacity:0;
-  transition: grid-template-rows .35s cubic-bezier(.16,1,.3,1), opacity .35s cubic-bezier(.16,1,.3,1);
+/* ③ Rahmen-Hinweis zum Vergleich: stellt VOR der ersten Auswahl klar, dass hier die
+   GRUNDPREISE verschiedener Papierhandtuch-Typen verglichen werden (nicht Produkt-Eigenschaften
+   zweier Artikel). Eine ruhige Zeile genügt; die Mechanik erklärt das Panel. Nur mit JS sichtbar,
+   da die „Vergleichen"-Checkboxen ebenfalls JS-gegated sind (sonst Hinweis ohne Funktion). */
+.hph-rail__comparenote{
+  display:none;
+  margin: clamp(10px,1.6vw,18px) auto 0;
+  max-width: 56ch;
+  text-align:center;
+  font-size: clamp(calc(.82 * var(--hph-u)), calc(.8 * var(--hph-u)) + .15vw, calc(.9 * var(--hph-u)));
+  line-height:1.4;
+  color: var(--hph-ink-mute);
 }
-.hph-rail__compare-bar.is-active{ grid-template-rows:1fr; opacity:1; }
-.hph-rail__compare-inner{
-  min-height:0; overflow:hidden;
-  padding: var(--hph-space-2xs) 0 var(--hph-space-xs);
+.hph-hero--js .hph-rail__comparenote{ display:block; }
+.hph-rail__comparenote strong{ font-weight:600; color: var(--hph-ink-soft); }
+
+/* ③ Vergleichs-TRAY: festes „Vergleichskorb"-Band am unteren Bildschirmrand.
+   ----------------------------------------------------------------------------
+   Erscheint mit der ersten Auswahl und bleibt beim Weiterscrollen über den Hero
+   hinaus sichtbar (echtes Tork-Verhalten). Hängt als Portal an <body>: ein
+   position:fixed-Element INNERHALB des Hero (overflow:hidden + eigener Stacking-
+   Context) würde von späteren Seitenabschnitten überdeckt. Da es an <body> hängt,
+   erbt es NICHT die auf .hph-hero deklarierten Tokens → die genutzten hier neu
+   deklariert (gleiche oklch/clamp-Ausdrücke, damit Resize/Skalierung erhalten bleibt). */
+.hph-tray{
+  --hph-u: max(16px, 1rem);
+  --hph-font-text: 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --hph-ink:        #0a2d47;
+  --hph-ink-mute:   oklch(0.52 0.028 245);
+  --hph-tray-ink:   oklch(0.985 0.012 263);  /* near-white auf dem Blau (kein reines #fff) */
+  --hph-tray-mute:  oklch(0.90 0.06 263);    /* gedämpftes Hell auf dem Blau */
+  --hph-tray-cta:   oklch(0.41 0.14 262);    /* Blau-Text für den weißen CTA (AA auf Weiß) */
+
+  position:fixed; left:0; right:0; bottom:0;
+  z-index:1000;                 /* über Seiteninhalt; Shop-Overlays (Cart/Cookie ≥1040) gewinnen bewusst */
+  box-sizing:border-box;
+  padding: clamp(10px,1.4vw,15px) clamp(12px,2.5vw,28px);
+  padding-bottom: calc(clamp(10px,1.4vw,15px) + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, oklch(0.50 0.14 263) 0%, oklch(0.45 0.145 263) 100%);   /* Tork-orientiertes Royalblau */
+  border-top:1px solid oklch(0.70 0.11 263 / .5);   /* hellere blaue Oberkante */
+  color: var(--hph-tray-ink);
+  font-family: var(--hph-font-text);
+  box-shadow: 0 -5px 18px -10px oklch(0.30 0.10 263 / .55);
+  /* Slide-up: nur transform/opacity; visibility verzögert ausblenden, damit der Exit sichtbar bleibt */
+  transform: translateY(110%); opacity:0; visibility:hidden;
+  transition: transform .42s cubic-bezier(.16,1,.3,1), opacity .30s ease, visibility 0s linear .42s;
 }
-.hph-rail__compare-row{
-  display:flex; align-items:center; flex-wrap:wrap; gap: clamp(10px,1.6vw,18px);
-  min-height:32px;
+.hph-tray.is-active{
+  transform:none; opacity:1; visibility:visible;
+  transition: transform .46s cubic-bezier(.16,1,.3,1), opacity .30s ease, visibility 0s linear 0s;
 }
-.hph-rail__compare-count{ font-size:calc(.92 * var(--hph-u)); font-weight:600; color: var(--hph-ink); }
+.hph-tray__inner{
+  display:flex; align-items:center; gap: clamp(12px,2vw,24px);
+  max-width:1760px; margin-inline:auto;
+}
+/* Karten-/Slot-Reihe nimmt den freien Raum und scrollt bei Bedarf horizontal */
+.hph-tray__slots{
+  flex:1 1 auto; min-width:0;
+  display:flex; align-items:stretch; gap:10px;
+  overflow-x:auto; overflow-y:hidden; scrollbar-width:none; padding-bottom:2px;
+}
+.hph-tray__slots::-webkit-scrollbar{ display:none; }
+.hph-tray__card{
+  flex:0 0 auto; display:flex; align-items:center; gap:10px;
+  min-width: clamp(150px, 16vw, 196px); max-width:236px;
+  padding:7px 8px; border-radius:11px;
+  background:#fff; color: var(--hph-ink);          /* solide weiße Karte auf dem Blau (Tork-Look) */
+  box-shadow: 0 2px 7px -1px oklch(0.25 0.08 263 / .30);
+}
+.hph-tray__thumb{ flex:none; width:44px; height:44px; border-radius:8px; object-fit:contain; background:#fff; }
+.hph-tray__cardlabel{
+  flex:1 1 auto; min-width:0;
+  font-size: calc(.82 * var(--hph-u)); font-weight:600; line-height:1.2; color: var(--hph-ink);
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.hph-tray__remove{
+  flex:none; display:grid; place-items:center; width:28px; height:28px; padding:0; border:0; border-radius:50%;
+  background:transparent; color: oklch(0.52 0.03 250); cursor:pointer; -webkit-tap-highlight-color:transparent;
+  transition: background-color .18s ease, color .18s ease, transform .16s cubic-bezier(.16,1,.3,1);
+}
+.hph-tray__remove svg{ width:13px; height:13px; }
+.hph-tray__remove:active{ transform:scale(.88); transition-duration:.1s; }
+.hph-tray__remove:focus-visible{ outline:2px solid var(--hph-ink); outline-offset:2px; }
+/* leerer Slot: hell-weiße gestrichelte Platzhalter auf dem Blau (Tork) */
+.hph-tray__slot{
+  flex:0 0 auto; display:grid; place-items:center; min-width: clamp(54px, 7vw, 76px);
+  border:1.5px dashed oklch(1 0 0 / .42); border-radius:11px; color: var(--hph-tray-mute);
+}
+.hph-tray__slot svg{ width:17px; height:17px; opacity:.6; }
+.hph-tray__actions{ flex:0 0 auto; display:flex; align-items:center; gap: clamp(12px,1.6vw,22px); }
+.hph-tray__count{
+  font-size: calc(.84 * var(--hph-u)); font-weight:600; color: var(--hph-tray-ink);
+  white-space:nowrap; font-variant-numeric: tabular-nums;
+}
+.hph-tray__clear{
+  border:0; background:transparent; cursor:pointer; padding:.3em .1em;
+  font:inherit; font-size: calc(.84 * var(--hph-u)); font-weight:600; color: var(--hph-tray-ink);
+  text-decoration:underline; text-underline-offset:2px; white-space:nowrap; transition: color .2s ease;
+}
+.hph-tray__clear:focus-visible{ outline:2px solid #fff; outline-offset:2px; border-radius:4px; }
+.hph-tray__open{
+  display:inline-flex; align-items:center; gap:.4em; margin-left: clamp(2px,0.8vw,8px);
+  padding:.66em 1.3em; border:0; border-radius:980px;
+  background:#fff; color: var(--hph-tray-cta);     /* weiße Pille mit Blau-Text (Tork) */
+  font-family:inherit; font-size: calc(.92 * var(--hph-u)); font-weight:700; white-space:nowrap; cursor:pointer;
+  box-shadow: 0 4px 14px -4px oklch(0.20 0.08 263 / .45);
+  transition: background-color .2s ease, transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease;
+}
+.hph-tray__open svg{ width:1em; height:1em; }
+.hph-tray__open:active{ transform:scale(.97); transition-duration:.1s; }
+.hph-tray__open:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+@media (hover:hover) and (pointer:fine){
+  .hph-tray__remove:hover{ background: oklch(0.93 0.01 250); color: var(--hph-ink); }
+  .hph-tray__clear:hover{ color:#fff; }
+  .hph-tray__open:hover{ background: oklch(0.965 0.012 263); transform: translateY(-1px); box-shadow: 0 8px 20px -6px oklch(0.20 0.08 263 / .5); }
+}
+/* Handy: Karten oben (scrollbar), Aktionen als volle Zeile darunter; Leer-Slots weichen */
+@media (max-width:640px){
+  .hph-tray__inner{ flex-direction:column; align-items:stretch; gap:10px; }
+  .hph-tray__slot{ display:none; }
+  .hph-tray__actions{ justify-content:space-between; }
+  .hph-tray__open{ flex:1 1 auto; justify-content:center; min-height:44px; margin-left:0; }
+  .hph-tray__remove{ width:40px; height:40px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .hph-tray{ transform:none; transition: opacity .2s linear, visibility 0s linear .2s; }
+  .hph-tray.is-active{ transition: opacity .2s linear, visibility 0s linear 0s; }
+}
 /* Mengen-Eingrenzung inline (ersetzt den früheren Mengen-Dialog): ruhige Pill-Gruppe.
    Default „Alle Mengen" lässt die Sets unverändert; Karton/Palette wird jedem Set
    als versandart:… mitgegeben (bestätigte Produktfinder-Token). */
@@ -728,137 +809,169 @@
 }
 
 /* ============================================================================
-   ③ VERGLEICHS-MODAL (natives <dialog>, per JS erzeugt)
-   Fokus-Trap, ESC und Top-Layer kommen vom <dialog> (escaped das overflow:hidden
-   des Hero). Bewegung nach Emil-Kowalski-Prinzipien: Backdrop-Fade + Panel
-   scale(.96)+opacity, transform-origin:center (Default), ease-out ~220ms (Enter) /
-   schneller wirkender Exit via @starting-style + transition-behavior:allow-discrete.
-   Nur transform/opacity animiert; ohne Browser-Support oeffnet/schliesst es ohne
-   Animation (graceful), ohne <dialog>-Support faellt der Trigger auf den Direktlink. */
+   ③ VERGLEICHS-PANEL · Bottom-Sheet (natives <dialog>, per JS erzeugt)
+   Fährt von unten herein (translateY 100%→0), Backdrop blendet auf. Fokus-Trap,
+   ESC und Top-Layer kommen vom <dialog> (escaped das overflow:hidden des Hero und
+   liegt über der ganzen Seite). Nur transform/opacity animiert; ohne @starting-
+   style-Support öffnet/schließt es ohne Animation (graceful), ohne <dialog> faellt
+   der Trigger auf den Produktfinder-Direktlink.
+   Volle Breite, Inhalt aber über --hph-vgl-gutter auf 1100px zentriert: Kopf/Fuß-
+   Trennlinien spannen voll, die Inhalte fluchten mittig (kein Inner-Wrapper nötig). */
 .hph-vgl{
-  width: min(92vw, 460px);
-  max-height: min(86vh, 640px);
-  margin:auto;                          /* im Viewport zentriert (Top-Layer) */
+  --hph-vgl-gutter: max(clamp(16px,3vw,32px), calc((100% - 1100px) / 2));
+  width:100%; max-width:100%;
+  max-height:92vh; max-height:92dvh;
+  margin:auto auto 0;                   /* unten verankert, horizontal zentriert (Top-Layer) */
   padding:0; border:0;
-  border-radius: clamp(16px, 2vw, 22px);
+  border-radius: clamp(18px,2.6vw,28px) clamp(18px,2.6vw,28px) 0 0;
   background:#fff; color: var(--hph-ink);
-  box-shadow: 0 1px 2px oklch(0.30 0.045 245 / .10), 0 24px 60px -16px oklch(0.30 0.045 245 / .30);
-  overflow:hidden;                      /* runde Ecken clippen; Body scrollt intern */
+  box-shadow: 0 -1px 2px oklch(0.30 0.045 245 / .10), 0 -26px 64px -18px oklch(0.24 0.05 250 / .40);
+  overflow:hidden;                      /* runde Ober-Ecken clippen; Body scrollt intern */
   font-family: var(--hph-font-text);
-  /* geschlossener/Exit-Zustand; Enter-Startwert via @starting-style[open] */
-  opacity:0;
-  transform: scale(.96) translateY(8px);
-  transition: opacity .22s cubic-bezier(.16,1,.3,1),
-              transform .22s cubic-bezier(.16,1,.3,1),
-              display .22s, overlay .22s;
+  transform: translateY(100%);          /* geschlossener/Exit-Zustand; Enter-Startwert via @starting-style[open] */
+  transition: transform .44s cubic-bezier(.16,1,.3,1), display .44s, overlay .44s;
   transition-behavior: allow-discrete;
 }
 .hph-vgl[open]{
   display:flex; flex-direction:column;  /* nur offen sichtbar; geschlossen greift UA display:none */
-  opacity:1; transform:none;
+  transform:none;
 }
 @starting-style{
-  .hph-vgl[open]{ opacity:0; transform: scale(.96) translateY(8px); }
+  .hph-vgl[open]{ transform: translateY(100%); }
 }
 .hph-vgl::backdrop{
-  background: oklch(0.22 0.04 245 / .42);
-  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  background: oklch(0.20 0.04 250 / .50);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
   opacity:0;
-  transition: opacity .22s ease, display .22s, overlay .22s;
+  transition: opacity .42s ease, display .42s, overlay .42s;
   transition-behavior: allow-discrete;
 }
 .hph-vgl[open]::backdrop{ opacity:1; }
 @starting-style{ .hph-vgl[open]::backdrop{ opacity:0; } }
 
 .hph-vgl__head{
-  display:flex; align-items:flex-start; justify-content:space-between; gap: var(--hph-space-sm);
-  padding: clamp(18px,2.4vw,24px) clamp(18px,2.4vw,26px) clamp(10px,1.4vw,14px);
+  display:flex; align-items:center; justify-content:space-between; gap: var(--hph-space-sm);
+  padding: clamp(16px,2vw,22px) var(--hph-vgl-gutter) clamp(12px,1.4vw,16px);
+  border-bottom:1px solid var(--hph-hairline);
 }
 .hph-vgl__title{
   margin:0; font-family: var(--hph-font-head);
-  font-size: clamp(calc(1.15 * var(--hph-u)),calc(1.05 * var(--hph-u))+.5vw,calc(1.4 * var(--hph-u))); font-weight:700; letter-spacing:-0.02em; line-height:1.15;
+  font-size: clamp(calc(1.25 * var(--hph-u)),calc(1.1 * var(--hph-u))+.6vw,calc(1.55 * var(--hph-u))); font-weight:700; letter-spacing:-0.02em; line-height:1.12;
   color: var(--hph-ink);
 }
 .hph-vgl__close{
-  flex:none; display:grid; place-items:center; width:34px; height:34px; margin:-3px -4px 0 0;
+  flex:none; display:grid; place-items:center; width:44px; height:44px; margin:0;
   padding:0; border:0; border-radius:50%; background: oklch(0.95 0.012 245); color: var(--hph-ink-soft);
   cursor:pointer; -webkit-tap-highlight-color:transparent;
   transition: background-color .18s ease, color .18s ease, transform .16s cubic-bezier(.16,1,.3,1);
 }
-.hph-vgl__close svg{ width:17px; height:17px; }
+.hph-vgl__close svg{ width:18px; height:18px; }
 .hph-vgl__close:active{ transform: scale(.92); transition-duration:.1s; }
 .hph-vgl__close:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:2px; }
 @media (hover:hover) and (pointer:fine){ .hph-vgl__close:hover{ background: oklch(0.92 0.02 245); color: var(--hph-ink); } }
 
-.hph-vgl__body{ padding:0 clamp(18px,2.4vw,26px); overflow-y:auto; }
-.hph-vgl__lead{ margin:0 0 var(--hph-space-sm); color: var(--hph-ink-soft); font-size: clamp(calc(.9 * var(--hph-u)),calc(.86 * var(--hph-u))+.2vw,calc(1 * var(--hph-u))); line-height:1.45; }
-.hph-vgl__list{ list-style:none; margin:0 0 var(--hph-space-md); padding:0; display:flex; flex-direction:column; gap:8px; }
-.hph-vgl__item{
-  display:flex; align-items:center; gap:.6em;
-  padding:.55em .6em .55em .9em; border:1px solid var(--hph-hairline); border-radius:12px;
-  background: oklch(0.985 0.004 245);
+.hph-vgl__body{ flex:1 1 auto; min-height:0; padding: clamp(14px,2vw,22px) var(--hph-vgl-gutter) clamp(8px,1.4vw,14px); overflow-y:auto; }
+/* Orientierungszeile: erklärt das Modell genau am Commit-Punkt (Grundpreis-Vergleich der Typen,
+   Produkte je Typ im Produktfinder) – die „richtige Stelle", ohne die Rail oben zu überladen. */
+.hph-vgl__lead{
+  margin: 0 0 var(--hph-space-sm);
+  max-width: 70ch;
+  font-size: clamp(calc(.86 * var(--hph-u)), calc(.84 * var(--hph-u)) + .15vw, calc(.96 * var(--hph-u)));
+  line-height:1.45; color: var(--hph-ink-soft);
 }
-.hph-vgl__item-label{ flex:1 1 auto; min-width:0; font-weight:600; font-size:calc(.96 * var(--hph-u)); color: var(--hph-ink); }
-.hph-vgl__remove{
-  flex:none; display:grid; place-items:center; width:28px; height:28px; padding:0; border:0; border-radius:50%;
-  background:transparent; color: var(--hph-ink-mute); cursor:pointer; -webkit-tap-highlight-color:transparent;
-  transition: background-color .18s ease, color .18s ease, transform .16s cubic-bezier(.16,1,.3,1);
-}
-.hph-vgl__remove svg{ width:15px; height:15px; }
-.hph-vgl__remove:active{ transform: scale(.9); transition-duration:.1s; }
-.hph-vgl__remove:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:2px; }
-@media (hover:hover) and (pointer:fine){ .hph-vgl__remove:hover{ background: oklch(0.93 0.02 245); color: var(--hph-ink); } }
 
-/* Liefermenge: als eigene, abgesetzte Karte mit klarer Überschrift + Hinweis, damit die
-   Auswahl im Modal nicht untergeht; Segmente full-width, aktiver Zustand deutlich (Navy). */
+/* Produkt-Spalten als ruhiges, haarlinien-gestütztes Vergleichsraster (KEINE Karten-Boxen):
+   Bild sitzt direkt auf dem Sheet, eine Haarlinie trennt Bild von Bezeichnung, dünne vertikale
+   Haarlinien trennen die Spalten; freie Kapazität schrumpft auf EINE schlanke Add-Spalte. */
+.hph-vgl__cols{
+  display:flex; gap:0;
+  overflow-x:auto; padding-bottom:8px; margin-bottom: var(--hph-space-md);
+  scroll-snap-type:x proximity;
+}
+.hph-vgl__cols::-webkit-scrollbar{ height:7px; }
+.hph-vgl__cols::-webkit-scrollbar-thumb{ background: var(--hph-hairline); border-radius:980px; }
+.hph-vgl__col{
+  flex:0 0 clamp(150px, 22vw, 216px);
+  display:flex; flex-direction:column;
+  padding-inline: clamp(12px,1.6vw,20px); scroll-snap-align:start;
+}
+.hph-vgl__col:first-child{ padding-left:0; }
+.hph-vgl__col + .hph-vgl__col{ border-left:1px solid var(--hph-hairline); }   /* Spalten-Trennlinie = Tabellenstruktur, kein Akzent-Stripe */
+.hph-vgl__colremove{
+  align-self:flex-end; display:grid; place-items:center; width:44px; height:44px; margin:0 -8px 0 0;
+  border:0; background:transparent; cursor:pointer; padding:0; border-radius:50%;
+  color: var(--hph-ink-mute); -webkit-tap-highlight-color:transparent;
+  transition: color .18s ease, background-color .18s ease, transform .16s cubic-bezier(.16,1,.3,1);
+}
+.hph-vgl__colremove svg{ width:15px; height:15px; }
+.hph-vgl__colremove:active{ transform:scale(.9); transition-duration:.1s; }
+.hph-vgl__colremove:focus-visible{ outline:2px solid var(--hph-brand); outline-offset:2px; }
+.hph-vgl__colcard{ flex:1 1 auto; display:flex; flex-direction:column; }
+.hph-vgl__colimg{ align-self:center; width:100%; max-width:148px; aspect-ratio:3/4; object-fit:contain; }
+.hph-vgl__collabel{
+  margin-top: clamp(12px,1.6vw,16px); padding-top: clamp(12px,1.6vw,16px);
+  border-top:1px solid var(--hph-hairline);
+  font-size:calc(.96 * var(--hph-u)); font-weight:600; line-height:1.25; color: var(--hph-ink);
+}
+/* leere Spalten spiegeln EXAKT die Produktspalten-Struktur (gleiche Breite, Bild-Zone, Haarlinie,
+   Label-Position) → einheitliche „offene Vergleichs-Slots" statt einer orphaned Box.
+   Bild-Zone zeigt nur ein zartes „+", Label „frei" in gedämpfter Stufe. Auf Mobil ausgeblendet. */
+.hph-vgl__col--empty .hph-vgl__colcard{ padding-top:44px; }   /* gleicht die 44px-Remove-Zeile der Produktspalten aus → Bildzonen fluchten */
+.hph-vgl__emptyimg{ display:grid; place-items:center; }
+.hph-vgl__emptyimg svg{ width:26px; height:26px; opacity:.45; color: var(--hph-ink-mute); }
+.hph-vgl__col--empty .hph-vgl__collabel{ color: var(--hph-ink-mute); font-weight:500; }
+@media (max-width:640px){ .hph-vgl__col--empty{ display:none; } }   /* Mobil: nur die echte Auswahl, keine Leer-Slots */
+@media (hover:hover) and (pointer:fine){
+  .hph-vgl__colremove:hover{ color: var(--hph-ink); background: oklch(0.95 0.012 245); }
+  .hph-vgl__qty .hph-rail__compare-seg-btn:not(.is-on):hover{ background: oklch(0.93 0.014 245); color: var(--hph-ink); }
+}
+
+/* Liefermenge: KEIN Karten-Kasten — Haarlinie + Weißraum trennen; verbundener Segment-Control statt loser Pills */
 .hph-vgl__qty{
   margin-bottom: var(--hph-space-sm);
-  padding: clamp(12px,1.6vw,16px);
-  border:1px solid var(--hph-hairline);
-  border-radius:14px;
-  background: oklch(0.985 0.004 245);
+  padding-top: var(--hph-space-sm);
+  border-top:1px solid var(--hph-hairline);
 }
-.hph-vgl__qty-label{ display:block; margin-bottom:10px; font-size:calc(1 * var(--hph-u)); font-weight:700; color: var(--hph-ink); }
-.hph-vgl__qty .hph-rail__compare-seg{ display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; }
-.hph-vgl__qty .hph-rail__compare-seg-btn{ padding:.72em .5em; text-align:center; font-size:calc(.9 * var(--hph-u)); }
+.hph-vgl__qty-label{ display:block; margin-bottom:10px; font-size:calc(.82 * var(--hph-u)); font-weight:600; color: var(--hph-ink-mute); }
+.hph-vgl__qty .hph-rail__compare-seg{
+  display:grid; grid-template-columns: repeat(3, 1fr); gap:0;
+  border:1px solid var(--hph-hairline); border-radius:12px; overflow:hidden;
+  background: oklch(0.965 0.012 245);
+}
+.hph-vgl__qty .hph-rail__compare-seg-btn{
+  border:0; border-radius:0; background:transparent;
+  border-left:1px solid var(--hph-hairline);
+  padding:.72em .5em; min-height:48px; display:flex; align-items:center; justify-content:center;
+  text-align:center; font-size:calc(.9 * var(--hph-u)); font-weight:600; color: var(--hph-ink-soft);
+}
+.hph-vgl__qty .hph-rail__compare-seg-btn:first-child{ border-left:0; }
 .hph-vgl__qty .hph-rail__compare-seg-btn.is-on{
-  background: oklch(0.93 0.03 245);     /* klarer Navy-Tint statt fast-weiß */
-  border-color: var(--hph-brand);
-  color: var(--hph-brand-dark);
-  font-weight:700;
+  background: var(--hph-brand-dark); color:#fff; font-weight:700;   /* satter Navy-Fill + Weiß = AA, eindeutig „gewählt" */
 }
 .hph-vgl__qty-hint{ margin:10px 0 0; font-size:calc(.82 * var(--hph-u)); line-height:1.4; color: var(--hph-ink-mute); }
 
 .hph-vgl__foot{
   display:flex; align-items:center; gap: clamp(12px,1.6vw,18px);
-  padding: clamp(12px,1.6vw,16px) clamp(18px,2.4vw,26px) clamp(18px,2.4vw,24px);
+  padding: clamp(12px,1.6vw,16px) var(--hph-vgl-gutter) clamp(16px,2vw,24px);
   border-top:1px solid var(--hph-hairline);
 }
-.hph-vgl__cancel{ margin-right:auto; }   /* „Abbrechen" links, CTA rechts */
-
-/* Modal-Controls als vollwertige Touch-Targets (≥44px, Touch-DoD): Close/Remove/
-   Mengen-Segmente/CTA „Im Produktfinder vergleichen". Icon bleibt klein, nur die
-   Tap-Fläche wächst (Remove transparent, Close heller Kreis). */
-.hph-vgl__close{ width:44px; height:44px; margin:0; }
-.hph-vgl__remove{ width:44px; height:44px; }
+.hph-vgl__cancel{ margin-right:auto; min-height:44px; }   /* „Abbrechen" links, CTA rechts */
 .hph-vgl__go{ min-height:44px; }
-.hph-vgl__qty .hph-rail__compare-seg-btn{ min-height:44px; display:flex; align-items:center; justify-content:center; }
 
-/* Modal auf sehr schmalen Phones (≤420px): Footer stapeln + Segmente/CTA einpassen,
-   sonst schneidet das overflow:hidden des Modals den CTA „Im Produktfinder
-   vergleichen", das „Palette"-Segment und das Close-× am rechten Rand ab. */
-@media (max-width:420px){
+/* Bottom-Sheet auf schmalen Phones: Footer stapeln, Spalten weiter scrollbar (nächste lugt hervor) */
+@media (max-width:480px){
+  .hph-vgl{ max-height:90dvh; }
+  .hph-vgl__col{ flex-basis:66vw; }
   .hph-vgl__foot{ flex-direction:column-reverse; align-items:stretch; gap:10px; }
-  .hph-vgl__cancel{ margin-right:0; text-align:center; padding:.5em; }
+  .hph-vgl__cancel{ margin-right:0; text-align:center; padding:.6em; }
   .hph-vgl__go{ justify-content:center; white-space:normal; }
   .hph-vgl__qty .hph-rail__compare-seg-btn{ white-space:normal; min-width:0; padding:.6em .35em; }
-  .hph-vgl__title{ font-size:calc(1.06 * var(--hph-u)); min-width:0; overflow-wrap:break-word; }  /* Titel weicht, damit der 44px-Close nicht aus der Rundecke gedrängt + geclippt wird */
-  .hph-vgl__close{ margin:0; }
 }
 
-/* Reduced Motion: keine Bewegung, nur (kurzer) Opazitaets-Wechsel */
+/* Reduced Motion: kein Slide, nur (kurzer) Opazitäts-Wechsel */
 @media (prefers-reduced-motion: reduce){
-  .hph-vgl{ transform:none; }
+  .hph-vgl{ transform:none; opacity:0; transition: opacity .2s ease, display .2s, overlay .2s; }
+  .hph-vgl[open]{ opacity:1; }
   @starting-style{ .hph-vgl[open]{ transform:none; opacity:0; } }
 }
 
@@ -1453,7 +1566,7 @@
     width:100%; height:100%; object-fit:cover;
   }
   .hph-hero__media-toggle{ display:none !important; }   /* Standbild statt Video → Pause-Toggle überflüssig */
-  .hph-rail__tile, .hph-rail__media img, .hph-rail__media::after, .hph-rail__nav{ transition:none !important; }  .hph-rail__compare, .hph-rail__compare-box, .hph-rail__compare-box svg, .hph-rail__compare-bar, .hph-rail__compare-go, .hph-rail__compare-seg-btn{ transition:none !important; }
+  .hph-rail__tile, .hph-rail__media img, .hph-rail__media::after, .hph-rail__nav{ transition:none !important; }  .hph-rail__compare, .hph-rail__compare-box, .hph-rail__compare-box svg, .hph-rail__compare-go, .hph-rail__compare-seg-btn, .hph-tray__open, .hph-tray__remove, .hph-tray__clear{ transition:none !important; }
   .hph-feature__card, .hph-feature__more, .hph-feature__buy, .hph-feature__img{ transition:none !important; }
   .hph-feature__buy-arrow{ transform: translateY(-50%) !important; transition:none !important; }          /* Kauf-Button: Pfeil bleibt ruhig zentriert */
   .hph-rail__ext, .hph-feature__more svg, .hph-feature__seeall svg{ transition:none !important; transform:none !important; }
@@ -1553,14 +1666,6 @@
     <!-- 1) Kopf: Titel + Aktionen -->
     <header class="hph-hero__head">
       <h1 class="hph-hero__title" id="hph-hero-title">Papierhandtücher</h1>
-
-      <!-- Kopf-Aktionen: primär ins Sortiment (Conversion-Ziel; auf der Kategorieseite fängt der
-           Scroll-Handler unten den Klick ab und scrollt sanft zum Listing – via data-hph-scroll-listing –,
-           sonst normale Navigation), sekundär zum Produktfinder. href je nach Ziel anpassen. -->
-      <div class="hph-hero__actions">
-        <a class="hph-hero__cta hph-hero__cta--primary" data-hph-scroll-listing href="https://www.hamburgpapier-shop.de/papierhandtuecher">Zum ganzen Sortiment</a>
-        <a class="hph-hero__cta hph-hero__cta--ghost" href="https://produktfinder.hamburgpapier-shop.de/"><span class="hph-hero__cta-underline">Unsicher? Hier das richtige Papierhandtuch finden</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
-      </div>
     </header>
 
       </div><!-- /.hph-hero__intro-text -->
@@ -1601,15 +1706,6 @@
 
       <ul class="hph-rail__track">
 
-        <!-- Preisanker „ab … € netto / 1.000 Stück" je Kachel: günstigster GRUNDPREIS der
-             jeweils verlinkten Listing-Seite · Stand 12.06.2026.
-             Diese Werte sind nur noch der No-JS-/Fallback-Stand: das Script
-             „GRUNDPREIS-SYNC" (unten) liest die Grundpreise live von den verlinkten
-             Listing-Seiten (10-Minuten-Cache im localStorage) und überschreibt die Spans.
-             Ein veralteter „ab"-Preis wäre irreführende Werbung (UWG-Risiko) – der
-             Fallback hier sollte daher bei Preisänderungen trotzdem gelegentlich
-             mitgezogen werden, ist aber nicht mehr zeitkritisch. -->
-
         <li class="hph-rail__item">
           <a class="hph-rail__tile" href="https://www.hamburgpapier-shop.de/papierhandtuecher-1-lagig">
             <span class="hph-rail__media">
@@ -1618,8 +1714,6 @@
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">1-lagig · Z-Falz</span>
-              <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
-              <span class="hph-rail__price">ab 2,50 € netto / 1.000 Stück</span>
             </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="lagen:1,falzung:z-falz" aria-label="„1-lagig · Z-Falz“ zum Vergleich hinzufügen">
@@ -1635,8 +1729,6 @@
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">2-lagig · Z-Falz</span>
-              <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
-              <span class="hph-rail__price">ab 4,29 € netto / 1.000 Stück</span>
             </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="lagen:2,falzung:z-falz" aria-label="„2-lagig · Z-Falz“ zum Vergleich hinzufügen">
@@ -1652,8 +1744,6 @@
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">3-lagig · Z-Falz</span>
-              <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
-              <span class="hph-rail__price">ab 7,15 € netto / 1.000 Stück</span>
             </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="lagen:3,falzung:z-falz" aria-label="„3-lagig · Z-Falz“ zum Vergleich hinzufügen">
@@ -1669,8 +1759,6 @@
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">Interfold</span>
-              <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
-              <span class="hph-rail__price">ab 4,42 € netto / 1.000 Stück</span>
             </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="falzung:interfold" aria-label="„Interfold“ zum Vergleich hinzufügen">
@@ -1686,8 +1774,6 @@
             </span>
             <span class="hph-rail__text">
               <span class="hph-rail__label">C-Falz</span>
-              <span class="hph-rail__pricenote">günstigster Preis der Kategorie</span>
-              <span class="hph-rail__price">ab 4,69 € netto / 1.000 Stück</span>
             </span>
           </a>
           <button type="button" class="hph-rail__compare" aria-pressed="false" data-hph-vglset="falzung:c-falz" aria-label="„C-Falz“ zum Vergleich hinzufügen">
@@ -1705,6 +1791,10 @@
 
       </ul>
     </nav>
+
+    <!-- ③ Rahmen-Hinweis: framt die „Vergleichen"-Checkboxen als GRUNDPREIS-Vergleich der Typen
+         (nicht Eigenschafts-Vergleich). Nur mit JS sichtbar (CSS .hph-hero--js-gegated). -->
+    <p class="hph-rail__comparenote">Unsicher, welcher Typ? Mehrere Typen auswählen und ihre <strong>Grundpreise</strong> vergleichen.</p>
 
     <!-- Trust-Strip: belegbare B2B-Fakten als volle-Breite-Band unter der Rail. KEINE Karten,
          nur Icon + Text mit Haarlinien getrennt. Inhalte nur ändern, wenn die Aussage stimmt. -->
@@ -1987,8 +2077,7 @@
     var REVEAL_SCENES = [
       { root: '.hph-hero__intro', seq: [
           ['.hph-hero__title',      0, false],   /* Titel zuerst                         */
-          ['.hph-hero__media',      1, false],   /* Video zusammen mit …                 */
-          ['.hph-hero__actions',    1, false],   /* … CTAs                               */
+          ['.hph-hero__media',      1, false],   /* Video                                */
           ['.hph-rail__item',       2, false],   /* Rail als EINE Einheit (kein Ripple)  */
           ['.hph-hero__trust-item', 3, false]    /* Trust-Strip unter der Rail           */
       ]},
@@ -2173,14 +2262,16 @@
         var selected = [];             // gewählte vglset-Strings (Reihenfolge = Klick-Reihenfolge)
         var versand  = '';             // '' | 'karton' | 'palette'
 
-        // Label + Button je vglset aus der zugehörigen Kachel (für Modal-Liste + Toggle)
-        var labelByset = {}, btnByset = {};
+        // Label + Bild + Button je vglset aus der zugehörigen Kachel (für Tray-/Panel-Karten + Toggle)
+        var labelByset = {}, btnByset = {}, imgByset = {};
         compareBtns.forEach(function (btn) {
           var set = btn.getAttribute('data-hph-vglset') || '';
           btnByset[set] = btn;
           var item = btn.closest('.hph-rail__item');
           var lab  = item && item.querySelector('.hph-rail__label');
           labelByset[set] = lab ? lab.textContent.trim() : 'Variante';
+          var img = item && item.querySelector('.hph-rail__media img');
+          imgByset[set] = img ? { src: (img.currentSrc || img.src || ''), alt: (img.getAttribute('alt') || '') } : null;
         });
 
         // Produktfinder-Deep-Link aus Auswahl + Menge (versandart nach dem ersten Paar – bestätigte Reihenfolge)
@@ -2195,35 +2286,47 @@
           return COMPARE_BASE + '?vglnach=custom&vglsets=' + encodeURIComponent(sets.join('|'));   // kodiert : , | → %3A %2C %7C
         }
 
-        /* ---- schlanke Bar unter der Rail: Zähler + „Vergleichen" (öffnet Modal) + „Leeren" ---- */
-        var bar = document.createElement('div'); bar.className = 'hph-rail__compare-bar';
-        var inner = document.createElement('div'); inner.className = 'hph-rail__compare-inner';
-        var row = document.createElement('div'); row.className = 'hph-rail__compare-row';
-        var countEl = document.createElement('span'); countEl.className = 'hph-rail__compare-count';
-        var openEl = document.createElement('button');
-        openEl.type = 'button';
-        openEl.className = 'hph-rail__compare-go';
-        openEl.innerHTML = 'Vergleichen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
-        var clearEl = document.createElement('button');
-        clearEl.type = 'button'; clearEl.className = 'hph-rail__compare-clear'; clearEl.textContent = 'Leeren';
-        row.appendChild(countEl); row.appendChild(openEl); row.appendChild(clearEl);
-        inner.appendChild(row); bar.appendChild(inner);
-        rail.parentNode.insertBefore(bar, rail.nextSibling);   /* Bar direkt unter der Rail */
+        /* ---- gemeinsame Icons (Tray + Panel) ---- */
+        var ARROW  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+        var X_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+        var PLUS   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
 
-        /* ---- Vergleichs-Modal: natives <dialog> (Fokus-Trap, ESC, Top-Layer vom Browser) ---- */
+        /* ---- Vergleichs-TRAY: festes „Vergleichskorb"-Band, an <body> gehängt ----
+           An <body> statt in den Hero: ein fixed-Element im Hero (overflow:hidden + eigener
+           Stacking-Context) würde von späteren Seitenabschnitten überdeckt. Inhalt: Korb-Karten
+           (Mini-Bild + Label + ×) + leere Slots, rechts „Alles löschen" + „Vergleichen" (öffnet Panel). */
+        var tray = document.createElement('div');
+        tray.className = 'hph-tray';
+        tray.setAttribute('role', 'region');
+        tray.setAttribute('aria-label', 'Vergleichsauswahl');
+        tray.innerHTML =
+          '<div class="hph-tray__inner">' +
+            '<div class="hph-tray__slots"></div>' +
+            '<div class="hph-tray__actions">' +
+              '<span class="hph-tray__count" aria-live="polite"></span>' +
+              '<button type="button" class="hph-tray__clear">Alles löschen</button>' +
+              '<button type="button" class="hph-tray__open">Grundpreise vergleichen' + ARROW + '</button>' +
+            '</div>' +
+          '</div>';
+        document.body.appendChild(tray);
+
+        var slotsEl   = tray.querySelector('.hph-tray__slots');
+        var trayCount = tray.querySelector('.hph-tray__count');
+        var trayClear = tray.querySelector('.hph-tray__clear');
+        var trayOpen  = tray.querySelector('.hph-tray__open');
+
+        /* ---- Vergleichs-PANEL: natives <dialog>-Bottom-Sheet (Fokus-Trap, ESC, Top-Layer vom Browser) ---- */
         var dlg = document.createElement('dialog');
         dlg.className = 'hph-vgl';
         dlg.setAttribute('aria-labelledby', 'hph-vgl-title');
         dlg.innerHTML =
           '<div class="hph-vgl__head">' +
-            '<h2 class="hph-vgl__title" id="hph-vgl-title">Papierhandtücher vergleichen</h2>' +
-            '<button type="button" class="hph-vgl__close" aria-label="Vergleich schließen">' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>' +
-            '</button>' +
+            '<h2 class="hph-vgl__title" id="hph-vgl-title">Grundpreise vergleichen</h2>' +
+            '<button type="button" class="hph-vgl__close" aria-label="Vergleich schließen">' + X_ICON + '</button>' +
           '</div>' +
           '<div class="hph-vgl__body">' +
-            '<p class="hph-vgl__lead">Liefermenge wählen und den direkten Vergleich im Produktfinder öffnen.</p>' +
-            '<ul class="hph-vgl__list"></ul>' +
+            '<p class="hph-vgl__lead">Verglichen werden die <strong>Grundpreise je 1.000 Stück</strong> der gewählten Papierhandtuch-Typen. Im Produktfinder sehen Sie anschließend die passenden Produkte je Typ.</p>' +
+            '<div class="hph-vgl__cols"></div>' +
             '<div class="hph-vgl__qty">' +
               '<span class="hph-vgl__qty-label">Liefermenge wählen</span>' +
               '<div class="hph-rail__compare-seg" role="group" aria-label="Liefermenge für den Vergleich"></div>' +
@@ -2236,11 +2339,11 @@
           '</div>';
         heroRoot.appendChild(dlg);
 
-        var listEl = dlg.querySelector('.hph-vgl__list');
+        var colsEl = dlg.querySelector('.hph-vgl__cols');
         var segEl  = dlg.querySelector('.hph-rail__compare-seg');
         var goEl   = dlg.querySelector('.hph-vgl__go');
 
-        // Mengen-Segmente (im Modal)
+        // Mengen-Segmente (im Panel)
         var segBtns = [];
         [
           { versand: '',        label: 'Alle Mengen' },
@@ -2264,14 +2367,36 @@
           segEl.appendChild(b); segBtns.push(b);
         });
 
-        var X_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
-
-        function renderBar() {
+        /* ---- Tray rendern: Korb-Karten + leere Slots + Zähler; Band erscheint mit erster Auswahl ---- */
+        function renderTray() {
           var n = selected.length, full = n >= MAX_COMPARE;
-          bar.classList.toggle('is-active', n > 0);   /* Bar erscheint erst mit der ersten Auswahl */
-          countEl.textContent = (n === 1 ? '1 Variante ausgewählt' : n + ' Varianten ausgewählt')
-                              + (full ? ' · Maximum (' + MAX_COMPARE + ') erreicht'
-                                      : (n === 1 ? ' · bis zu ' + MAX_COMPARE + ' möglich' : ''));
+          tray.classList.toggle('is-active', n > 0);
+          tray.setAttribute('aria-hidden', n > 0 ? 'false' : 'true');
+          if ('inert' in tray) { tray.inert = (n === 0); }   // versteckt → nicht fokussierbar / aus dem A11y-Baum
+          trayCount.textContent = n + ' von ' + MAX_COMPARE;
+
+          slotsEl.innerHTML = '';
+          selected.forEach(function (set) {
+            var card = document.createElement('div'); card.className = 'hph-tray__card';
+            var info = imgByset[set];
+            if (info && info.src) {
+              var img = document.createElement('img'); img.className = 'hph-tray__thumb';
+              img.src = info.src; img.alt = ''; img.setAttribute('loading', 'lazy'); img.setAttribute('decoding', 'async');
+              card.appendChild(img);
+            }
+            var lab = document.createElement('span'); lab.className = 'hph-tray__cardlabel';
+            lab.textContent = labelByset[set] || 'Variante';
+            var rm = document.createElement('button');
+            rm.type = 'button'; rm.className = 'hph-tray__remove';
+            rm.setAttribute('aria-label', (labelByset[set] || 'Variante') + ' aus dem Vergleich entfernen');
+            rm.innerHTML = X_ICON;
+            rm.addEventListener('click', function () { toggle(set, false); });
+            card.appendChild(lab); card.appendChild(rm); slotsEl.appendChild(card);
+          });
+          for (var i = n; i < MAX_COMPARE; i++) {
+            var slot = document.createElement('div'); slot.className = 'hph-tray__slot'; slot.setAttribute('aria-hidden', 'true');
+            slot.innerHTML = PLUS; slotsEl.appendChild(slot);
+          }
           // Maximum erreicht: noch nicht gewählte Kacheln sperren – gewählte bleiben abwählbar
           compareBtns.forEach(function (b) {
             var dis = full && !b.classList.contains('is-on');
@@ -2280,51 +2405,69 @@
           });
         }
 
-        function renderList() {
-          listEl.innerHTML = '';
+        /* ---- Panel-Spalten rendern: borderlose Bild+Label-Spalte je Variante + EINE schlanke Add-Spalte ---- */
+        function renderCols() {
+          colsEl.innerHTML = '';
           selected.forEach(function (set) {
-            var li = document.createElement('li'); li.className = 'hph-vgl__item';
-            var lab = document.createElement('span'); lab.className = 'hph-vgl__item-label';
-            lab.textContent = labelByset[set] || 'Variante';
+            var col = document.createElement('div'); col.className = 'hph-vgl__col';
             var rm = document.createElement('button');
-            rm.type = 'button'; rm.className = 'hph-vgl__remove';
+            rm.type = 'button'; rm.className = 'hph-vgl__colremove';
             rm.setAttribute('aria-label', (labelByset[set] || 'Variante') + ' aus dem Vergleich entfernen');
             rm.innerHTML = X_ICON;
             rm.addEventListener('click', function () { toggle(set, false); if (!selected.length) closeModal(); });
-            li.appendChild(lab); li.appendChild(rm); listEl.appendChild(li);
+            var card = document.createElement('div'); card.className = 'hph-vgl__colcard';
+            var info = imgByset[set];
+            if (info && info.src) {
+              var img = document.createElement('img'); img.className = 'hph-vgl__colimg';
+              img.src = info.src; img.alt = info.alt || ''; img.setAttribute('decoding', 'async');
+              card.appendChild(img);
+            }
+            var lab = document.createElement('span'); lab.className = 'hph-vgl__collabel';
+            lab.textContent = labelByset[set] || 'Variante';
+            card.appendChild(lab);
+            col.appendChild(rm); col.appendChild(card); colsEl.appendChild(col);
           });
+          for (var i = selected.length; i < MAX_COMPARE; i++) {   // offene Slots spiegeln die Produktspalten-Struktur (einheitlich, nicht orphaned)
+            var ec = document.createElement('div'); ec.className = 'hph-vgl__col hph-vgl__col--empty'; ec.setAttribute('aria-hidden', 'true');
+            ec.innerHTML =
+              '<div class="hph-vgl__colcard">' +
+                '<div class="hph-vgl__colimg hph-vgl__emptyimg">' + PLUS + '</div>' +
+                '<span class="hph-vgl__collabel">frei</span>' +
+              '</div>';
+            colsEl.appendChild(ec);
+          }
         }
 
-        // zentrale Auswahl-Mutation (Kachel-Checkbox UND Modal-Entfernen nutzen sie)
+        // zentrale Auswahl-Mutation (Kachel-Checkbox, Tray UND Panel nutzen sie)
         function toggle(set, on) {
           var at = selected.indexOf(set);
           if (on && at < 0) { if (selected.length >= MAX_COMPARE) return; selected.push(set); }   // Sicherheitsnetz
           else if (!on && at > -1) { selected.splice(at, 1); }
           var btn = btnByset[set];
           if (btn) { btn.classList.toggle('is-on', on); btn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
-          renderBar(); renderList(); goEl.href = buildUrl();
+          renderTray(); renderCols(); goEl.href = buildUrl();
         }
 
-        /* ---- Öffnen/Schließen (Exit-Animation via CSS allow-discrete) ---- */
+        /* ---- Öffnen/Schließen (Slide-up + Exit-Animation via CSS allow-discrete) ---- */
         var lastFocus = null;
         function openModal() {
           if (!selected.length) return;
           if (typeof dlg.showModal !== 'function') { window.open(buildUrl(), '_blank', 'noopener'); return; }   // Fallback ohne <dialog>
           if (dlg.open) return;
           lastFocus = document.activeElement;
-          renderList(); goEl.href = buildUrl();
+          renderCols(); goEl.href = buildUrl();
           dlg.showModal();
         }
         function closeModal() { if (dlg.open) dlg.close(); }
 
-        openEl.addEventListener('click', openModal);
+        trayOpen.addEventListener('click', openModal);
         dlg.querySelector('.hph-vgl__close').addEventListener('click', closeModal);
         dlg.querySelector('.hph-vgl__cancel').addEventListener('click', closeModal);
         dlg.addEventListener('click', function (e) { if (e.target === dlg) closeModal(); });   /* Backdrop-Klick schließt */
         dlg.addEventListener('close', function () { if (lastFocus && lastFocus.focus) lastFocus.focus(); });   /* Fokus zurück */
-        goEl.addEventListener('click', function () { setTimeout(closeModal, 0); });   /* neuer Tab öffnet, Modal schließen */
+        goEl.addEventListener('click', function () { setTimeout(closeModal, 0); });   /* neuer Tab öffnet, Panel schließen */
 
-        clearEl.addEventListener('click', function () {
+        trayClear.addEventListener('click', function () {
           selected.slice().forEach(function (set) { toggle(set, false); });
         });
 
@@ -2335,7 +2478,7 @@
           });
         });
 
-        renderBar();
+        renderTray();
       }
     });
 
@@ -2557,117 +2700,6 @@
         });
       } catch (e) { /* Fail-open */ }
     } catch (e) { /* Fail-open: Seite bleibt ungestört. */ }
-
-    /* ============================================================================
-       GRUNDPREIS-SYNC: Rail-Preise live von den Listing-Seiten
-       ----------------------------------------------------------------------------
-       Jede Rail-Kachel verlinkt auf ihre Unterkategorie-Listing-Seite; deren HTML
-       enthält server-seitig je Produkt den Grundpreis („… €* / 1000 Stück" im
-       Element .product-price-unit). Dieses Script holt pro Kachel die verlinkte
-       Seite (same-origin, da der Block im Shop läuft), nimmt den GÜNSTIGSTEN
-       Grundpreis und schreibt ihn als „ab X,XX € netto / 1.000 Stück" in den
-       Preis-Span. Damit zeigt die Kachel garantiert denselben „ab"-Preis, den der
-       Kunde nach dem Klick im Listing sieht (UWG-sauber).
-
-       Frische: localStorage-Cache mit 10-Minuten-TTL → höchstens alle 10 Min. ein
-       Fetch-Schub pro Browser; bei Rückkehr in den Tab (visibilitychange) wird die
-       TTL erneut geprüft. Gecachte Preise werden sofort angezeigt (auch wenn älter
-       als 10 Min. – sie sind immer frischer als der statische Fallback im Markup).
-
-       Fail-open auf jeder Ebene: schlägt fetch/Parsing fehl (z. B. auf einer
-       Vorschau-Seite außerhalb des Shops → CORS), bleiben die statischen
-       Fallback-Preise aus dem Markup einfach stehen. */
-    try {
-      var GP_TTL_MS  = 10 * 60 * 1000;          // 10 Minuten
-      var GP_KEY     = 'hphRailGrundpreise';     // localStorage-Schlüssel
-      /* Grundpreis-Muster der Listing-Seite: „2,50 €* / 1000 Stück" (dt. Format,
-         Tausenderpunkt sicherheitshalber erlaubt). */
-      var GP_RE      = /(\d{1,3}(?:\.\d{3})*,\d{2})\s*€\*?\s*\/\s*1000\s*Stück/;
-      var GP_MIN_EUR = 0.5, GP_MAX_EUR = 100;    // Plausibilitätsfenster gegen Parser-Ausreißer
-
-      var gpTiles = document.querySelectorAll('.hph-rail__tile');
-      if (gpTiles.length) {
-
-        /* dt. Preisstring („2,50" / „1.234,56") → Zahl */
-        function gpParse(str) { return parseFloat(str.replace(/\./g, '').replace(',', '.')); }
-
-        /* Zahl → „ab 2,50 € netto / 1.000 Stück" */
-        function gpLabel(eur) {
-          return 'ab ' + eur.toFixed(2).replace('.', ',') + ' € netto / 1.000 Stück';
-        }
-
-        /* Preis-Map { "/papierhandtuecher-1-lagig": 2.5, … } in die Spans schreiben */
-        function gpApply(prices) {
-          Array.prototype.forEach.call(gpTiles, function (tile) {
-            try {
-              var span = tile.querySelector('.hph-rail__price');
-              var path = new URL(tile.getAttribute('href'), location.href).pathname;
-              var eur  = prices[path];
-              if (span && typeof eur === 'number' && eur >= GP_MIN_EUR && eur <= GP_MAX_EUR) {
-                span.textContent = gpLabel(eur);
-              }
-            } catch (e) { /* Kachel überspringen, Fallback-Preis bleibt */ }
-          });
-        }
-
-        /* Listing-HTML → günstigster Grundpreis (nur innerhalb des Produkt-Listings
-           suchen, damit z. B. Cross-Selling-Slider den „ab"-Preis nicht verfälschen) */
-        function gpCheapest(html) {
-          var doc   = new DOMParser().parseFromString(html, 'text/html');
-          var scope = doc.querySelector('.cms-element-product-listing') || doc;
-          var units = scope.querySelectorAll('.product-price-unit');
-          var best  = null;
-          Array.prototype.forEach.call(units, function (el) {
-            var m = GP_RE.exec(el.textContent || '');
-            if (!m) return;
-            var eur = gpParse(m[1]);
-            if (eur >= GP_MIN_EUR && eur <= GP_MAX_EUR && (best === null || eur < best)) best = eur;
-          });
-          return best;
-        }
-
-        function gpReadCache() {
-          try { return JSON.parse(localStorage.getItem(GP_KEY) || 'null'); } catch (e) { return null; }
-        }
-
-        function gpRefresh() {
-          var cache = gpReadCache();
-          if (cache && cache.prices && (Date.now() - cache.t) < GP_TTL_MS) return;   // noch frisch
-          if (!window.fetch || !window.DOMParser || !window.URL) return;             // sehr alte Browser: Fallback-Preise
-          var prices  = (cache && cache.prices) || {};
-          var pending = 0;
-          Array.prototype.forEach.call(gpTiles, function (tile) {
-            var href = tile.getAttribute('href');
-            if (!href) return;
-            var path;
-            try { path = new URL(href, location.href).pathname; } catch (e) { return; }
-            pending++;
-            fetch(href, { credentials: 'same-origin' })
-              .then(function (r) { return r.ok ? r.text() : null; })
-              .then(function (html) {
-                var eur = html && gpCheapest(html);
-                if (typeof eur === 'number') prices[path] = eur;
-              })
-              .catch(function () { /* Kategorie behält alten/Fallback-Preis */ })
-              .then(function () {
-                if (--pending > 0) return;
-                gpApply(prices);
-                try { localStorage.setItem(GP_KEY, JSON.stringify({ t: Date.now(), prices: prices })); } catch (e) {}
-              });
-          });
-        }
-
-        /* Start: gecachte Preise sofort zeigen, danach (falls TTL abgelaufen) neu holen */
-        var gpCached = gpReadCache();
-        if (gpCached && gpCached.prices) gpApply(gpCached.prices);
-        gpRefresh();
-
-        /* Lange offene Tabs: bei Rückkehr in den Tab TTL erneut prüfen */
-        document.addEventListener('visibilitychange', function () {
-          if (!document.hidden) { try { gpRefresh(); } catch (e) {} }
-        });
-      }
-    } catch (e) { /* Fail-open: statische Fallback-Preise aus dem Markup bleiben stehen */ }
   } catch (err) {
     /* Fail-open: bei einem Script-Fehler die verborgenen Reveal-Startzustände
        abschalten (entfernt .hph-hero--js → Inhalt sichtbar, Akkordeon offen). */
